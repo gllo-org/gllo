@@ -1,15 +1,15 @@
 FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 
-COPY backend/build.gradle.kts backend/settings.gradle.kts backend/gradlew ./
-COPY backend/gradle gradle/
+COPY build.gradle.kts settings.gradle.kts gradlew ./
+COPY gradle gradle/
 
-COPY backend/api-app api-app/
-COPY backend/application application/
-COPY backend/domain domain/
-COPY backend/inbound inbound/
-COPY backend/infra infra/
-COPY backend/shared shared/
+COPY api-app api-app/
+COPY application application/
+COPY domain domain/
+COPY inbound inbound/
+COPY infra infra/
+COPY shared shared/
 
 RUN chmod +x gradlew
 RUN ./gradlew :api-app:build -x test --no-daemon
