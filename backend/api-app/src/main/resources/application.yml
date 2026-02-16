@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: global-ledger
+  profiles:
+    active: local

@@ -1,0 +1,59 @@
+# === Claude Code 흔적 제거 ===
+# 문서
+CLAUDE.md
+/docs/
+.clinerules
+
+# 스킬
+.skills/
+/mnt/skills/
+.claude/
+
+# Claude 설정
+.anthropic/
+
+# 개발 메모
+NOTES.md
+TODO.md
+DEVLOG.md
+
+# === 보안 ===
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+# === Gradle ===
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# === IntelliJ ===
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === 로그 ===
+*.log
+logs/
+
+# === 백업 ===
+*.bak
+*~
+
+# === 임시 파일 ===
+/.env.example
+
+# 로컬 파일
+/backend/api-app/src/main/resources/application-local.yml
+/nul
