@@ -1,11 +1,11 @@
-package com.globalledger.domain.port.output;
+package com.globalledger.domain.port.input;
 
 import com.globalledger.domain.vo.MonthlyReportData;
 
 import java.time.YearMonth;
 import java.util.UUID;
 
-public interface PdfGeneratorPort {
+public interface GeneratePdfReportPort {
     byte[] generateMonthlyReport(UUID userId, YearMonth yearMonth);
-    byte[] generateMonthlyReport(MonthlyReportData reportData);
+    MonthlyReportData getMonthlyReportData(UUID userId, YearMonth yearMonth);
 }
