@@ -21,7 +21,8 @@ server:
 supabase:
   url: ${SUPABASE_URL}
   anon-key: ${SUPABASE_ANON_KEY}
-  jwt-secret: ${SUPABASE_JWT_SECRET}
+  jwt:
+    secret: ${SUPABASE_JWT_SECRET}
 
 exchange-rate-api:
   base-url: https://api.exchangerate-api.com/v4/latest
