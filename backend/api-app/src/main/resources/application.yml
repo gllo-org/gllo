@@ -3,3 +3,7 @@ spring:
     name: global-ledger
   profiles:
     active: local
+
+exchange-rate-api:
+  url: ${EXCHANGE_RATE_API_URL:https://v6.exchangerate-api.com/v6}
+  api-key: ${EXCHANGE_RATE_API_KEY:demo}

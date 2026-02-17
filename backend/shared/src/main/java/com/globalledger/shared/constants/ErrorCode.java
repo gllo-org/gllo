@@ -16,6 +16,8 @@ public enum ErrorCode {
     ACCOUNT_HAS_TRANSACTIONS(400, "거래 내역이 있는 계좌는 삭제할 수 없습니다."),
     UNSUPPORTED_CURRENCY(400, "지원하지 않는 통화입니다."),
     INSUFFICIENT_BALANCE(400, "잔액이 부족합니다."),
+    SAME_ACCOUNT_EXCHANGE(400, "동일한 계좌로는 환전할 수 없습니다."),
+    INVALID_AMOUNT(400, "금액은 0보다 커야 합니다."),
 
     TRANSACTION_NOT_FOUND(404, "거래 내역을 찾을 수 없습니다."),
 
