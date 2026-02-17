@@ -53,12 +53,16 @@ public class RecurringTransactionScheduler {
                 rule.userId(),
                 rule.accountId(),
                 rule.type(),
+                rule.title(),
                 rule.amount(),
                 rule.currency(),
                 rule.categoryId(),
                 null,
                 today,
-                String.format("고정 지출: %s", rule.name())
+                String.format("고정 지출: %s", rule.name()),
+                null,
+                null,
+                null
         );
 
         transactionRepository.save(transaction);

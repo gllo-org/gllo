@@ -15,6 +15,7 @@ public class RecurringRuleMapper {
                 entity.getId(),
                 entity.getUserId(),
                 entity.getName(),
+                entity.getTitle(),
                 TransactionType.valueOf(entity.getType()),
                 entity.getAmount(),
                 Currency.valueOf(entity.getCurrency()),
@@ -25,6 +26,9 @@ public class RecurringRuleMapper {
                 entity.getStartDate(),
                 entity.getEndDate(),
                 entity.getNextExecutionDate(),
+                entity.getActive(),
+                entity.getNotifyDaysBefore(),
+                entity.getNotificationMessage(),
                 entity.getCreatedAt()
         );
     }
@@ -34,6 +38,7 @@ public class RecurringRuleMapper {
                 .id(domain.id())
                 .userId(domain.userId())
                 .name(domain.name())
+                .title(domain.title())
                 .type(domain.type().name())
                 .amount(domain.amount())
                 .currency(domain.currency().name())
@@ -44,6 +49,9 @@ public class RecurringRuleMapper {
                 .startDate(domain.startDate())
                 .endDate(domain.endDate())
                 .nextExecutionDate(domain.nextExecutionDate())
+                .active(domain.active())
+                .notifyDaysBefore(domain.notifyDaysBefore())
+                .notificationMessage(domain.notificationMessage())
                 .createdAt(domain.createdAt())
                 .build();
     }

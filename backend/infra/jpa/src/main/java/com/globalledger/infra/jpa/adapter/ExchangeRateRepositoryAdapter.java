@@ -44,4 +44,13 @@ public class ExchangeRateRepositoryAdapter implements ExchangeRateRepositoryPort
                 .map(exchangeRateMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public List<ExchangeRate> findByPairAndDateRange(Currency baseCurrency, Currency targetCurrency,
+                                                       LocalDate fromDate, LocalDate toDate) {
+        return exchangeRateJpaRepository.findByPairAndDateRange(
+                baseCurrency.name(), targetCurrency.name(), fromDate, toDate).stream()
+                .map(exchangeRateMapper::toDomain)
+                .toList();
+    }
 }

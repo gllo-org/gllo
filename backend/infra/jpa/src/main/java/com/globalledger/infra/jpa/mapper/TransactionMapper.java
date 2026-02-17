@@ -15,12 +15,16 @@ public class TransactionMapper {
                 entity.getUserId(),
                 entity.getAccountId(),
                 TransactionType.valueOf(entity.getType()),
+                entity.getTitle(),
                 entity.getAmount(),
                 Currency.valueOf(entity.getCurrency()),
                 entity.getCategoryId(),
                 entity.getTripId(),
                 entity.getTransactionDate(),
                 entity.getNote(),
+                entity.getSystemExchangeRate(),
+                entity.getCustomExchangeRate(),
+                entity.getCustomConvertedAmount(),
                 entity.getCreatedAt()
         );
     }
@@ -31,12 +35,16 @@ public class TransactionMapper {
                 .userId(domain.userId())
                 .accountId(domain.accountId())
                 .type(domain.type().name())
+                .title(domain.title())
                 .amount(domain.amount())
                 .currency(domain.currency().name())
                 .categoryId(domain.categoryId())
                 .tripId(domain.tripId())
                 .transactionDate(domain.transactionDate())
                 .note(domain.note())
+                .systemExchangeRate(domain.systemExchangeRate())
+                .customExchangeRate(domain.customExchangeRate())
+                .customConvertedAmount(domain.customConvertedAmount())
                 .createdAt(domain.createdAt())
                 .build();
     }

@@ -12,4 +12,6 @@ public interface ExchangeRateRepositoryPort {
     Optional<ExchangeRate> findLatestByPair(Currency baseCurrency, Currency targetCurrency);
     List<ExchangeRate> findLatestAll();
     List<ExchangeRate> findByRateDate(LocalDate rateDate);
+    List<ExchangeRate> findByPairAndDateRange(Currency baseCurrency, Currency targetCurrency,
+                                                LocalDate fromDate, LocalDate toDate);
 }

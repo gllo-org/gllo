@@ -32,6 +32,9 @@ public class RecurringRuleEntity {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
+    @Column(name = "title", nullable = false, length = 100)
+    private String title;
+
     @Column(name = "type", nullable = false, length = 10)
     private String type;
 
@@ -62,10 +65,23 @@ public class RecurringRuleEntity {
     @Column(name = "next_execution_date", nullable = false)
     private LocalDate nextExecutionDate;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active;
+
+    @Column(name = "notify_days_before")
+    private Integer notifyDaysBefore;
+
+    @Column(name = "notification_message", length = 200)
+    private String notificationMessage;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public void updateNextExecutionDate(LocalDate nextDate) {
         this.nextExecutionDate = nextDate;
+    }
+
+    public void toggleActive() {
+        this.active = !this.active;
     }
 }

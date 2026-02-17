@@ -19,4 +19,10 @@ public interface ExchangeRateJpaRepository extends JpaRepository<ExchangeRateEnt
     List<ExchangeRateEntity> findLatestAll();
 
     List<ExchangeRateEntity> findAllByRateDate(LocalDate rateDate);
+
+    @Query("SELECT e FROM ExchangeRateEntity e WHERE e.baseCurrency = :base AND e.targetCurrency = :target AND e.rateDate >= :fromDate AND e.rateDate <= :toDate ORDER BY e.rateDate ASC")
+    List<ExchangeRateEntity> findByPairAndDateRange(@Param("base") String baseCurrency,
+                                                      @Param("target") String targetCurrency,
+                                                      @Param("fromDate") LocalDate fromDate,
+                                                      @Param("toDate") LocalDate toDate);
 }

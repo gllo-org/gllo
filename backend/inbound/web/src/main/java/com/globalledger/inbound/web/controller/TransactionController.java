@@ -3,6 +3,7 @@ package com.globalledger.inbound.web.controller;
 import com.globalledger.domain.model.Transaction;
 import com.globalledger.domain.port.input.TransactionPort;
 import com.globalledger.inbound.web.dto.request.CreateTransactionRequest;
+import com.globalledger.inbound.web.dto.request.UpdateTransactionRequest;
 import com.globalledger.inbound.web.dto.response.TransactionResponse;
 import com.globalledger.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,12 +36,15 @@ public class TransactionController {
                 userId,
                 request.accountId(),
                 request.type(),
+                request.title(),
                 request.amount(),
                 request.currency(),
                 request.categoryId(),
                 request.tripId(),
                 request.transactionDate(),
-                request.note()
+                request.note(),
+                request.customExchangeRate(),
+                request.customConvertedAmount()
         );
 
         return ResponseEntity
@@ -75,6 +79,30 @@ public class TransactionController {
         UUID userId = UUID.fromString(authentication.getName());
         Transaction transaction = transactionUseCase.getById(userId, id);
         return ResponseEntity.ok(ApiResponse.success(TransactionResponse.from(transaction)));
+    }
+
+    @Operation(summary = "거래 수정", description = "특정 거래의 정보를 부분 수정합니다. 수정하고 싶은 필드만 전송하면 됩니다.")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<TransactionResponse>> updateTransaction(
+            Authentication authentication,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateTransactionRequest request) {
+
+        UUID userId = UUID.fromString(authentication.getName());
+        Transaction transaction = transactionUseCase.update(
+                userId,
+                id,
+                request.title(),
+                request.amount(),
+                request.categoryId(),
+                request.tripId(),
+                request.transactionDate(),
+                request.note(),
+                request.customExchangeRate(),
+                request.customConvertedAmount()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success("거래가 수정되었습니다.", TransactionResponse.from(transaction)));
     }
 
     @Operation(summary = "거래 삭제", description = "특정 거래를 삭제합니다.")

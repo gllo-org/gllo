@@ -36,6 +36,9 @@ public class TransactionEntity {
     @Column(name = "type", nullable = false, length = 10)
     private String type;
 
+    @Column(name = "title", nullable = false, length = 100)
+    private String title;
+
     @Column(name = "amount", precision = 19, scale = 4, nullable = false)
     private BigDecimal amount;
 
@@ -53,6 +56,15 @@ public class TransactionEntity {
 
     @Column(name = "note", length = 500)
     private String note;
+
+    @Column(name = "system_exchange_rate", precision = 19, scale = 4)
+    private BigDecimal systemExchangeRate;
+
+    @Column(name = "custom_exchange_rate", precision = 19, scale = 4)
+    private BigDecimal customExchangeRate;
+
+    @Column(name = "custom_converted_amount", precision = 19, scale = 4)
+    private BigDecimal customConvertedAmount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

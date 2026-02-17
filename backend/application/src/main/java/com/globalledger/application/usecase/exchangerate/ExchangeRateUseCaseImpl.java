@@ -13,6 +13,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -65,5 +66,18 @@ public class ExchangeRateUseCaseImpl implements ExchangeRatePort {
         }
 
         log.info("Exchange rate update completed");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExchangeRate> getRatesByDate(LocalDate rateDate) {
+        return exchangeRateRepository.findByRateDate(rateDate);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ExchangeRate> getHistory(Currency baseCurrency, Currency targetCurrency,
+                                          LocalDate fromDate, LocalDate toDate) {
+        return exchangeRateRepository.findByPairAndDateRange(baseCurrency, targetCurrency, fromDate, toDate);
     }
 }

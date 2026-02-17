@@ -70,14 +70,18 @@ public class ExchangeCurrencyUseCaseImpl implements ExchangeCurrencyPort {
 
         Transaction fromTransaction = Transaction.create(
                 userId, fromAccountId, TransactionType.EXCHANGE,
+                "환전 출금",
                 amount.negate(), fromAccount.currency(),
-                null, null, today, note
+                null, null, today, note,
+                null, null, null
         );
 
         Transaction toTransaction = Transaction.create(
                 userId, toAccountId, TransactionType.EXCHANGE,
+                "환전 입금",
                 exchangedAmount, toAccount.currency(),
-                null, null, today, note
+                null, null, today, note,
+                rate.rate(), null, null
         );
 
         transactionRepository.save(fromTransaction);
