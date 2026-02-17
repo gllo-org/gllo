@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Tag(name = "환전", description = "계좌 간 환전 API")
+@Tag(name = "환전 API")
 @RestController
 @RequestMapping("/api/v1/exchange")
 @RequiredArgsConstructor
@@ -33,10 +33,12 @@ public class ExchangeController {
     })
     @PostMapping
     public ResponseEntity<ApiResponse<Void>> exchange(
-            @AuthenticationPrincipal String userId,
+            Authentication authentication,
             @Valid @RequestBody ExchangeCurrencyRequest request) {
+
+        UUID userId = UUID.fromString(authentication.getName());
         exchangeCurrencyPort.exchange(
-                UUID.fromString(userId),
+                userId,
                 request.fromAccountId(),
                 request.toAccountId(),
                 request.amount()

@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
-@Tag(name = "평가손익", description = "외화 계좌 평가손익 조회 API")
+@Tag(name = "평가손익 API")
 @RestController
 @RequestMapping("/api/v1/unrealized-pnl")
 @RequiredArgsConstructor
@@ -30,10 +30,12 @@ public class UnrealizedPnlController {
     })
     @GetMapping
     public ResponseEntity<ApiResponse<List<UnrealizedPnlResponse>>> getAllPnl(
-            @AuthenticationPrincipal String userId,
+            Authentication authentication,
             @RequestParam(defaultValue = "KRW") Currency baseCurrency) {
+
+        UUID userId = UUID.fromString(authentication.getName());
         List<UnrealizedPnl> pnlList = unrealizedPnlPort.getAllUnrealizedPnl(
-                UUID.fromString(userId), baseCurrency);
+                userId, baseCurrency);
         List<UnrealizedPnlResponse> response = pnlList.stream()
                 .map(UnrealizedPnlResponse::from)
                 .toList();
@@ -47,11 +49,13 @@ public class UnrealizedPnlController {
     })
     @GetMapping("/{accountId}")
     public ResponseEntity<ApiResponse<UnrealizedPnlResponse>> getPnl(
-            @AuthenticationPrincipal String userId,
+            Authentication authentication,
             @PathVariable Long accountId,
             @RequestParam(defaultValue = "KRW") Currency baseCurrency) {
+
+        UUID userId = UUID.fromString(authentication.getName());
         UnrealizedPnl pnl = unrealizedPnlPort.getUnrealizedPnl(
-                UUID.fromString(userId), accountId, baseCurrency);
+                userId, accountId, baseCurrency);
         UnrealizedPnlResponse response = UnrealizedPnlResponse.from(pnl);
         return ResponseEntity.ok(ApiResponse.success("평가손익을 조회했습니다.", response));
     }

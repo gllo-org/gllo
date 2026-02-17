@@ -11,13 +11,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-@Tag(name = "Report", description = "리포트 API")
+@Tag(name = "리포트 API")
 @RestController
 @RequestMapping("/api/v1/reports")
 @RequiredArgsConstructor
@@ -29,9 +30,10 @@ public class ReportController {
     @Operation(summary = "월별 자산 리포트 PDF 다운로드", description = "지정된 월의 자산 현황 리포트를 PDF로 생성하여 다운로드합니다.")
     @GetMapping("/monthly/{yearMonth}/pdf")
     public ResponseEntity<byte[]> downloadMonthlyReportPdf(
-            @RequestHeader("X-User-Id") UUID userId,
+            Authentication authentication,
             @PathVariable @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
 
+        UUID userId = UUID.fromString(authentication.getName());
         MonthlyReportData reportData = reportUseCase.getMonthlyReportData(userId, yearMonth);
         byte[] pdfBytes = pdfGenerator.generateMonthlyReport(reportData);
 
@@ -47,9 +49,10 @@ public class ReportController {
     @Operation(summary = "월별 리포트 데이터 조회", description = "PDF 생성 없이 월별 리포트 데이터만 조회합니다.")
     @GetMapping("/monthly/{yearMonth}")
     public ResponseEntity<ApiResponse<MonthlyReportData>> getMonthlyReportData(
-            @RequestHeader("X-User-Id") UUID userId,
+            Authentication authentication,
             @PathVariable @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
 
+        UUID userId = UUID.fromString(authentication.getName());
         MonthlyReportData reportData = reportUseCase.getMonthlyReportData(userId, yearMonth);
 
         return ResponseEntity.ok(ApiResponse.success(reportData));

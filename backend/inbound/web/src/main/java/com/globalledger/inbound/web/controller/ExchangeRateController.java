@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "환율 관리", description = "환율 조회 및 갱신 API")
+@Tag(name = "환율 API")
 @RestController
 @RequestMapping("/api/v1/exchange-rates")
 @RequiredArgsConstructor
