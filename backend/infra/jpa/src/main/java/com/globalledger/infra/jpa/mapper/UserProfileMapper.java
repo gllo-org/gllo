@@ -15,7 +15,8 @@ public class UserProfileMapper {
                 entity.getDisplayName(),
                 entity.getProfileImageUrl(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getDeletedAt()
         );
     }
 
@@ -27,7 +28,8 @@ public class UserProfileMapper {
                 domain.displayName(),
                 domain.profileImageUrl(),
                 domain.createdAt(),
-                domain.updatedAt()
+                domain.updatedAt(),
+                domain.deletedAt()
         );
     }
 }

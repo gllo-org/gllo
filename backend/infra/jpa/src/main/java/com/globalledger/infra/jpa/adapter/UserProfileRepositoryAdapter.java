@@ -20,6 +20,12 @@ public class UserProfileRepositoryAdapter implements UserProfileRepositoryPort {
 
     @Override
     public Optional<UserProfile> findByUserId(UUID userId) {
+        return jpaRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<UserProfile> findByUserIdIncludeDeleted(UUID userId) {
         return jpaRepository.findByUserId(userId)
                 .map(mapper::toDomain);
     }

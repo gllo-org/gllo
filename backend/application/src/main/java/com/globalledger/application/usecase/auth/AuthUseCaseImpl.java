@@ -1,9 +1,12 @@
 package com.globalledger.application.usecase.auth;
 
+import com.globalledger.domain.exception.NotFoundException;
+import com.globalledger.domain.model.UserProfile;
 import com.globalledger.domain.port.input.AuthPort;
 import com.globalledger.domain.port.output.AuthServicePort;
 import com.globalledger.domain.port.output.UserProfileRepositoryPort;
 import com.globalledger.domain.vo.AuthSession;
+import com.globalledger.shared.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,8 +38,9 @@ public class AuthUseCaseImpl implements AuthPort {
 
     @Override
     public void deleteAccount(UUID userId, String accessToken) {
-        userProfileRepository.deleteByUserId(userId);
-        authServicePort.deleteUser(userId, accessToken);
-        log.info("Account deleted: {}", userId);
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_PROFILE_NOT_FOUND));
+        userProfileRepository.save(profile.softDelete());
+        log.info("Account soft-deleted: {}", userId);
     }
 }

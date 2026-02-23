@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface UserProfileRepositoryPort {
     Optional<UserProfile> findByUserId(UUID userId);
+    Optional<UserProfile> findByUserIdIncludeDeleted(UUID userId);
     UserProfile save(UserProfile userProfile);
     void deleteByUserId(UUID userId);
 }

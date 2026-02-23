@@ -10,7 +10,8 @@ public record UserProfile(
         String displayName,
         String profileImageUrl,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        LocalDateTime deletedAt
 ) {
     public static UserProfile create(UUID userId, String email) {
         String defaultName = extractNameFromEmail(email);
@@ -21,7 +22,8 @@ public record UserProfile(
                 defaultName,
                 null,
                 LocalDateTime.now(),
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                null
         );
     }
 
@@ -33,7 +35,8 @@ public record UserProfile(
                 newDisplayName,
                 profileImageUrl,
                 createdAt,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                deletedAt
         );
     }
 
@@ -45,7 +48,8 @@ public record UserProfile(
                 displayName,
                 imageUrl,
                 createdAt,
-                LocalDateTime.now()
+                LocalDateTime.now(),
+                deletedAt
         );
     }
 
@@ -57,8 +61,56 @@ public record UserProfile(
                 displayName,
                 null,
                 createdAt,
+                LocalDateTime.now(),
+                deletedAt
+        );
+    }
+
+    public UserProfile softDelete() {
+        return new UserProfile(
+                id,
+                userId,
+                email,
+                displayName,
+                profileImageUrl,
+                createdAt,
+                LocalDateTime.now(),
                 LocalDateTime.now()
         );
+    }
+
+    public UserProfile restore() {
+        return new UserProfile(
+                id,
+                userId,
+                email,
+                displayName,
+                profileImageUrl,
+                createdAt,
+                LocalDateTime.now(),
+                null
+        );
+    }
+
+    public UserProfile resetToFresh() {
+        return new UserProfile(
+                id,
+                userId,
+                email,
+                extractNameFromEmail(email),
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        );
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    public boolean isRestorable() {
+        return deletedAt != null && deletedAt.isAfter(LocalDateTime.now().minusDays(30));
     }
 
     public String getInitialLetter() {

@@ -22,7 +22,20 @@ public class UserProfileUseCaseImpl implements UserProfilePort {
 
     @Override
     public UserProfile getOrCreateProfile(UUID userId, String email) {
-        return userProfileRepository.findByUserId(userId)
+        return userProfileRepository.findByUserIdIncludeDeleted(userId)
+                .map(existing -> {
+                    if (!existing.isDeleted()) {
+                        return existing;
+                    }
+                    if (existing.isRestorable()) {
+                        UserProfile restored = userProfileRepository.save(existing.restore());
+                        log.info("Account restored for user: {}", userId);
+                        return restored;
+                    }
+                    UserProfile fresh = userProfileRepository.save(existing.resetToFresh());
+                    log.info("Account reset to fresh for user: {}", userId);
+                    return fresh;
+                })
                 .orElseGet(() -> {
                     UserProfile newProfile = UserProfile.create(userId, email);
                     UserProfile saved = userProfileRepository.save(newProfile);
