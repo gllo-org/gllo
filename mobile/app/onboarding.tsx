@@ -307,10 +307,10 @@ export default function OnboardingScreen() {
     onYearChange: (v: string) => void;
     onMonthChange: (v: string) => void;
     onDayChange: (v: string) => void;
-    yearRef?: React.RefObject<TextInput>;
-    monthRef?: React.RefObject<TextInput>;
-    dayRef?: React.RefObject<TextInput>;
-    nextRef?: React.RefObject<TextInput>;
+    yearRef?: React.RefObject<TextInput | null>;
+    monthRef?: React.RefObject<TextInput | null>;
+    dayRef?: React.RefObject<TextInput | null>;
+    nextRef?: React.RefObject<TextInput | null>;
   }) {
     const inputStyle = {
       backgroundColor: colors.bg.input,

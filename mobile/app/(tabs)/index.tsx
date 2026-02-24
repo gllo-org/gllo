@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator, DimensionValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
@@ -32,7 +32,7 @@ interface Account {
   pnlRate: number | null;
 }
 
-function SkeletonBox({ width, height }: { width: number | string; height: number }) {
+function SkeletonBox({ width, height }: { width: DimensionValue; height: number }) {
   return (
     <View style={{
       width, height,
