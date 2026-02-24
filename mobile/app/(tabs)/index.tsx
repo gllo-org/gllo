@@ -82,14 +82,18 @@ export default function DashboardScreen() {
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary }}>글로</Text>
-            <TouchableOpacity style={{
-              backgroundColor: 'rgba(255,255,255,0.7)',
-              borderRadius: 20,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-            }}>
+            <TouchableOpacity
+              onPress={() => router.push('/exchange')}
+              activeOpacity={0.8}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                borderRadius: 20,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+              }}
+            >
               <Text style={{ fontSize: 13, color: colors.text.brand, fontWeight: '600' }}>
-                + 환전 기록
+                ⇄ 환전 기록
               </Text>
             </TouchableOpacity>
           </View>
@@ -186,9 +190,15 @@ export default function DashboardScreen() {
         </View>
 
         {stats?.budgetAmount && (
+          <TouchableOpacity
+            onPress={() => router.push('/budget')}
+            activeOpacity={0.92}
+            style={{
+              marginHorizontal: spacing.screenPadding,
+              marginTop: spacing.sectionGap,
+            }}
+          >
           <View style={{
-            marginHorizontal: spacing.screenPadding,
-            marginTop: spacing.sectionGap,
             backgroundColor: colors.bg.surface,
             borderRadius: radius.card,
             padding: spacing.cardPadding,
@@ -254,6 +264,7 @@ export default function DashboardScreen() {
               </View>
             )}
           </View>
+          </TouchableOpacity>
         )}
 
         <View style={{ paddingHorizontal: spacing.screenPadding, marginTop: spacing.sectionGap }}>

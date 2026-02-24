@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatDateTime } from '@/lib/utils/date';
@@ -38,20 +39,24 @@ const TYPE_LABELS: Record<TransactionType, string> = {
 };
 
 function TransactionItem({ item }: { item: Transaction }) {
+  const router = useRouter();
   const isPositive = item.type === 'INCOME';
   const isExchange = item.type === 'EXCHANGE';
   const amountColor = isPositive ? colors.profit.text : isExchange ? colors.text.brand : colors.loss.text;
   const prefix = isPositive ? '+' : isExchange ? '↕' : '-';
 
   return (
-    <TouchableOpacity style={{
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 14,
-      paddingHorizontal: spacing.screenPadding,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.system.divider,
-    }}>
+    <TouchableOpacity
+      onPress={() => router.push(`/transaction/${item.id}`)}
+      activeOpacity={0.7}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 14,
+        paddingHorizontal: spacing.screenPadding,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.system.divider,
+      }}>
       <View style={{
         width: 44,
         height: 44,

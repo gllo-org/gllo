@@ -88,6 +88,14 @@ export default function RootLayout() {
               name="exchange"
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen
+              name="budget"
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="transaction/[id]"
+              options={{ animation: 'slide_from_right' }}
+            />
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
