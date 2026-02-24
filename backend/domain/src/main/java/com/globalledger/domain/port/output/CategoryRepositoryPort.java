@@ -12,4 +12,5 @@ public interface CategoryRepositoryPort {
     Optional<Category> findByIdAndUserId(Long id, UUID userId);
     List<Category> findAllByUserId(UUID userId);
     void deleteById(Long id);
+    boolean existsByUserIdAndName(UUID userId, String name);
 }

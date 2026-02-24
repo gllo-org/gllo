@@ -374,6 +374,24 @@ export default function AccountsScreen() {
         </TouchableOpacity>
       </View>
 
+      <TouchableOpacity
+        onPress={() => router.push('/exchange')}
+        activeOpacity={0.8}
+        style={{
+          flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+          marginHorizontal: spacing.screenPadding, marginBottom: 12,
+          paddingVertical: 11,
+          borderRadius: radius.chip,
+          backgroundColor: colors.bg.surface,
+          borderWidth: 1.5,
+          borderColor: colors.system.border,
+          gap: 6,
+        }}
+      >
+        <Text style={{ fontSize: 15 }}>⇄</Text>
+        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>환전 기록</Text>
+      </TouchableOpacity>
+
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 40 }}

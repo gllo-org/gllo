@@ -1,9 +1,12 @@
 package com.globalledger.application.usecase.userprofile;
 
 import com.globalledger.domain.exception.NotFoundException;
+import com.globalledger.domain.model.Category;
+import com.globalledger.domain.model.OnboardingCategoryTemplate;
 import com.globalledger.domain.model.StayPurpose;
 import com.globalledger.domain.model.UserProfile;
 import com.globalledger.domain.port.input.UserProfilePort;
+import com.globalledger.domain.port.output.CategoryRepositoryPort;
 import com.globalledger.domain.port.output.UserProfileRepositoryPort;
 import com.globalledger.shared.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class UserProfileUseCaseImpl implements UserProfilePort {
 
     private final UserProfileRepositoryPort userProfileRepository;
+    private final CategoryRepositoryPort categoryRepository;
 
     @Override
     public UserProfile getOrCreateProfile(UUID userId, String email) {
@@ -52,7 +56,16 @@ public class UserProfileUseCaseImpl implements UserProfilePort {
         UserProfile profile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.USER_PROFILE_NOT_FOUND));
         UserProfile updated = profile.updateOnboarding(purpose, country, stayStartDate, stayEndDate);
-        return userProfileRepository.save(updated);
+        UserProfile saved = userProfileRepository.save(updated);
+        createOnboardingCategoriesIfAbsent(userId, purpose, country);
+        return saved;
+    }
+
+    private void createOnboardingCategoriesIfAbsent(UUID userId, StayPurpose purpose, String country) {
+        OnboardingCategoryTemplate.getTemplates(purpose, country).stream()
+                .filter(spec -> !categoryRepository.existsByUserIdAndName(userId, spec.name()))
+                .map(spec -> Category.createCustom(userId, spec.name(), spec.type(), spec.color()))
+                .forEach(categoryRepository::save);
     }
 
     @Override
