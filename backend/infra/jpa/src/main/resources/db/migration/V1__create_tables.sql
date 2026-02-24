@@ -7,19 +7,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TABLE user_profiles (
-    id                   BIGSERIAL     PRIMARY KEY,
-    user_id              UUID          NOT NULL UNIQUE,
-    email                VARCHAR(255)  NOT NULL,
-    display_name         VARCHAR(50)   NOT NULL,
+    id                   BIGSERIAL                    PRIMARY KEY,
+    user_id              UUID                         NOT NULL UNIQUE,
+    email                VARCHAR(255)                 NOT NULL,
+    display_name         VARCHAR(50)                  NOT NULL,
     profile_image_url    VARCHAR(500),
-    purpose              VARCHAR(30),
+    purpose              VARCHAR(30)                  CHECK (purpose IN ('EXCHANGE_STUDENT', 'IMMIGRATION', 'WORKING_HOLIDAY', 'LONG_TERM_TRAVEL')),
     country              VARCHAR(100),
     stay_start_date      DATE,
     stay_end_date        DATE,
-    onboarding_completed BOOLEAN       NOT NULL DEFAULT FALSE,
-    created_at           TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    updated_at           TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    deleted_at           TIMESTAMPTZ
+    onboarding_completed BOOLEAN                      NOT NULL DEFAULT FALSE,
+    created_at           TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW(),
+    deleted_at           TIMESTAMP WITHOUT TIME ZONE
 );
 
 CREATE UNIQUE INDEX idx_user_profile_user_id ON user_profiles(user_id);
@@ -36,7 +36,7 @@ CREATE TABLE accounts (
     currency     VARCHAR(3)     NOT NULL CHECK (currency IN ('EUR', 'USD', 'GBP', 'KRW')),
     balance      NUMERIC(19, 4) NOT NULL DEFAULT 0,
     average_rate NUMERIC(19, 6) NOT NULL DEFAULT 0,
-    created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    created_at   TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_accounts_user_id ON accounts(user_id);
@@ -48,7 +48,7 @@ CREATE TABLE categories (
     type            VARCHAR(10) NOT NULL CHECK (type IN ('INCOME', 'EXPENSE')),
     system_category BOOLEAN     NOT NULL DEFAULT FALSE,
     color           VARCHAR(20),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_categories_user_id ON categories(user_id);
@@ -59,7 +59,7 @@ CREATE TABLE exchange_rates (
     target_currency VARCHAR(3)     NOT NULL,
     rate            NUMERIC(19, 6) NOT NULL,
     rate_date       DATE           NOT NULL,
-    created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    created_at      TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW(),
     CONSTRAINT uk_exchange_rate_pair_date UNIQUE (base_currency, target_currency, rate_date)
 );
 
@@ -75,7 +75,7 @@ CREATE TABLE trips (
     budget          NUMERIC(19, 4),
     budget_currency VARCHAR(3),
     active          BOOLEAN        NOT NULL DEFAULT TRUE,
-    created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    created_at      TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_trips_user_id ON trips(user_id);
@@ -95,7 +95,7 @@ CREATE TABLE transactions (
     system_exchange_rate    NUMERIC(19, 4),
     custom_exchange_rate    NUMERIC(19, 4),
     custom_converted_amount NUMERIC(19, 4),
-    created_at              TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    created_at              TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_transactions_user_id    ON transactions(user_id);
@@ -108,7 +108,7 @@ CREATE TABLE monthly_budgets (
     year_month VARCHAR(7)     NOT NULL,
     amount     NUMERIC(19, 4) NOT NULL,
     currency   VARCHAR(3)     NOT NULL,
-    created_at TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW(),
     CONSTRAINT uk_budget_user_yearmonth UNIQUE (user_id, year_month)
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE recurring_rules (
     active               BOOLEAN        NOT NULL DEFAULT TRUE,
     notify_days_before   INTEGER,
     notification_message VARCHAR(200),
-    created_at           TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    created_at           TIMESTAMP WITHOUT TIME ZONE  NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_recurring_user_id   ON recurring_rules(user_id);
