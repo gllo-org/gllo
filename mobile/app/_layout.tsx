@@ -96,6 +96,18 @@ export default function RootLayout() {
               name="transaction/[id]"
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen
+              name="categories"
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="recurring"
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="report"
+              options={{ animation: 'slide_from_right' }}
+            />
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
