@@ -84,6 +84,10 @@ export default function RootLayout() {
               name="accounts"
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen
+              name="exchange"
+              options={{ animation: 'slide_from_right' }}
+            />
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
