@@ -14,4 +14,6 @@ public interface CategoryJpaRepository extends JpaRepository<CategoryEntity, Lon
 
     @Query("SELECT c FROM CategoryEntity c WHERE c.userId = :userId OR c.systemCategory = true ORDER BY c.systemCategory DESC, c.name ASC")
     List<CategoryEntity> findAllByUserId(@Param("userId") UUID userId);
+
+    boolean existsByUserIdAndName(UUID userId, String name);
 }

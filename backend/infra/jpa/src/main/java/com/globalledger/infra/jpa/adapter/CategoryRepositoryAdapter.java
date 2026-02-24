@@ -44,4 +44,9 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     public void deleteById(Long id) {
         categoryJpaRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsByUserIdAndName(UUID userId, String name) {
+        return categoryJpaRepository.existsByUserIdAndName(userId, name);
+    }
 }
