@@ -48,6 +48,7 @@ Thumbs.db
 logs/
 
 # === 백업 ===
+backup.sh
 *.bak
 *~
 
