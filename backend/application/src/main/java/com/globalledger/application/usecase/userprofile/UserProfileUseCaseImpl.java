@@ -1,6 +1,7 @@
 package com.globalledger.application.usecase.userprofile;
 
 import com.globalledger.domain.exception.NotFoundException;
+import com.globalledger.domain.model.StayPurpose;
 import com.globalledger.domain.model.UserProfile;
 import com.globalledger.domain.port.input.UserProfilePort;
 import com.globalledger.domain.port.output.UserProfileRepositoryPort;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Slf4j
@@ -42,6 +44,15 @@ public class UserProfileUseCaseImpl implements UserProfilePort {
                     log.info("Created new profile for user: {}", userId);
                     return saved;
                 });
+    }
+
+    @Override
+    public UserProfile updateOnboarding(UUID userId, StayPurpose purpose, String country,
+                                        LocalDate stayStartDate, LocalDate stayEndDate) {
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_PROFILE_NOT_FOUND));
+        UserProfile updated = profile.updateOnboarding(purpose, country, stayStartDate, stayEndDate);
+        return userProfileRepository.save(updated);
     }
 
     @Override

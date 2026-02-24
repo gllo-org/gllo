@@ -3,6 +3,7 @@ package com.globalledger.inbound.web.controller;
 import com.globalledger.domain.model.UserProfile;
 import com.globalledger.domain.port.input.UserProfilePort;
 import com.globalledger.inbound.web.dto.request.UpdateDisplayNameRequest;
+import com.globalledger.inbound.web.dto.request.UpdateOnboardingRequest;
 import com.globalledger.inbound.web.dto.request.UpdateProfileImageRequest;
 import com.globalledger.inbound.web.dto.response.UserProfileResponse;
 import com.globalledger.shared.response.ApiResponse;
@@ -36,6 +37,26 @@ public class UserProfileController {
         String email = authentication.getDetails().toString();
         UserProfile profile = userProfilePort.getOrCreateProfile(userId, email);
         return ResponseEntity.ok(ApiResponse.success(UserProfileResponse.from(profile)));
+    }
+
+    @Operation(summary = "온보딩 정보 저장", description = "체류 목적, 거주 국가, 체류 기간을 저장합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "저장 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "유효성 검증 실패"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 필요"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "프로필 없음")
+    })
+    @PutMapping("/onboarding")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateOnboarding(
+            Authentication authentication,
+            @Valid @RequestBody UpdateOnboardingRequest request
+    ) {
+        UUID userId = UUID.fromString(authentication.getName());
+        UserProfile updated = userProfilePort.updateOnboarding(
+                userId, request.purpose(), request.country(),
+                request.stayStartDate(), request.stayEndDate()
+        );
+        return ResponseEntity.ok(ApiResponse.success("온보딩 정보가 저장되었습니다.", UserProfileResponse.from(updated)));
     }
 
     @Operation(summary = "표시 이름 수정", description = "사용자의 표시 이름을 수정합니다.")

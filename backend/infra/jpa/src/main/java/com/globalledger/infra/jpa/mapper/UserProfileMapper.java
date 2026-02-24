@@ -14,6 +14,11 @@ public class UserProfileMapper {
                 entity.getEmail(),
                 entity.getDisplayName(),
                 entity.getProfileImageUrl(),
+                entity.getPurpose(),
+                entity.getCountry(),
+                entity.getStayStartDate(),
+                entity.getStayEndDate(),
+                entity.isOnboardingCompleted(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getDeletedAt()
@@ -27,6 +32,11 @@ public class UserProfileMapper {
                 domain.email(),
                 domain.displayName(),
                 domain.profileImageUrl(),
+                domain.purpose(),
+                domain.country(),
+                domain.stayStartDate(),
+                domain.stayEndDate(),
+                domain.onboardingCompleted(),
                 domain.createdAt(),
                 domain.updatedAt(),
                 domain.deletedAt()

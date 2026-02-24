@@ -1,5 +1,6 @@
 package com.globalledger.infra.jpa.entity;
 
+import com.globalledger.domain.model.StayPurpose;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -37,6 +39,22 @@ public class UserProfileEntity {
 
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "purpose", length = 30)
+    private StayPurpose purpose;
+
+    @Column(name = "country", length = 100)
+    private String country;
+
+    @Column(name = "stay_start_date")
+    private LocalDate stayStartDate;
+
+    @Column(name = "stay_end_date")
+    private LocalDate stayEndDate;
+
+    @Column(name = "onboarding_completed", nullable = false)
+    private boolean onboardingCompleted;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
