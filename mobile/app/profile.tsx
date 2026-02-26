@@ -142,10 +142,10 @@ export default function ProfileScreen() {
   }
 
   const emailFromSession = session?.user?.email ?? '';
-  const effectiveName = profile?.displayName
-    ?? (emailFromSession.includes('@') ? emailFromSession.split('@')[0] : emailFromSession)
+  const effectiveName = (profile?.displayName
+    ?? (emailFromSession.includes('@') ? emailFromSession.split('@')[0] : emailFromSession))
     || '-';
-  const effectiveEmail = profile?.email ?? emailFromSession || '-';
+  const effectiveEmail = (profile?.email ?? emailFromSession) || '-';
   const effectiveLetter = profile?.initialLetter
     ?? (emailFromSession ? emailFromSession[0].toUpperCase() : '?');
 
