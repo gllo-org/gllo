@@ -328,7 +328,7 @@ export default function DashboardScreen() {
             justifyContent: 'center',
           }}
         >
-          <Text style={{ fontSize: 28, color: colors.text.inverse, lineHeight: 32 }}>+</Text>
+          <Text style={{ fontSize: 26, color: colors.text.inverse }}>+</Text>
         </LinearGradient>
       </TouchableOpacity>
 

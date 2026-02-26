@@ -141,8 +141,16 @@ export default function ProfileScreen() {
     }
   }
 
+  const emailFromSession = session?.user?.email ?? '';
+  const effectiveName = profile?.displayName
+    ?? (emailFromSession.includes('@') ? emailFromSession.split('@')[0] : emailFromSession)
+    || '-';
+  const effectiveEmail = profile?.email ?? emailFromSession || '-';
+  const effectiveLetter = profile?.initialLetter
+    ?? (emailFromSession ? emailFromSession[0].toUpperCase() : '?');
+
   function startEditName() {
-    setNameInput(profile?.displayName ?? '');
+    setNameInput(profile?.displayName ?? effectiveName);
     setEditingName(true);
   }
 
@@ -192,7 +200,7 @@ export default function ProfileScreen() {
                 />
               ) : (
                 <Text style={{ fontSize: 36, fontWeight: '700', color: colors.text.brand }}>
-                  {profile?.initialLetter ?? '?'}
+                  {effectiveLetter}
                 </Text>
               )}
             </View>
@@ -271,7 +279,7 @@ export default function ProfileScreen() {
                 style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
               >
                 <Text style={{ fontSize: 16, color: colors.text.primary, fontWeight: '500' }}>
-                  {profile?.displayName ?? '-'}
+                  {effectiveName}
                 </Text>
                 <Text style={{ color: colors.text.brand, fontSize: 13, fontWeight: '500' }}>수정</Text>
               </TouchableOpacity>
@@ -283,7 +291,7 @@ export default function ProfileScreen() {
               이메일
             </Text>
             <Text style={{ fontSize: 16, color: colors.text.secondary }}>
-              {profile?.email ?? '-'}
+              {effectiveEmail}
             </Text>
           </View>
         </View>

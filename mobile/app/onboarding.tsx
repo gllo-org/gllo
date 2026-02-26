@@ -114,11 +114,28 @@ export default function OnboardingScreen() {
           stayEndDate: buildDate(endYear, endMonth, endDay),
         }),
       });
+      await createDefaultAccounts(selectedCountry);
       setStep(4);
     } catch {
       Alert.alert('오류', '글로가 정보를 저장하지 못했어요. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function createDefaultAccounts(country: Country) {
+    try {
+      await apiClient('/accounts', {
+        method: 'POST',
+        body: JSON.stringify({ name: '한국 계좌', currency: 'KRW', initialBalance: 0 }),
+      });
+      if (country.currency !== 'KRW') {
+        await apiClient('/accounts', {
+          method: 'POST',
+          body: JSON.stringify({ name: `${country.label} 계좌`, currency: country.currency, initialBalance: 0 }),
+        });
+      }
+    } catch {
     }
   }
 

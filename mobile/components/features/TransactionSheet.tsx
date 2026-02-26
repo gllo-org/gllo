@@ -29,6 +29,13 @@ interface Account {
   balance: number;
 }
 
+interface ExchangeRate {
+  baseCurrency: string;
+  targetCurrency: string;
+  rate: number;
+  rateDate: string;
+}
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -146,8 +153,12 @@ export function TransactionSheet({ visible, onClose }: Props) {
   const [showDate, setShowDate]       = useState(false);
   const [memo, setMemo]               = useState('');
   const [view, setView]               = useState<SheetView>('main');
+  const [krwOverride, setKrwOverride] = useState<string | null>(null);
+  const [editingKrw, setEditingKrw]   = useState(false);
+  const [newCatName, setNewCatName]   = useState('');
+  const [addingCat, setAddingCat]     = useState(false);
 
-  const { data: categories } = useQuery({
+  const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => apiClient<Category[]>('/categories'),
     enabled: visible,
@@ -159,12 +170,66 @@ export function TransactionSheet({ visible, onClose }: Props) {
     enabled: visible,
   });
 
+  const isToday = txDate === todayStr();
+
+  const { data: currentRate } = useQuery({
+    queryKey: ['exchange-rate', currency, 'KRW'],
+    queryFn: () => apiClient<ExchangeRate>(`/exchange-rates/${currency}/KRW`),
+    enabled: visible && currency !== 'KRW',
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const { data: historicRates } = useQuery({
+    queryKey: ['exchange-rate-history', txDate],
+    queryFn: () => apiClient<ExchangeRate[]>(`/exchange-rates/history/${txDate}`),
+    enabled: visible && currency !== 'KRW' && !isToday,
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const effectiveRate: number | null = (() => {
+    if (currency === 'KRW') return null;
+    if (isToday) return currentRate?.rate ?? null;
+    const match = historicRates?.find(
+      r => r.baseCurrency === currency && r.targetCurrency === 'KRW'
+    );
+    return match?.rate ?? currentRate?.rate ?? null;
+  })();
+
+  const amount = parseFloat(amountStr) || 0;
+
+  const krwEstimate: number | null = (() => {
+    if (currency === 'KRW' || effectiveRate === null || amount <= 0) return null;
+    return Math.round(amount * effectiveRate);
+  })();
+
+  const krwDisplayStr: string | null = (() => {
+    if (currency === 'KRW') return null;
+    if (krwOverride !== null) return krwOverride;
+    if (krwEstimate === null) return null;
+    return String(krwEstimate);
+  })();
+
   const { mutateAsync: save, isPending } = useMutation({
     mutationFn: (body: object) =>
       apiClient('/transactions', { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const { mutateAsync: createCategory, isPending: creatingCat } = useMutation({
+    mutationFn: (name: string) =>
+      apiClient<Category>('/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name, color: '#6366F1' }),
+      }),
+    onSuccess: (newCat) => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      refetchCategories();
+      pickCategory(newCat);
+      setNewCatName('');
+      setAddingCat(false);
     },
   });
 
@@ -182,6 +247,10 @@ export function TransactionSheet({ visible, onClose }: Props) {
     }
   }, [visible]);
 
+  useEffect(() => {
+    setKrwOverride(null);
+  }, [amountStr, currency, txDate]);
+
   function resetForm() {
     setTxType('EXPENSE');
     setAmountStr('0');
@@ -194,6 +263,10 @@ export function TransactionSheet({ visible, onClose }: Props) {
     setShowDate(false);
     setMemo('');
     setView('main');
+    setKrwOverride(null);
+    setEditingKrw(false);
+    setNewCatName('');
+    setAddingCat(false);
   }
 
   function closeSheet() {
@@ -219,20 +292,22 @@ export function TransactionSheet({ visible, onClose }: Props) {
   }
 
   async function handleSave() {
-    const amount = parseFloat(amountStr);
-    if (amount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
+    const numAmount = parseFloat(amountStr);
+    if (numAmount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
     if (!categoryId)  { Alert.alert('', '카테고리를 선택해주세요.'); return; }
     if (!accountId)   { Alert.alert('', '계좌를 선택해주세요.'); return; }
+    const krwAmount = krwDisplayStr ? parseInt(krwDisplayStr.replace(/,/g, '')) : null;
     try {
       await save({
         type: txType,
-        amount,
+        amount: numAmount,
         currency,
         title: categoryLabel?.replace(/^.{1,2}\s/, '') ?? txType,
         categoryId,
         accountId,
         transactionDate: txDate,
         note: memo || null,
+        ...(krwAmount !== null ? { krwAmount } : {}),
       });
       closeSheet();
     } catch {
@@ -253,7 +328,16 @@ export function TransactionSheet({ visible, onClose }: Props) {
     setView('main');
   }
 
-  const amount = parseFloat(amountStr) || 0;
+  async function handleAddCategory() {
+    const name = newCatName.trim();
+    if (!name) return;
+    try {
+      await createCategory(name);
+    } catch {
+      Alert.alert('오류', '카테고리를 추가하지 못했어요.');
+    }
+  }
+
   const isValid = amount > 0 && !!categoryId && !!accountId;
   const cfg = TYPE_CONFIG[txType];
 
@@ -297,7 +381,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
               {view === 'category' ? '카테고리 선택' : view === 'account' ? '계좌 선택' : '새 거래 추가'}
             </Text>
             <TouchableOpacity
-              onPress={view === 'main' ? closeSheet : () => setView('main')}
+              onPress={view === 'main' ? closeSheet : () => { setView('main'); setAddingCat(false); setNewCatName(''); }}
               style={{ padding: 6 }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
@@ -378,7 +462,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
               {/* Amount display */}
               <View style={{
-                alignItems: 'center', paddingVertical: 10,
+                alignItems: 'center', paddingTop: 10, paddingBottom: 4,
                 borderBottomWidth: 1, borderBottomColor: colors.system.divider,
                 marginBottom: 2,
               }}>
@@ -388,6 +472,47 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 }}>
                   {cfg.prefix}{amountDisplay}
                 </Text>
+
+                {currency !== 'KRW' && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setEditingKrw(true);
+                      if (krwOverride === null && krwEstimate !== null) {
+                        setKrwOverride(String(krwEstimate));
+                      }
+                    }}
+                    activeOpacity={0.7}
+                    style={{ marginTop: 4, marginBottom: 6 }}
+                  >
+                    {editingKrw ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text style={{ fontSize: 13, color: colors.text.tertiary }}>≈ ₩</Text>
+                        <TextInput
+                          value={krwOverride ?? ''}
+                          onChangeText={setKrwOverride}
+                          keyboardType="number-pad"
+                          style={{
+                            fontSize: 13, color: colors.text.secondary,
+                            borderBottomWidth: 1, borderBottomColor: colors.text.brand,
+                            minWidth: 80, paddingVertical: 2,
+                          }}
+                          onBlur={() => setEditingKrw(false)}
+                          autoFocus
+                        />
+                        <TouchableOpacity onPress={() => setEditingKrw(false)}>
+                          <Text style={{ fontSize: 12, color: colors.text.brand }}>완료</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
+                        ≈ {krwDisplayStr !== null
+                          ? `₩${parseInt(krwDisplayStr).toLocaleString()}`
+                          : '환율 로딩 중…'}
+                        {krwOverride !== null && <Text style={{ color: colors.text.brand }}> (수정됨)</Text>}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Info rows */}
@@ -503,12 +628,75 @@ export function TransactionSheet({ visible, onClose }: Props) {
               style={{ flex: 1 }}
               contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 40 }}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
+              {/* Inline add category */}
+              {addingCat ? (
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 8,
+                  backgroundColor: colors.bg.surface,
+                  borderRadius: radius.card,
+                  padding: 12,
+                  marginBottom: 16,
+                  borderWidth: 1.5,
+                  borderColor: colors.text.brand,
+                }}>
+                  <TextInput
+                    value={newCatName}
+                    onChangeText={setNewCatName}
+                    placeholder="카테고리 이름"
+                    placeholderTextColor={colors.text.tertiary}
+                    style={{ flex: 1, fontSize: 15, color: colors.text.primary, padding: 0 }}
+                    autoFocus
+                    maxLength={20}
+                    returnKeyType="done"
+                    onSubmitEditing={handleAddCategory}
+                  />
+                  <TouchableOpacity
+                    onPress={handleAddCategory}
+                    disabled={creatingCat || !newCatName.trim()}
+                    style={{
+                      backgroundColor: newCatName.trim() ? colors.text.brand : colors.system.border,
+                      borderRadius: radius.chip,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#fff' }}>
+                      {creatingCat ? '...' : '추가'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { setAddingCat(false); setNewCatName(''); }}>
+                    <Text style={{ fontSize: 13, color: colors.text.tertiary }}>취소</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setAddingCat(true)}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                    gap: 6,
+                    backgroundColor: colors.bg.surface,
+                    borderRadius: radius.card,
+                    padding: 12,
+                    marginBottom: 16,
+                    borderWidth: 1,
+                    borderColor: colors.system.border,
+                    borderStyle: 'dashed',
+                  }}
+                >
+                  <Text style={{ fontSize: 16, color: colors.text.brand }}>+</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: colors.text.brand }}>
+                    카테고리 추가
+                  </Text>
+                </TouchableOpacity>
+              )}
+
               {!categories || categories.length === 0 ? (
-                <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
+                <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
                   <Text style={{ fontSize: 36 }}>💸</Text>
                   <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-                    카테고리가 없어요.{'\n'}설정에서 카테고리를 만들어보세요.
+                    아직 카테고리가 없어요.{'\n'}위의 버튼으로 첫 카테고리를 만들어보세요.
                   </Text>
                 </View>
               ) : (
