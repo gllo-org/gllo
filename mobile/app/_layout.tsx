@@ -116,6 +116,14 @@ export default function RootLayout() {
               name="unrealized-pnl"
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen
+              name="profile"
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="delete-account"
+              options={{ animation: 'slide_from_right' }}
+            />
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>

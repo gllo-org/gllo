@@ -68,7 +68,7 @@ export default function SettingsScreen() {
           marginBottom: 16,
           overflow: 'hidden',
         }}>
-          <SettingsRow emoji="👤" label="프로필 설정" />
+          <SettingsRow emoji="👤" label="프로필 설정" onPress={() => router.push('/profile')} />
           <SettingsRow emoji="💰" label="계좌 관리" onPress={() => router.push('/accounts')} />
           <SettingsRow emoji="🏷️" label="카테고리 관리" onPress={() => router.push('/categories')} />
           <SettingsRow emoji="🔁" label="고정 지출 관리" onPress={() => router.push('/recurring')} />
