@@ -3,6 +3,7 @@ package com.globalledger.domain.port.input;
 import com.globalledger.domain.model.Currency;
 import com.globalledger.domain.model.Transaction;
 import com.globalledger.domain.model.TransactionType;
+import com.globalledger.shared.response.PageResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +22,9 @@ public interface TransactionPort {
 
     List<Transaction> getList(UUID userId, Integer year, Integer month,
                                Long accountId, Long categoryId);
+
+    PageResult<Transaction> getPage(UUID userId, Integer year, Integer month,
+                                    Long accountId, Long categoryId, int page, int size);
 
     Transaction getById(UUID userId, Long transactionId);
 

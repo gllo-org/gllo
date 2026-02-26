@@ -54,6 +54,15 @@ public class JwtTokenProvider {
         }
     }
 
+    public String extractEmail(String token) {
+        try {
+            Claims claims = isEs256(token) ? verifyEs256(token) : verifyHs256(token);
+            return claims.get("email", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public boolean validateToken(String token) {
         return validateTokenAndGetUserId(token) != null;
     }

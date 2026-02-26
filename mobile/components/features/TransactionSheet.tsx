@@ -222,7 +222,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
     mutationFn: (name: string) =>
       apiClient<Category>('/categories', {
         method: 'POST',
-        body: JSON.stringify({ name, color: '#6366F1' }),
+        body: JSON.stringify({ name, type: txType === 'INCOME' ? 'INCOME' : 'EXPENSE', color: '#6366F1' }),
       }),
     onSuccess: (newCat) => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -307,7 +307,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
         accountId,
         transactionDate: txDate,
         note: memo || null,
-        ...(krwAmount !== null ? { krwAmount } : {}),
+        ...(krwAmount !== null ? { customConvertedAmount: krwAmount } : {}),
       });
       closeSheet();
     } catch {

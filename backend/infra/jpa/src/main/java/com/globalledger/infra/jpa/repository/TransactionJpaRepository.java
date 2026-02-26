@@ -1,6 +1,8 @@
 package com.globalledger.infra.jpa.repository;
 
 import com.globalledger.infra.jpa.entity.TransactionEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,6 +30,20 @@ public interface TransactionJpaRepository extends JpaRepository<TransactionEntit
             @Param("month") Integer month,
             @Param("accountId") Long accountId,
             @Param("categoryId") Long categoryId);
+
+    @Query("SELECT t FROM TransactionEntity t WHERE t.userId = :userId " +
+            "AND (:year IS NULL OR YEAR(t.transactionDate) = :year) " +
+            "AND (:month IS NULL OR MONTH(t.transactionDate) = :month) " +
+            "AND (:accountId IS NULL OR t.accountId = :accountId) " +
+            "AND (:categoryId IS NULL OR t.categoryId = :categoryId) " +
+            "ORDER BY t.transactionDate DESC")
+    Page<TransactionEntity> findPageWithFilters(
+            @Param("userId") UUID userId,
+            @Param("year") Integer year,
+            @Param("month") Integer month,
+            @Param("accountId") Long accountId,
+            @Param("categoryId") Long categoryId,
+            Pageable pageable);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TransactionEntity t " +
             "WHERE t.userId = :userId " +

@@ -4,7 +4,10 @@ import com.globalledger.domain.model.Transaction;
 import com.globalledger.domain.port.output.TransactionRepositoryPort;
 import com.globalledger.infra.jpa.mapper.TransactionMapper;
 import com.globalledger.infra.jpa.repository.TransactionJpaRepository;
+import com.globalledger.shared.response.PageResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -36,6 +39,16 @@ public class TransactionRepositoryAdapter implements TransactionRepositoryPort {
                 .stream()
                 .map(transactionMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public PageResult<Transaction> findPageByUserIdAndFilter(UUID userId, Integer year, Integer month,
+                                                              Long accountId, Long categoryId,
+                                                              int page, int size) {
+        Page<Transaction> result = transactionJpaRepository
+                .findPageWithFilters(userId, year, month, accountId, categoryId, PageRequest.of(page, size))
+                .map(transactionMapper::toDomain);
+        return new PageResult<>(result.getContent(), result.hasNext(), result.getNumber());
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.globalledger.domain.port.output.AccountRepositoryPort;
 import com.globalledger.domain.port.output.ExchangeRateRepositoryPort;
 import com.globalledger.domain.port.output.TransactionRepositoryPort;
 import com.globalledger.shared.constants.ErrorCode;
+import com.globalledger.shared.response.PageResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,6 +103,13 @@ public class TransactionUseCaseImpl implements TransactionPort {
     public List<Transaction> getList(UUID userId, Integer year, Integer month,
                                        Long accountId, Long categoryId) {
         return transactionRepository.findAllByUserIdAndFilter(userId, year, month, accountId, categoryId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResult<Transaction> getPage(UUID userId, Integer year, Integer month,
+                                            Long accountId, Long categoryId, int page, int size) {
+        return transactionRepository.findPageByUserIdAndFilter(userId, year, month, accountId, categoryId, page, size);
     }
 
     @Override

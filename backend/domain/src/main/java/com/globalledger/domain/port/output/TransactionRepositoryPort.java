@@ -1,6 +1,7 @@
 package com.globalledger.domain.port.output;
 
 import com.globalledger.domain.model.Transaction;
+import com.globalledger.shared.response.PageResult;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,6 +13,9 @@ public interface TransactionRepositoryPort {
     Optional<Transaction> findByIdAndUserId(Long id, UUID userId);
     List<Transaction> findAllByUserIdAndFilter(UUID userId, Integer year, Integer month,
                                                 Long accountId, Long categoryId);
+    PageResult<Transaction> findPageByUserIdAndFilter(UUID userId, Integer year, Integer month,
+                                                       Long accountId, Long categoryId,
+                                                       int page, int size);
     void deleteById(Long id);
     BigDecimal sumAmountByUserIdAndYearMonth(UUID userId, int year, int month, boolean excludeTrip);
 }

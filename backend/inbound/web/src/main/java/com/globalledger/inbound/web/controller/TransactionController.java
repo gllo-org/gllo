@@ -4,6 +4,7 @@ import com.globalledger.domain.model.Transaction;
 import com.globalledger.domain.port.input.TransactionPort;
 import com.globalledger.inbound.web.dto.request.CreateTransactionRequest;
 import com.globalledger.inbound.web.dto.request.UpdateTransactionRequest;
+import com.globalledger.inbound.web.dto.response.TransactionPageResponse;
 import com.globalledger.inbound.web.dto.response.TransactionResponse;
 import com.globalledger.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "거래 API")
@@ -52,22 +52,25 @@ public class TransactionController {
                 .body(ApiResponse.created("거래가 생성되었습니다.", TransactionResponse.from(transaction)));
     }
 
-    @Operation(summary = "거래 목록 조회", description = "조건에 따라 거래 목록을 조회합니다.")
+    @Operation(summary = "거래 목록 조회", description = "조건에 따라 거래 목록을 페이지 단위로 조회합니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getTransactions(
+    public ResponseEntity<ApiResponse<TransactionPageResponse>> getTransactions(
             Authentication authentication,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Long accountId,
-            @RequestParam(required = false) Long categoryId) {
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
 
         UUID userId = UUID.fromString(authentication.getName());
-        List<TransactionResponse> transactions = transactionUseCase
-                .getList(userId, year, month, accountId, categoryId).stream()
-                .map(TransactionResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(ApiResponse.success(transactions));
+        var pageResult = transactionUseCase.getPage(userId, year, month, accountId, categoryId, page, size);
+        var response = new TransactionPageResponse(
+                pageResult.content().stream().map(TransactionResponse::from).toList(),
+                pageResult.hasNext(),
+                pageResult.page()
+        );
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @Operation(summary = "거래 상세 조회", description = "특정 거래의 상세 정보를 조회합니다.")
