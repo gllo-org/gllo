@@ -72,7 +72,7 @@ export default function SettingsScreen() {
           <SettingsRow emoji="💰" label="계좌 관리" onPress={() => router.push('/accounts')} />
           <SettingsRow emoji="🏷️" label="카테고리 관리" onPress={() => router.push('/categories')} />
           <SettingsRow emoji="🔁" label="고정 지출 관리" onPress={() => router.push('/recurring')} />
-          <SettingsRow emoji="✈️" label="여행 기록" />
+          <SettingsRow emoji="✈️" label="여행 기록" onPress={() => router.push('/trips')} />
         </View>
 
         <View style={{
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
           overflow: 'hidden',
         }}>
           <SettingsRow emoji="📄" label="월간 리포트" onPress={() => router.push('/report')} />
-          <SettingsRow emoji="📈" label="미실현 손익" />
+          <SettingsRow emoji="📈" label="미실현 손익" onPress={() => router.push('/unrealized-pnl')} />
         </View>
 
         <View style={{

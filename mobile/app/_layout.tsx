@@ -108,6 +108,14 @@ export default function RootLayout() {
               name="report"
               options={{ animation: 'slide_from_right' }}
             />
+            <Stack.Screen
+              name="trips"
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="unrealized-pnl"
+              options={{ animation: 'slide_from_right' }}
+            />
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
