@@ -4,6 +4,15 @@ spring:
   profiles:
     active: local
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 exchange-rate-api:
   url: ${EXCHANGE_RATE_API_URL:https://v6.exchangerate-api.com/v6}
   api-key: ${EXCHANGE_RATE_API_KEY:demo}
