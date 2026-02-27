@@ -236,13 +236,16 @@ function CategoryPickerSheet({
 
 function RecurringFormSheet({
   visible,
+  editTarget,
   onClose,
 }: {
   visible: boolean;
+  editTarget: RecurringRule | null;
   onClose: () => void;
 }) {
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
+  const isEditMode = editTarget !== null;
 
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
@@ -269,14 +272,33 @@ function RecurringFormSheet({
 
   useEffect(() => {
     if (visible) {
-      setName('');
-      setTitle('');
-      setType('EXPENSE');
-      setAmountStr('');
-      setCurrency('KRW');
-      setSelectedAccount(null);
-      setSelectedCategory(null);
-      setDayOfMonth('1');
+      if (isEditMode && editTarget) {
+        setName(editTarget.name);
+        setTitle(editTarget.title);
+        setType(editTarget.type);
+        setAmountStr(String(editTarget.amount));
+        setCurrency(editTarget.currency);
+        setSelectedAccount(
+          editTarget.accountId
+            ? { id: editTarget.accountId, name: editTarget.accountName ?? '', currency: editTarget.currency, balance: 0 }
+            : null
+        );
+        setSelectedCategory(
+          editTarget.categoryId
+            ? { id: editTarget.categoryId, name: editTarget.categoryName ?? '', type: editTarget.type, color: '#9CA3AF' }
+            : null
+        );
+        setDayOfMonth(String(editTarget.dayOfMonth));
+      } else {
+        setName('');
+        setTitle('');
+        setType('EXPENSE');
+        setAmountStr('');
+        setCurrency('KRW');
+        setSelectedAccount(null);
+        setSelectedCategory(null);
+        setDayOfMonth('1');
+      }
       Animated.timing(translateY, {
         toValue: 0, duration: 280,
         easing: Easing.out(Easing.bezier(0.25, 0.46, 0.45, 0.94)),
@@ -292,36 +314,55 @@ function RecurringFormSheet({
       .start(() => onClose());
   }
 
-  const { mutateAsync: createRule, isPending } = useMutation({
+  const { mutateAsync: createRule, isPending: isCreating } = useMutation({
     mutationFn: (body: object) =>
       apiClient('/recurring-rules', { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recurring-rules'] }),
   });
+
+  const { mutateAsync: updateRule, isPending: isUpdating } = useMutation({
+    mutationFn: (body: object) =>
+      apiClient(`/recurring-rules/${editTarget!.id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recurring-rules'] }),
+  });
+
+  const isPending = isCreating || isUpdating;
 
   async function handleSave() {
     if (!name.trim()) { Alert.alert('', '규칙 이름을 입력해주세요.'); return; }
     if (!title.trim()) { Alert.alert('', '거래 제목을 입력해주세요.'); return; }
     const amount = parseFloat(amountStr);
     if (!amount || amount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
-    if (!selectedAccount) { Alert.alert('', '계좌를 선택해주세요.'); return; }
+    if (!isEditMode && !selectedAccount) { Alert.alert('', '계좌를 선택해주세요.'); return; }
     if (!selectedCategory) { Alert.alert('', '카테고리를 선택해주세요.'); return; }
     const day = parseInt(dayOfMonth, 10);
     if (!day || day < 1 || day > 28) { Alert.alert('', '실행일은 1~28 사이로 입력해주세요.'); return; }
 
-    const today = new Date().toISOString().split('T')[0];
     try {
-      await createRule({
-        name: name.trim(),
-        title: title.trim(),
-        type,
-        amount,
-        currency,
-        accountId: selectedAccount.id,
-        categoryId: selectedCategory.id,
-        frequency: 'MONTHLY',
-        dayOfMonth: day,
-        startDate: today,
-      });
+      if (isEditMode) {
+        await updateRule({
+          name: name.trim(),
+          title: title.trim(),
+          amount,
+          categoryId: selectedCategory.id,
+          frequency: 'MONTHLY',
+          dayOfMonth: day,
+        });
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        await createRule({
+          name: name.trim(),
+          title: title.trim(),
+          type,
+          amount,
+          currency,
+          accountId: selectedAccount!.id,
+          categoryId: selectedCategory.id,
+          frequency: 'MONTHLY',
+          dayOfMonth: day,
+          startDate: today,
+        });
+      }
       closeSheet();
     } catch {
       Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
@@ -348,7 +389,7 @@ function RecurringFormSheet({
               keyboardShouldPersistTaps="handled"
             >
               <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
-                고정 지출 추가
+                {isEditMode ? '고정 지출 수정' : '고정 지출 추가'}
               </Text>
 
               <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>규칙 이름</Text>
@@ -384,12 +425,13 @@ function RecurringFormSheet({
                   return (
                     <TouchableOpacity
                       key={t}
-                      onPress={() => setType(t)}
+                      onPress={() => { if (!isEditMode) setType(t); }}
                       style={{
                         flex: 1, paddingVertical: 10, borderRadius: radius.chip,
                         backgroundColor: active ? colors.bg.surface : 'transparent',
                         alignItems: 'center', borderWidth: 1.5,
                         borderColor: active ? colors.text.brand : colors.system.border,
+                        opacity: isEditMode ? 0.5 : 1,
                       }}
                     >
                       <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.text.brand : colors.text.tertiary }}>
@@ -531,6 +573,17 @@ export default function RecurringScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [formVisible, setFormVisible] = useState(false);
+  const [editTarget, setEditTarget] = useState<RecurringRule | null>(null);
+
+  function openEdit(rule: RecurringRule) {
+    setEditTarget(rule);
+    setFormVisible(true);
+  }
+
+  function openCreate() {
+    setEditTarget(null);
+    setFormVisible(true);
+  }
 
   const { data: rules = [], isLoading } = useQuery({
     queryKey: ['recurring-rules'],
@@ -716,6 +769,17 @@ export default function RecurringScreen() {
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
+                      onPress={() => openEdit(rule)}
+                      activeOpacity={0.75}
+                      style={{
+                        flex: 1, paddingVertical: 8, borderRadius: radius.chip,
+                        backgroundColor: colors.bg.input, alignItems: 'center',
+                        borderWidth: 1, borderColor: colors.system.border,
+                      }}
+                    >
+                      <Text style={{ fontSize: 13, color: colors.text.brand }}>수정</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                       onPress={() => handleExecute(rule)}
                       activeOpacity={0.75}
                       style={{
@@ -724,7 +788,7 @@ export default function RecurringScreen() {
                         borderWidth: 1, borderColor: colors.system.border,
                       }}
                     >
-                      <Text style={{ fontSize: 13, color: colors.text.brand }}>즉시 실행</Text>
+                      <Text style={{ fontSize: 13, color: colors.text.brand }}>실행</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleDelete(rule)}
@@ -744,7 +808,7 @@ export default function RecurringScreen() {
           )}
 
           <TouchableOpacity
-            onPress={() => setFormVisible(true)}
+            onPress={openCreate}
             activeOpacity={0.85}
           >
             <LinearGradient
@@ -767,6 +831,7 @@ export default function RecurringScreen() {
 
       <RecurringFormSheet
         visible={formVisible}
+        editTarget={editTarget}
         onClose={() => setFormVisible(false)}
       />
     </SafeAreaView>

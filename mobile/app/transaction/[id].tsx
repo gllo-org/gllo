@@ -37,6 +37,13 @@ interface TransactionDetail {
   transactionDate: string;
   note: string | null;
   isTrip: boolean;
+  tripId: number | null;
+}
+
+interface ExchangeRateEntry {
+  baseCurrency: string;
+  targetCurrency: string;
+  rate: number;
 }
 
 const TYPE_CONFIG: Record<TxType, { label: string; color: string; bg: string; prefix: string }> = {
@@ -255,6 +262,14 @@ export default function TransactionDetailScreen() {
     enabled: isEditing,
   });
 
+  const { data: rateEntry } = useQuery({
+    queryKey: ['exchange-rate', tx?.currency, 'KRW'],
+    queryFn: () => apiClient<ExchangeRateEntry>(`/exchange-rates/${tx!.currency}/KRW`),
+    enabled: !!tx && tx.currency !== 'KRW',
+    staleTime: 1000 * 60 * 10,
+  });
+  const krwRate = rateEntry?.rate ?? null;
+
   const { mutateAsync: updateTx, isPending: isUpdating } = useMutation({
     mutationFn: (body: object) =>
       apiClient(`/transactions/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
@@ -299,6 +314,7 @@ export default function TransactionDetailScreen() {
         title: editTitle || undefined,
         amount,
         categoryId: editCategoryId ?? undefined,
+        tripId: tx?.tripId ?? undefined,
         transactionDate: editDate,
         note: editNote || null,
       });
@@ -426,6 +442,11 @@ export default function TransactionDetailScreen() {
           }}>
             {cfg.prefix}{formatCurrency(tx.amount, tx.currency)}
           </Text>
+          {tx.currency !== 'KRW' && krwRate !== null && (
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginTop: 4 }}>
+              ≈ {formatCurrency(tx.amount * krwRate, 'KRW')}
+            </Text>
+          )}
           {tx.categoryEmoji && (
             <Text style={{ fontSize: 32, marginTop: 12 }}>{tx.categoryEmoji}</Text>
           )}

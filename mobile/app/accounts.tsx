@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
 import { colors, spacing, radius, shadow, typography } from '@/theme';
@@ -39,7 +40,7 @@ const ACCOUNT_TYPES = [
   { value: 'CARD', label: '카드' },
 ];
 
-function AccountCard({ account }: { account: Account }) {
+function AccountCard({ account, onDelete }: { account: Account; onDelete: () => void }) {
   const cc = colors.currency[account.currency];
   const isPositive = (account.pnlRate ?? 0) >= 0;
 
@@ -65,9 +66,17 @@ function AccountCard({ account }: { account: Account }) {
           paddingHorizontal: 10, paddingVertical: 4,
           borderRadius: radius.chip,
           backgroundColor: cc.primary + '20',
+          marginRight: 8,
         }}>
           <Text style={{ fontSize: 12, fontWeight: '600', color: cc.text }}>{account.currency}</Text>
         </View>
+        <TouchableOpacity
+          onPress={onDelete}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={{ padding: 4 }}
+        >
+          <Text style={{ fontSize: 16, color: colors.text.tertiary }}>🗑️</Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={{ ...typography.amount.medium, color: colors.text.primary, marginBottom: 6 }}>
@@ -347,12 +356,39 @@ function CreateAccountSheet({
 
 export default function AccountsScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [createVisible, setCreateVisible] = useState(false);
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => apiClient<Account[]>('/accounts'),
   });
+
+  const { mutateAsync: deleteAccount } = useMutation({
+    mutationFn: (id: string) => apiClient(`/accounts/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  function handleDelete(account: Account) {
+    Alert.alert(
+      '계좌 삭제',
+      `"${account.name}"을(를) 삭제할까요?\n계좌와 관련된 모든 데이터가 삭제돼요.`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try { await deleteAccount(account.id); }
+            catch { Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.'); }
+          },
+        },
+      ]
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
@@ -410,7 +446,11 @@ export default function AccountsScreen() {
         ) : accounts && accounts.length > 0 ? (
           <>
             {accounts.map((account) => (
-              <AccountCard key={account.id} account={account} />
+              <AccountCard
+                key={account.id}
+                account={account}
+                onDelete={() => handleDelete(account)}
+              />
             ))}
             <TouchableOpacity
               onPress={() => setCreateVisible(true)}
