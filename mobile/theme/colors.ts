@@ -3,8 +3,8 @@ export const colors = {
     primary:     ['#C4B5F8', '#F0A8C8', '#FFBDA0'] as const,
     light:       ['#EDE8FF', '#FDE8F2', '#FFF0E8'] as const,
     card:        ['#D4C8FC', '#F8C0D8', '#FFC8AE'] as const,
-    travel:      ['#A8E6C0', '#A8D8F0', '#FFD4A8'] as const,
-    travelLight: ['#E4FDE9', '#DCF4FF', '#FFF5EC'] as const,
+    travel:      ['#A8E6C0', '#FFD4A8', '#A8D8F0'] as const,
+    travelLight: ['#E4FDE9', '#FFF5EC', '#DCF4FF'] as const,
   },
 
   bg: {

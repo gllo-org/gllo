@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient, ApiError } from '@/lib/api/client';
+import { hasTutorialBeenSeen } from './tutorial';
 import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
@@ -43,10 +44,11 @@ function AuthGuard() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const isLogoutComplete = segments[1] === 'logout-complete';
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (session && inAuthGroup && !pendingPinSetup) {
+    } else if (session && inAuthGroup && !isLogoutComplete && !pendingPinSetup) {
       checkOnboardingAndRoute();
     }
   }, [session, isLoading, segments, pendingPinSetup]);
@@ -55,7 +57,8 @@ function AuthGuard() {
     try {
       const profile = await apiClient<{ onboardingCompleted: boolean }>('/user/profile');
       if (profile.onboardingCompleted) {
-        router.replace('/(tabs)');
+        const seen = await hasTutorialBeenSeen();
+        router.replace(seen ? '/(tabs)' : '/tutorial');
       } else {
         router.replace('/onboarding');
       }
@@ -101,6 +104,10 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
               name="onboarding"
+              options={{ animation: 'fade' }}
+            />
+            <Stack.Screen
+              name="tutorial"
               options={{ animation: 'fade' }}
             />
             <Stack.Screen
