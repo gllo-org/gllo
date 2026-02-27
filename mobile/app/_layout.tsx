@@ -18,7 +18,7 @@ const queryClient = new QueryClient({
 });
 
 function AuthGuard() {
-  const { session, isLoading, setSession, setLoading } = useAuthStore();
+  const { session, isLoading, setSession, setLoading, pendingPinSetup } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
 
@@ -42,10 +42,10 @@ function AuthGuard() {
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
-    } else if (session && inAuthGroup) {
+    } else if (session && inAuthGroup && !pendingPinSetup) {
       checkOnboardingAndRoute();
     }
-  }, [session, isLoading, segments]);
+  }, [session, isLoading, segments, pendingPinSetup]);
 
   async function checkOnboardingAndRoute() {
     try {

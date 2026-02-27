@@ -6,8 +6,10 @@ interface AuthState {
   session: Session | null;
   isLoading: boolean;
   pendingEmail: string | null;
+  pendingPinSetup: boolean;
   setSession: (session: Session | null) => void;
   setLoading: (isLoading: boolean) => void;
+  setPendingPinSetup: (val: boolean) => void;
   sendOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -17,9 +19,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   session: null,
   isLoading: true,
   pendingEmail: null,
+  pendingPinSetup: false,
 
   setSession: (session) => set({ session }),
   setLoading: (isLoading) => set({ isLoading }),
+  setPendingPinSetup: (pendingPinSetup) => set({ pendingPinSetup }),
 
   sendOtp: async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
