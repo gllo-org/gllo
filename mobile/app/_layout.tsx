@@ -3,10 +3,14 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient, ApiError } from '@/lib/api/client';
 import '../global.css';
+
+SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +72,25 @@ function AuthGuard() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    'Pretendard-Regular':  require('../assets/fonts/pretendard/Pretendard-Regular.otf'),
+    'Pretendard-Medium':   require('../assets/fonts/pretendard/Pretendard-Medium.otf'),
+    'Pretendard-SemiBold': require('../assets/fonts/pretendard/Pretendard-SemiBold.otf'),
+    'Pretendard-Bold':     require('../assets/fonts/pretendard/Pretendard-Bold.otf'),
+    'SUIT-Regular':        require('../assets/fonts/suite/SUIT-Regular.otf'),
+    'SUIT-Medium':         require('../assets/fonts/suite/SUIT-Medium.otf'),
+    'SUIT-SemiBold':       require('../assets/fonts/suite/SUIT-SemiBold.otf'),
+    'SUIT-Bold':           require('../assets/fonts/suite/SUIT-Bold.otf'),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

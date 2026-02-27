@@ -1,28 +1,28 @@
 export const typography = {
   family: {
-    sans: 'System',
-    mono: 'Courier',
+    display: 'SUIT',
+    sans: 'Pretendard',
   },
 
   amount: {
-    hero:   { fontSize: 36, fontWeight: '700' as const, letterSpacing: -1 },
-    large:  { fontSize: 28, fontWeight: '700' as const, letterSpacing: -0.5 },
-    medium: { fontSize: 20, fontWeight: '600' as const, letterSpacing: 0 },
-    small:  { fontSize: 15, fontWeight: '500' as const, letterSpacing: 0 },
+    hero:   { fontFamily: 'Pretendard-Bold',     fontSize: 36, letterSpacing: -1 },
+    large:  { fontFamily: 'Pretendard-Bold',     fontSize: 28, letterSpacing: -0.5 },
+    medium: { fontFamily: 'Pretendard-SemiBold', fontSize: 20, letterSpacing: 0 },
+    small:  { fontFamily: 'Pretendard-Medium',   fontSize: 15, letterSpacing: 0 },
   },
 
   heading: {
-    h1: { fontSize: 24, fontWeight: '700' as const },
-    h2: { fontSize: 20, fontWeight: '700' as const },
-    h3: { fontSize: 17, fontWeight: '600' as const },
+    h1: { fontFamily: 'SUIT-Bold',     fontSize: 24 },
+    h2: { fontFamily: 'SUIT-Bold',     fontSize: 20 },
+    h3: { fontFamily: 'SUIT-SemiBold', fontSize: 17 },
   },
 
   body: {
-    large:  { fontSize: 16, fontWeight: '400' as const },
-    medium: { fontSize: 15, fontWeight: '400' as const },
-    small:  { fontSize: 13, fontWeight: '400' as const },
+    large:  { fontFamily: 'Pretendard-Regular', fontSize: 16 },
+    medium: { fontFamily: 'Pretendard-Regular', fontSize: 15 },
+    small:  { fontFamily: 'Pretendard-Regular', fontSize: 13 },
   },
 
-  caption: { fontSize: 12, fontWeight: '400' as const },
-  label:   { fontSize: 13, fontWeight: '500' as const },
+  caption: { fontFamily: 'Pretendard-Regular', fontSize: 12 },
+  label:   { fontFamily: 'Pretendard-Medium',  fontSize: 13 },
 } as const;
