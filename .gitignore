@@ -58,3 +58,6 @@ backup.sh
 # 로컬 파일
 /backend/api-app/src/main/resources/application-local.yml
 /nul
+
+# === 참고 자료 ===
+references/
