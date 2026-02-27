@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
 import { colors, spacing, radius, shadow } from '@/theme';
@@ -13,7 +14,7 @@ import type { CurrencyCode } from '@/theme';
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.92;
 
-type TxType = 'EXPENSE' | 'INCOME' | 'TRANSFER';
+type TxType = 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'EXCHANGE';
 type SheetView = 'main' | 'category' | 'account';
 
 interface Category {
@@ -42,9 +43,10 @@ interface Props {
 }
 
 const TYPE_CONFIG: Record<TxType, { label: string; color: string; prefix: string }> = {
-  EXPENSE:  { label: '지출', color: colors.loss.text,   prefix: '-' },
-  INCOME:   { label: '수입', color: colors.profit.text, prefix: '+' },
-  TRANSFER: { label: '이체', color: colors.text.brand,  prefix: '' },
+  EXPENSE:  { label: '지출',   color: colors.loss.text,   prefix: '-' },
+  INCOME:   { label: '수입',   color: colors.profit.text, prefix: '+' },
+  TRANSFER: { label: '이체',   color: colors.text.brand,  prefix: '' },
+  EXCHANGE: { label: '환전',   color: colors.currency.EUR.text, prefix: '⇄' },
 };
 
 const CURRENCIES: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'KRW'];
@@ -141,6 +143,7 @@ function SelectorRow({
 export function TransactionSheet({ visible, onClose }: Props) {
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [txType, setTxType]           = useState<TxType>('EXPENSE');
   const [amountStr, setAmountStr]     = useState('0');
@@ -403,12 +406,19 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 padding: 3,
                 marginBottom: 10,
               }}>
-                {(['EXPENSE', 'INCOME', 'TRANSFER'] as TxType[]).map((t) => {
+                {(['EXPENSE', 'INCOME', 'TRANSFER', 'EXCHANGE'] as TxType[]).map((t) => {
                   const active = txType === t;
                   return (
                     <TouchableOpacity
                       key={t}
-                      onPress={() => setTxType(t)}
+                      onPress={() => {
+                        if (t === 'EXCHANGE') {
+                          closeSheet();
+                          setTimeout(() => router.push('/exchange'), 260);
+                          return;
+                        }
+                        setTxType(t);
+                      }}
                       style={{
                         flex: 1, paddingVertical: 8, borderRadius: 10,
                         backgroundColor: active ? colors.bg.screen : 'transparent',
@@ -417,8 +427,8 @@ export function TransactionSheet({ visible, onClose }: Props) {
                       }}
                     >
                       <Text style={{
-                        fontSize: 14,
-                        fontWeight: active ? '600' : '400',
+                        fontSize: 13,
+                        fontFamily: active ? 'Pretendard-SemiBold' : 'Pretendard-Regular',
                         color: active ? TYPE_CONFIG[t].color : colors.text.tertiary,
                       }}>
                         {TYPE_CONFIG[t].label}

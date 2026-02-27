@@ -142,7 +142,7 @@ export default function TransactionsScreen() {
         borderBottomWidth: 1,
         borderBottomColor: colors.system.border,
       }}>
-        <Text style={{ flex: 1, fontSize: 20, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, ...typography.heading.h2, color: colors.text.primary }}>
           거래 내역
         </Text>
         <TouchableOpacity
@@ -182,12 +182,38 @@ export default function TransactionsScreen() {
           renderItem={({ item }) => (
             <TransactionItem item={item} krwRate={krwRateMap[item.currency] ?? null} />
           )}
-          onEndReached={() => { if (hasNextPage) fetchNextPage(); }}
-          onEndReachedThreshold={0.3}
           ListFooterComponent={
-            isFetchingNextPage
-              ? <ActivityIndicator color={colors.text.brand} style={{ padding: 16 }} />
-              : null
+            hasNextPage ? (
+              <TouchableOpacity
+                onPress={() => { if (!isFetchingNextPage) fetchNextPage(); }}
+                disabled={isFetchingNextPage}
+                style={{
+                  alignItems: 'center',
+                  paddingVertical: 16,
+                  borderTopWidth: 1,
+                  borderTopColor: colors.system.divider,
+                  marginTop: 4,
+                }}
+              >
+                {isFetchingNextPage ? (
+                  <ActivityIndicator color={colors.text.brand} />
+                ) : (
+                  <Text style={{ fontSize: 14, color: colors.text.brand, fontFamily: 'Pretendard-Medium' }}>
+                    이전 거래 더 보기
+                  </Text>
+                )}
+              </TouchableOpacity>
+            ) : allTransactions.length > 0 ? (
+              <Text style={{
+                textAlign: 'center',
+                fontSize: 12,
+                color: colors.text.tertiary,
+                fontFamily: 'Pretendard-Regular',
+                paddingVertical: 16,
+              }}>
+                모든 거래를 불러왔어요
+              </Text>
+            ) : null
           }
         />
       )}

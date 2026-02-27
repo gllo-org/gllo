@@ -18,7 +18,7 @@ const SHEET_H = Dimensions.get('window').height * 0.65;
 
 type AnalyticsTab = '지출 추이' | '카테고리별';
 type ViewMode = '이번달' | '3개월' | '6개월';
-type AmountType = '지출' | '수입';
+type AmountType = '전체' | '지출' | '수입';
 
 interface MonthlyReport {
   yearMonth: string;
@@ -227,7 +227,7 @@ function TrendTab({
   onChangeYearMonth: (ym: string) => void;
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>('이번달');
-  const [amountType, setAmountType] = useState<AmountType>('지출');
+  const [amountType, setAmountType] = useState<AmountType>('전체');
 
   const monthCount = viewMode === '3개월' ? 3 : viewMode === '6개월' ? 6 : 1;
   const yearMonths = viewMode === '이번달'
@@ -248,24 +248,60 @@ function TrendTab({
 
   const isLoading = isSingleLoading || isMultiLoading;
 
-  const barData = viewMode === '이번달'
-    ? (singleReport?.dailyExpenses.map((d, i) => ({
+  const barData = (() => {
+    if (viewMode === '이번달') {
+      if (amountType === '전체') {
+        return [
+          {
+            value: singleReport?.totalExpense ?? 0,
+            label: '지출',
+            frontColor: colors.loss.text,
+            spacing: 8,
+          },
+          {
+            value: singleReport?.totalIncome ?? 0,
+            label: '수입',
+            frontColor: colors.profit.text,
+            spacing: 0,
+          },
+        ];
+      }
+      return (singleReport?.dailyExpenses.map((d, i) => ({
         value: amountType === '지출' ? d.amount : 0,
         label: d.date.slice(8),
-        frontColor: i === (singleReport.dailyExpenses.length - 1)
-          ? colors.gradient.primary[1]
-          : colors.gradient.primary[0],
-      })) ?? [])
-    : (multiReports?.map((r) => {
+        frontColor: amountType === '지출' ? colors.loss.text : colors.profit.text,
+        spacing: 0,
+      })) ?? []);
+    }
+    if (amountType === '전체') {
+      return (multiReports?.flatMap((r) => {
         const [, m] = r.yearMonth.split('-');
-        return {
-          value: amountType === '지출' ? r.totalExpense : r.totalIncome,
-          label: `${Number(m)}월`,
-          frontColor: amountType === '지출'
-            ? colors.gradient.primary[0]
-            : colors.profit.text,
-        };
+        return [
+          {
+            value: r.totalExpense,
+            label: `${Number(m)}월`,
+            frontColor: colors.loss.text,
+            spacing: 4,
+          },
+          {
+            value: r.totalIncome,
+            label: '',
+            frontColor: colors.profit.text,
+            spacing: 20,
+          },
+        ];
       }) ?? []);
+    }
+    return (multiReports?.map((r) => {
+      const [, m] = r.yearMonth.split('-');
+      return {
+        value: amountType === '지출' ? r.totalExpense : r.totalIncome,
+        label: `${Number(m)}월`,
+        frontColor: amountType === '지출' ? colors.loss.text : colors.profit.text,
+        spacing: 0,
+      };
+    }) ?? []);
+  })();
 
   const report = singleReport;
   const currency: CurrencyCode = report?.currency ?? 'KRW';
@@ -310,8 +346,10 @@ function TrendTab({
         paddingHorizontal: spacing.screenPadding,
         marginBottom: spacing.sectionGap,
       }}>
-        {(['지출', '수입'] as AmountType[]).map((t) => {
+        {(['전체', '지출', '수입'] as AmountType[]).map((t) => {
           const active = amountType === t;
+          const activeColor = t === '지출' ? colors.loss.text : t === '수입' ? colors.profit.text : colors.text.brand;
+          const activeBg = t === '지출' ? colors.loss.light : t === '수입' ? colors.profit.light : colors.bg.surface;
           return (
             <TouchableOpacity
               key={t}
@@ -319,14 +357,15 @@ function TrendTab({
               style={{
                 paddingHorizontal: 14, paddingVertical: 6,
                 borderRadius: radius.chip,
-                backgroundColor: active ? (t === '지출' ? colors.loss.light : colors.profit.light) : colors.bg.surface,
+                backgroundColor: active ? activeBg : colors.bg.surface,
                 borderWidth: 1,
-                borderColor: active ? (t === '지출' ? colors.loss.text : colors.profit.text) : colors.system.border,
+                borderColor: active ? activeColor : colors.system.border,
               }}
             >
               <Text style={{
-                fontSize: 13, fontWeight: '600',
-                color: active ? (t === '지출' ? colors.loss.text : colors.profit.text) : colors.text.secondary,
+                fontSize: 13,
+                fontFamily: active ? 'Pretendard-SemiBold' : 'Pretendard-Regular',
+                color: active ? activeColor : colors.text.secondary,
               }}>
                 {t}
               </Text>
@@ -374,14 +413,30 @@ function TrendTab({
           padding: spacing.cardPadding,
           ...shadow.card,
         }}>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>
-            {viewMode === '이번달' ? '일별 지출' : `${viewMode} ${amountType} 추이`}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 8 }}>
+            <Text style={{ ...typography.heading.h3, color: colors.text.primary, flex: 1 }}>
+              {viewMode === '이번달' && amountType === '전체' ? '이번달 수입 vs 지출'
+                : viewMode === '이번달' ? `일별 ${amountType}`
+                : `${viewMode} ${amountType} 추이`}
+            </Text>
+            {amountType === '전체' && (
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.loss.text }} />
+                  <Text style={{ fontSize: 11, color: colors.text.tertiary }}>지출</Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.profit.text }} />
+                  <Text style={{ fontSize: 11, color: colors.text.tertiary }}>수입</Text>
+                </View>
+              </View>
+            )}
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
               data={barData}
-              barWidth={viewMode === '이번달' ? 18 : 40}
-              spacing={viewMode === '이번달' ? 8 : 20}
+              barWidth={viewMode === '이번달' && amountType !== '전체' ? 18 : viewMode === '이번달' ? 60 : amountType === '전체' ? 30 : 40}
+              spacing={viewMode === '이번달' && amountType !== '전체' ? 8 : 12}
               hideRules
               xAxisThickness={0}
               yAxisThickness={0}
@@ -560,10 +615,10 @@ export default function AnalyticsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
       <View style={{ paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 8 }}>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text.primary, marginBottom: 4 }}>
+        <Text style={{ ...typography.heading.h2, color: colors.text.primary, marginBottom: 4 }}>
           지출 분석
         </Text>
-        <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
+        <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
           글로가 이번 달 지출 흐름을 살펴봤어요.
         </Text>
       </View>

@@ -48,15 +48,12 @@ function BudgetStatusText(spentRate: number, timeRate: number): string {
   return '글로가 이번 달 지출 흐름을 살펴봤어요.';
 }
 
-function getBudgetBarColor(spentRate: number, timeRate: number): string {
-  if (spentRate > timeRate + 5) return colors.status.danger;
-  if (spentRate > timeRate) return colors.status.warning;
-  return colors.status.normal;
-}
-
 export default function DashboardScreen() {
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [travelMode, setTravelMode] = useState(false);
   const router = useRouter();
+
+  const heroGradient = travelMode ? colors.gradient.travelLight : colors.gradient.light;
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard'],
@@ -75,30 +72,34 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <LinearGradient
-          colors={colors.gradient.light}
+          colors={heroGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: spacing.screenPadding, paddingTop: 20, paddingBottom: 28 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary }}>글로</Text>
+            <Text style={{ ...typography.heading.h2, color: colors.text.primary }}>글로</Text>
             <TouchableOpacity
-              onPress={() => router.push('/exchange')}
+              onPress={() => setTravelMode(!travelMode)}
               activeOpacity={0.8}
               style={{
-                backgroundColor: 'rgba(255,255,255,0.7)',
+                backgroundColor: 'rgba(255,255,255,0.75)',
                 borderRadius: 20,
                 paddingHorizontal: 12,
                 paddingVertical: 6,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
               }}
             >
-              <Text style={{ fontSize: 13, color: colors.text.brand, fontWeight: '600' }}>
-                ⇄ 환전 기록
+              <Text style={{ fontSize: 18 }}>{travelMode ? '✈️' : '🏡'}</Text>
+              <Text style={{ fontSize: 12, color: colors.text.secondary, fontFamily: 'Pretendard-Medium' }}>
+                {travelMode ? '여행 모드' : '일상 모드'}
               </Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 4 }}>
+          <Text style={{ ...typography.body.small, color: colors.text.secondary, marginBottom: 4 }}>
             총 자산 (KRW 환산)
           </Text>
           {statsLoading ? (
@@ -111,7 +112,7 @@ export default function DashboardScreen() {
         </LinearGradient>
 
         <View style={{ paddingHorizontal: spacing.screenPadding, marginTop: spacing.sectionGap }}>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary, marginBottom: 12 }}>
+          <Text style={{ ...typography.heading.h3, color: colors.text.primary, marginBottom: 12 }}>
             내 계좌
           </Text>
 
@@ -137,21 +138,21 @@ export default function DashboardScreen() {
                       <Text style={{ fontSize: 20, marginBottom: 4 }}>
                         {CURRENCY_FLAGS[account.currency]}
                       </Text>
-                      <Text style={{ fontSize: 12, color: currencyColor.text, fontWeight: '500', marginBottom: 8 }}>
+                      <Text style={{ ...typography.label, color: currencyColor.text, marginBottom: 8 }}>
                         {account.name}
                       </Text>
                       <Text style={{ ...typography.amount.medium, color: colors.text.primary }}>
                         {formatCurrency(account.balance, account.currency)}
                       </Text>
                       {account.averageRate !== null && (
-                        <Text style={{ fontSize: 11, color: colors.text.secondary, marginTop: 4 }}>
+                        <Text style={{ ...typography.caption, color: colors.text.secondary, marginTop: 4 }}>
                           평단가 {formatCurrency(account.averageRate, 'KRW')}/{account.currency}
                         </Text>
                       )}
                       {account.pnlRate !== null && (
                         <Text style={{
-                          fontSize: 12,
-                          fontWeight: '600',
+                          ...typography.caption,
+                          fontFamily: 'Pretendard-SemiBold',
                           color: isPositive ? colors.profit.text : colors.loss.text,
                           marginTop: 4,
                         }}>
@@ -178,10 +179,10 @@ export default function DashboardScreen() {
                 borderStyle: 'dashed',
               }}>
                 <Text style={{ fontSize: 24, marginBottom: 8 }}>🏦</Text>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>
+                <Text style={{ ...typography.body.medium, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>
                   + 계좌 추가하기
                 </Text>
-                <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 4 }}>
+                <Text style={{ ...typography.caption, color: colors.text.tertiary, marginTop: 4 }}>
                   글로와 함께 첫 계좌를 만들어볼까요?
                 </Text>
               </View>
@@ -204,10 +205,10 @@ export default function DashboardScreen() {
             padding: spacing.cardPadding,
             ...shadow.card,
           }}>
-            <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 4 }}>
+            <Text style={{ ...typography.caption, color: colors.text.tertiary, marginBottom: 4 }}>
               {BudgetStatusText(stats.budgetSpentRate, stats.timeProgressRate)}
             </Text>
-            <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>
+            <Text style={{ ...typography.heading.h3, color: colors.text.primary, marginBottom: 16 }}>
               이번 달 예산
             </Text>
 
@@ -215,7 +216,7 @@ export default function DashboardScreen() {
               <Text style={{ ...typography.amount.medium, color: colors.text.primary }}>
                 {formatCurrency(stats.budgetSpent, stats.currency)}
               </Text>
-              <Text style={{ fontSize: 13, color: colors.text.secondary }}>
+              <Text style={{ ...typography.body.small, color: colors.text.secondary }}>
                 / {formatCurrency(stats.budgetAmount, stats.currency)}
               </Text>
             </View>
@@ -228,7 +229,7 @@ export default function DashboardScreen() {
               marginBottom: 8,
             }}>
               <LinearGradient
-                colors={colors.gradient.primary}
+                colors={travelMode ? colors.gradient.travel : colors.gradient.primary}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={{
@@ -240,10 +241,10 @@ export default function DashboardScreen() {
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: 11, color: colors.text.secondary }}>
+              <Text style={{ ...typography.caption, color: colors.text.secondary }}>
                 예산 소진 {stats.budgetSpentRate.toFixed(1)}%
               </Text>
-              <Text style={{ fontSize: 11, color: colors.text.tertiary }}>
+              <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
                 시간 경과 {stats.timeProgressRate.toFixed(1)}%
               </Text>
             </View>
@@ -255,7 +256,7 @@ export default function DashboardScreen() {
                 borderTopWidth: 1,
                 borderTopColor: colors.system.divider,
               }}>
-                <Text style={{ fontSize: 12, color: colors.text.tertiary }}>
+                <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
                   하루 권장 지출
                 </Text>
                 <Text style={{ ...typography.amount.small, color: colors.text.brand, marginTop: 2 }}>
@@ -269,7 +270,7 @@ export default function DashboardScreen() {
 
         <View style={{ paddingHorizontal: spacing.screenPadding, marginTop: spacing.sectionGap }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>
+            <Text style={{ ...typography.heading.h3, color: colors.text.primary }}>
               이번 달
             </Text>
           </View>
@@ -280,10 +281,10 @@ export default function DashboardScreen() {
               borderRadius: radius.card,
               padding: 16,
             }}>
-              <Text style={{ fontSize: 12, color: colors.text.secondary, marginBottom: 4 }}>수입</Text>
+              <Text style={{ ...typography.caption, color: colors.text.secondary, marginBottom: 4 }}>수입</Text>
               {statsLoading
                 ? <SkeletonBox width="100%" height={24} />
-                : <Text style={{ ...typography.amount.small, color: colors.profit.text, fontWeight: '700' }}>
+                : <Text style={{ ...typography.amount.small, fontFamily: 'Pretendard-Bold', color: colors.profit.text }}>
                     +{formatCurrency(stats?.monthlyIncome ?? 0, stats?.currency ?? 'KRW')}
                   </Text>
               }
@@ -294,10 +295,10 @@ export default function DashboardScreen() {
               borderRadius: radius.card,
               padding: 16,
             }}>
-              <Text style={{ fontSize: 12, color: colors.text.secondary, marginBottom: 4 }}>지출</Text>
+              <Text style={{ ...typography.caption, color: colors.text.secondary, marginBottom: 4 }}>지출</Text>
               {statsLoading
                 ? <SkeletonBox width="100%" height={24} />
-                : <Text style={{ ...typography.amount.small, color: colors.loss.text, fontWeight: '700' }}>
+                : <Text style={{ ...typography.amount.small, fontFamily: 'Pretendard-Bold', color: colors.loss.text }}>
                     -{formatCurrency(stats?.monthlyExpense ?? 0, stats?.currency ?? 'KRW')}
                   </Text>
               }
@@ -317,18 +318,25 @@ export default function DashboardScreen() {
         activeOpacity={0.85}
       >
         <LinearGradient
-          colors={colors.gradient.primary}
+          colors={travelMode ? colors.gradient.travel : colors.gradient.primary}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
             width: 56,
             height: 56,
             borderRadius: 28,
+            overflow: 'hidden',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text style={{ fontSize: 26, color: colors.text.inverse }}>+</Text>
+          <Text style={{
+            fontSize: 28,
+            color: colors.text.inverse,
+            lineHeight: 32,
+            textAlign: 'center',
+            includeFontPadding: false,
+          }}>+</Text>
         </LinearGradient>
       </TouchableOpacity>
 
