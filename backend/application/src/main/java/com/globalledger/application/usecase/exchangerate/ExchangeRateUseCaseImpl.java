@@ -2,10 +2,12 @@ package com.globalledger.application.usecase.exchangerate;
 
 import com.globalledger.domain.model.Currency;
 import com.globalledger.domain.model.ExchangeRate;
+import com.globalledger.domain.exception.NotFoundException;
 import com.globalledger.domain.port.input.ExchangeRatePort;
 import com.globalledger.domain.port.output.ExchangeRateApiPort;
 import com.globalledger.domain.port.output.ExchangeRateRepositoryPort;
 import com.globalledger.domain.vo.ExchangeRateInfo;
+import com.globalledger.shared.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,7 +39,7 @@ public class ExchangeRateUseCaseImpl implements ExchangeRatePort {
     @Transactional(readOnly = true)
     public ExchangeRate getLatestRate(Currency baseCurrency, Currency targetCurrency) {
         return exchangeRateRepository.findLatestByPair(baseCurrency, targetCurrency)
-                .orElse(null);
+                .orElseThrow(() -> new NotFoundException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
     }
 
     @Override

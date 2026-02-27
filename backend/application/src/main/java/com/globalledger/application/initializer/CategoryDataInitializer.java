@@ -26,6 +26,11 @@ public class CategoryDataInitializer implements ApplicationRunner {
     }
 
     private void initializeSystemCategories() {
+        if (categoryRepository.hasSystemCategories()) {
+            log.info("시스템 카테고리 이미 존재함. 초기화 건너뜀.");
+            return;
+        }
+
         List<Category> systemCategories = List.of(
                 Category.createSystem("급여", CategoryType.INCOME),
                 Category.createSystem("용돈", CategoryType.INCOME),
