@@ -35,7 +35,9 @@ public enum ErrorCode {
     EXCHANGE_RATE_API_FAILURE(500, "환율 정보를 가져오는 데 실패했습니다."),
 
     USER_PROFILE_NOT_FOUND(404, "사용자 프로필을 찾을 수 없습니다."),
-    INVALID_DISPLAY_NAME(400, "표시 이름은 1자 이상 50자 이하여야 합니다.");
+    INVALID_DISPLAY_NAME(400, "표시 이름은 1자 이상 50자 이하여야 합니다."),
+
+    RESOURCE_NOT_FOUND(404, "요청한 리소스를 찾을 수 없습니다.");
 
     private final int httpStatus;
     private final String message;

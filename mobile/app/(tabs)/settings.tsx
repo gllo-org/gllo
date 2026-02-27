@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/stores/authStore';
 import { colors, spacing, radius } from '@/theme';
 
 interface SettingsRowProps {
@@ -38,7 +37,6 @@ function SettingsRow({ label, emoji, onPress, isDanger = false }: SettingsRowPro
 }
 
 export default function SettingsScreen() {
-  const { signOut } = useAuthStore();
   const router = useRouter();
 
   function handleSignOut() {
@@ -47,7 +45,7 @@ export default function SettingsScreen() {
       {
         text: '로그아웃',
         style: 'destructive',
-        onPress: signOut,
+        onPress: () => router.replace('/(auth)/logout-complete'),
       },
     ]);
   }

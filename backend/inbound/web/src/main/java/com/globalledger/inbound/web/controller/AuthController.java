@@ -55,6 +55,18 @@ public class AuthController {
     }
 
     @Operation(
+            summary = "로그아웃",
+            description = "로그아웃 처리합니다. 클라이언트에서 토큰을 삭제해야 합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    })
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        return ResponseEntity.ok(ApiResponse.success("로그아웃되었습니다.", null));
+    }
+
+    @Operation(
             summary = "계정 탈퇴",
             description = "계정을 탈퇴 처리합니다. 탈퇴 후 30일 이내에 재로그인하면 계정이 자동으로 복구됩니다. 30일 경과 후에는 새 계정으로 초기화됩니다."
     )
