@@ -32,7 +32,7 @@ export default function LogoutCompleteScreen() {
           marginBottom: 12,
           textAlign: 'center',
         }}>
-          잘 가요, 또 만나요!
+          당신의 매일을 응원합니다. 또 만나요!
         </Text>
 
         <Text style={{
