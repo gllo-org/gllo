@@ -72,12 +72,14 @@ function AccountPickerSheet({
   excludeId,
   onSelect,
   onClose,
+  onAddAccount,
 }: {
   visible: boolean;
   accounts: Account[];
   excludeId: number | null;
   onSelect: (account: Account) => void;
   onClose: () => void;
+  onAddAccount?: () => void;
 }) {
   const translateY = useRef(new Animated.Value(PICKER_H)).current;
 
@@ -171,11 +173,29 @@ function AccountPickerSheet({
               );
             })}
             {selectable.length === 0 && (
-              <View style={{ alignItems: 'center', paddingTop: 40 }}>
+              <View style={{ alignItems: 'center', paddingTop: 40, paddingBottom: 16 }}>
                 <Text style={{ fontSize: 14, color: colors.text.tertiary }}>
                   선택 가능한 계좌가 없어요
                 </Text>
               </View>
+            )}
+            {onAddAccount && (
+              <TouchableOpacity
+                onPress={() => { closeSheet(); setTimeout(onAddAccount, 250); }}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  paddingVertical: 14,
+                  borderRadius: radius.card,
+                  borderWidth: 1.5,
+                  borderColor: colors.text.brand,
+                  borderStyle: 'dashed',
+                  marginTop: 8,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>
+                  + 계좌 추가하기
+                </Text>
+              </TouchableOpacity>
             )}
           </ScrollView>
         </Animated.View>
@@ -459,6 +479,7 @@ export default function ExchangeScreen() {
           setPickerTarget(null);
         }}
         onClose={() => setPickerTarget(null)}
+        onAddAccount={() => router.push('/accounts')}
       />
     </SafeAreaView>
   );

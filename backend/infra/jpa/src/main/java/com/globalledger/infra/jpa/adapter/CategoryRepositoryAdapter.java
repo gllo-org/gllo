@@ -51,6 +51,11 @@ public class CategoryRepositoryAdapter implements CategoryRepositoryPort {
     }
 
     @Override
+    public boolean existsByNameForUser(UUID userId, String name) {
+        return categoryJpaRepository.existsByNameForUser(userId, name);
+    }
+
+    @Override
     public boolean hasSystemCategories() {
         return categoryJpaRepository.countBySystemCategoryTrue() > 0;
     }

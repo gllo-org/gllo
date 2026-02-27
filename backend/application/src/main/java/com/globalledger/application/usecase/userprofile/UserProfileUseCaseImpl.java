@@ -63,7 +63,7 @@ public class UserProfileUseCaseImpl implements UserProfilePort {
 
     private void createOnboardingCategoriesIfAbsent(UUID userId, StayPurpose purpose, String country) {
         OnboardingCategoryTemplate.getTemplates(purpose, country).stream()
-                .filter(spec -> !categoryRepository.existsByUserIdAndName(userId, spec.name()))
+                .filter(spec -> !categoryRepository.existsByNameForUser(userId, spec.name()))
                 .map(spec -> Category.createCustom(userId, spec.name(), spec.type(), spec.color()))
                 .forEach(categoryRepository::save);
     }

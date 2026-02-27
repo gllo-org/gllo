@@ -266,7 +266,7 @@ function TrendTab({
           },
         ];
       }
-      return (singleReport?.dailyExpenses.map((d, i) => ({
+      return (singleReport?.dailyExpenses?.map((d, i) => ({
         value: amountType === '지출' ? d.amount : 0,
         label: d.date.slice(8),
         frontColor: amountType === '지출' ? colors.loss.text : colors.profit.text,
@@ -480,7 +480,7 @@ function CategoryTab({
     queryFn: () => apiClient<MonthlyReport>(`/reports/monthly/${yearMonth}`),
   });
 
-  const pieData = report?.categoryExpenses.map((c, i) => ({
+  const pieData = report?.categoryExpenses?.map((c, i) => ({
     value: c.amount,
     color: CHART_COLORS[i % CHART_COLORS.length],
     text: `${c.percentage.toFixed(0)}%`,
@@ -548,7 +548,7 @@ function CategoryTab({
                 카테고리 상세 (탭하면 거래 목록)
               </Text>
               <View style={{ gap: 0 }}>
-                {report?.categoryExpenses.map((cat, i) => (
+                {report?.categoryExpenses?.map((cat, i) => (
                   <TouchableOpacity
                     key={cat.categoryName}
                     onPress={() => openDrilldown(cat)}

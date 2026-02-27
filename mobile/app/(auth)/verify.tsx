@@ -239,19 +239,27 @@ export default function VerifyScreen() {
               <Text style={{ fontSize: 14, color: secondsLeft > 0 ? colors.text.brand : colors.loss.text }}>
                 {secondsLeft > 0 ? timerText : '인증번호가 만료되었습니다'}
               </Text>
-              {secondsLeft <= OTP_EXPIRE_SECONDS - 60 && (
-                <TouchableOpacity onPress={handleResend} style={{
-                  paddingHorizontal: 12, paddingVertical: 5,
-                  borderRadius: 20,
-                  backgroundColor: colors.bg.surface,
-                  borderWidth: 1,
-                  borderColor: colors.text.brand,
-                }}>
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.brand }}>
-                    재전송
-                  </Text>
-                </TouchableOpacity>
-              )}
+              {(() => {
+                const canResend = secondsLeft <= OTP_EXPIRE_SECONDS - 60;
+                return (
+                  <TouchableOpacity
+                    onPress={canResend ? handleResend : undefined}
+                    disabled={!canResend}
+                    style={{
+                      paddingHorizontal: 12, paddingVertical: 5,
+                      borderRadius: 20,
+                      backgroundColor: colors.bg.surface,
+                      borderWidth: 1,
+                      borderColor: canResend ? colors.text.brand : colors.system.border,
+                      opacity: canResend ? 1 : 0.4,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: canResend ? colors.text.brand : colors.text.tertiary }}>
+                      재전송
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })()}
             </View>
           </View>
 

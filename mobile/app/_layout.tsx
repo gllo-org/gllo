@@ -66,7 +66,8 @@ function AuthGuard() {
       if (error instanceof ApiError && error.code === 404) {
         router.replace('/onboarding');
       } else {
-        router.replace('/(tabs)');
+        const seen = await hasTutorialBeenSeen();
+        router.replace(seen ? '/(tabs)' : '/tutorial');
       }
     }
   }

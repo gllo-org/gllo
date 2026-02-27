@@ -38,10 +38,12 @@ function TripDetailSheet({
   trip,
   visible,
   onClose,
+  onEdit,
 }: {
   trip: Trip | null;
   visible: boolean;
   onClose: () => void;
+  onEdit: (trip: Trip) => void;
 }) {
   const translateY = useRef(new Animated.Value(DETAIL_H)).current;
   const queryClient = useQueryClient();
@@ -64,11 +66,19 @@ function TripDetailSheet({
       .start(() => onClose());
   }
 
-  const { mutateAsync: completeTrip, isPending } = useMutation({
+  const { mutateAsync: completeTrip, isPending: isCompleting } = useMutation({
     mutationFn: (id: number) =>
       apiClient(`/trips/${id}/complete`, { method: 'POST' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
   });
+
+  const { mutateAsync: deleteTrip, isPending: isDeleting } = useMutation({
+    mutationFn: (id: number) =>
+      apiClient(`/trips/${id}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
+  });
+
+  const isPending = isCompleting || isDeleting;
 
   function handleComplete() {
     if (!trip) return;
@@ -86,6 +96,29 @@ function TripDetailSheet({
               Alert.alert('완료', '여행이 완료 처리되었어요.');
             } catch {
               Alert.alert('오류', '처리에 실패했어요. 다시 시도해주세요.');
+            }
+          },
+        },
+      ]
+    );
+  }
+
+  function handleDelete() {
+    if (!trip) return;
+    Alert.alert(
+      '여행 삭제',
+      `"${trip.name}" 여행을 삭제할까요?`,
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTrip(trip.id);
+              closeSheet();
+            } catch {
+              Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
             }
           },
         },
@@ -129,6 +162,20 @@ function TripDetailSheet({
             <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
               여행 상세
             </Text>
+            <TouchableOpacity
+              onPress={() => { closeSheet(); setTimeout(() => onEdit(trip), 250); }}
+              style={{ marginRight: 16 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>수정</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleDelete}
+              style={{ marginRight: 16 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.loss.text }}>삭제</Text>
+            </TouchableOpacity>
             <TouchableOpacity onPress={closeSheet} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               <Text style={{ fontSize: 22, color: colors.text.tertiary }}>×</Text>
             </TouchableOpacity>
@@ -220,9 +267,11 @@ function TripDetailSheet({
 
 function TripFormSheet({
   visible,
+  editTrip,
   onClose,
 }: {
   visible: boolean;
+  editTrip?: Trip | null;
   onClose: () => void;
 }) {
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
@@ -236,11 +285,11 @@ function TripFormSheet({
 
   useEffect(() => {
     if (visible) {
-      setName('');
-      setStartDate('');
-      setEndDate('');
-      setBudgetStr('');
-      setBudgetCurrency('EUR');
+      setName(editTrip?.name ?? '');
+      setStartDate(editTrip?.startDate ?? '');
+      setEndDate(editTrip?.endDate ?? '');
+      setBudgetStr(editTrip?.budget?.toString() ?? '');
+      setBudgetCurrency(editTrip?.budgetCurrency ?? 'EUR');
       Animated.timing(translateY, {
         toValue: 0,
         duration: 280,
@@ -257,9 +306,12 @@ function TripFormSheet({
       .start(() => onClose());
   }
 
-  const { mutateAsync: createTrip, isPending } = useMutation({
+  const { mutateAsync: saveTrip, isPending } = useMutation({
     mutationFn: (body: object) =>
-      apiClient('/trips', { method: 'POST', body: JSON.stringify(body) }),
+      apiClient(editTrip ? `/trips/${editTrip.id}` : '/trips', {
+        method: editTrip ? 'PATCH' : 'POST',
+        body: JSON.stringify(body),
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['trips'] }),
   });
 
@@ -276,7 +328,7 @@ function TripFormSheet({
     if (!budget || budget <= 0) { Alert.alert('', '예산을 입력해주세요.'); return; }
 
     try {
-      await createTrip({
+      await saveTrip({
         name: name.trim(),
         startDate,
         endDate,
@@ -310,7 +362,7 @@ function TripFormSheet({
             keyboardShouldPersistTaps="handled"
           >
             <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
-              새 여행 추가
+              {editTrip ? '여행 수정' : '새 여행 추가'}
             </Text>
 
             <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>여행 이름</Text>
@@ -415,6 +467,7 @@ function TripFormSheet({
 export default function TripsScreen() {
   const router = useRouter();
   const [formVisible, setFormVisible] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
   const { data: trips = [], isLoading } = useQuery({
@@ -567,13 +620,21 @@ export default function TripsScreen() {
       )}
 
       <TripFormSheet
-        visible={formVisible}
-        onClose={() => setFormVisible(false)}
+        visible={formVisible || editingTrip !== null}
+        editTrip={editingTrip}
+        onClose={() => {
+          setFormVisible(false);
+          setEditingTrip(null);
+        }}
       />
       <TripDetailSheet
         trip={selectedTrip}
         visible={selectedTrip !== null}
         onClose={() => setSelectedTrip(null)}
+        onEdit={(trip) => {
+          setSelectedTrip(null);
+          setEditingTrip(trip);
+        }}
       />
     </SafeAreaView>
   );

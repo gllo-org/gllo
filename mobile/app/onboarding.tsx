@@ -73,6 +73,23 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 export default function OnboardingScreen() {
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
+
+  async function handleSkip() {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+      await apiClient('/user/profile/onboarding', {
+        method: 'PUT',
+        body: JSON.stringify({
+          purpose: 'LONG_TERM_TRAVEL',
+          country: '기타',
+          stayStartDate: today,
+          stayEndDate: nextYear,
+        }),
+      });
+    } catch {}
+    router.replace('/(tabs)');
+  }
   const [selectedPurpose, setSelectedPurpose] = useState<Purpose | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
@@ -598,7 +615,8 @@ export default function OnboardingScreen() {
     );
   }
 
-  const canGoBack = step === 2 || step === 3;
+  const canGoBackStep = step === 2 || step === 3;
+  const canGoBackRoute = step === 1 && router.canGoBack();
   const headerTitle = step === 4 ? '' : ['', '체류 목적', '거주 국가', '체류 기간'][step];
 
   return (
@@ -610,9 +628,16 @@ export default function OnboardingScreen() {
           paddingTop: 16,
           paddingBottom: 24,
         }}>
-          {canGoBack ? (
+          {canGoBackStep ? (
             <TouchableOpacity
               onPress={() => setStep((prev) => (prev - 1) as Step)}
+              style={{ padding: 8, marginLeft: -8 }}
+            >
+              <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+            </TouchableOpacity>
+          ) : canGoBackRoute ? (
+            <TouchableOpacity
+              onPress={() => router.back()}
               style={{ padding: 8, marginLeft: -8 }}
             >
               <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
@@ -628,7 +653,13 @@ export default function OnboardingScreen() {
               {headerTitle}
             </Text>
           ) : <View style={{ flex: 1 }} />}
-          <View style={{ width: 36 }} />
+          {step !== 4 ? (
+            <TouchableOpacity onPress={handleSkip} style={{ width: 36, alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 13, color: colors.text.tertiary }}>건너뛰기</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 36 }} />
+          )}
         </View>
 
         {step === 1 && renderStep1()}

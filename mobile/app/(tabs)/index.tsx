@@ -115,13 +115,15 @@ export default function DashboardScreen() {
                 />
                 <Text style={{
                   position: 'absolute', left: 8,
-                  top: (TRACK_H - 18) / 2, fontSize: 16,
+                  top: (TRACK_H - 18) / 2 - 2, fontSize: 16,
+                  lineHeight: 18, includeFontPadding: false,
                   opacity: travelMode ? 0.45 : 1,
                   zIndex: 2,
                 }}>🏡</Text>
                 <Text style={{
                   position: 'absolute', right: 8,
-                  top: (TRACK_H - 18) / 2, fontSize: 16,
+                  top: (TRACK_H - 18) / 2 - 2, fontSize: 16,
+                  lineHeight: 18, includeFontPadding: false,
                   opacity: travelMode ? 1 : 0.45,
                   zIndex: 2,
                 }}>✈️</Text>
@@ -378,9 +380,10 @@ export default function DashboardScreen() {
           <Text style={{
             fontSize: 28,
             color: colors.text.inverse,
-            lineHeight: 32,
+            lineHeight: 28,
             textAlign: 'center',
             includeFontPadding: false,
+            textAlignVertical: 'center',
           }}>+</Text>
         </LinearGradient>
       </TouchableOpacity>

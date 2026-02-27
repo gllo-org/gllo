@@ -17,4 +17,7 @@ public interface CategoryJpaRepository extends JpaRepository<CategoryEntity, Lon
 
     boolean existsByUserIdAndName(UUID userId, String name);
     long countBySystemCategoryTrue();
+
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM CategoryEntity c WHERE (c.userId = :userId OR c.systemCategory = true) AND c.name = :name")
+    boolean existsByNameForUser(@Param("userId") UUID userId, @Param("name") String name);
 }
