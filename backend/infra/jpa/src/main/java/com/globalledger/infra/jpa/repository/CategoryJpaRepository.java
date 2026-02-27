@@ -16,4 +16,5 @@ public interface CategoryJpaRepository extends JpaRepository<CategoryEntity, Lon
     List<CategoryEntity> findAllByUserId(@Param("userId") UUID userId);
 
     boolean existsByUserIdAndName(UUID userId, String name);
+    long countBySystemCategoryTrue();
 }
