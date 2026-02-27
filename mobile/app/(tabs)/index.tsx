@@ -191,12 +191,12 @@ export default function DashboardScreen() {
                       <Text style={{ ...typography.amount.medium, color: colors.text.primary }}>
                         {formatCurrency(account.balance, account.currency)}
                       </Text>
-                      {account.averageRate !== null && (
+                      {!!account.averageRate && (
                         <Text style={{ ...typography.caption, color: colors.text.secondary, marginTop: 4 }}>
                           평단가 {formatCurrency(account.averageRate, 'KRW')}/{account.currency}
                         </Text>
                       )}
-                      {account.pnlRate !== null && (
+                      {account.pnlRate != null && (
                         <Text style={{
                           ...typography.caption,
                           fontFamily: 'Pretendard-SemiBold',

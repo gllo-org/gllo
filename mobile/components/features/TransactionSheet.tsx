@@ -20,7 +20,8 @@ type SheetView = 'main' | 'category' | 'account';
 interface Category {
   id: string;
   name: string;
-  type: 'SYSTEM' | 'CUSTOM';
+  type: 'INCOME' | 'EXPENSE';
+  systemCategory: boolean;
 }
 
 interface Account {
@@ -341,6 +342,13 @@ export function TransactionSheet({ visible, onClose }: Props) {
     }
   }
 
+  const filteredCategories = (() => {
+    if (!categories) return [];
+    if (txType === 'EXPENSE') return categories.filter(c => c.type === 'EXPENSE');
+    if (txType === 'INCOME') return categories.filter(c => c.type === 'INCOME');
+    return categories;
+  })();
+
   const isValid = amount > 0 && !!categoryId && !!accountId;
   const cfg = TYPE_CONFIG[txType];
 
@@ -418,6 +426,8 @@ export function TransactionSheet({ visible, onClose }: Props) {
                           return;
                         }
                         setTxType(t);
+                        setCategoryId(null);
+                        setCategoryLbl(null);
                       }}
                       style={{
                         flex: 1, paddingVertical: 8, borderRadius: 10,
@@ -702,7 +712,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 </TouchableOpacity>
               )}
 
-              {!categories || categories.length === 0 ? (
+              {filteredCategories.length === 0 ? (
                 <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
                   <Text style={{ fontSize: 36 }}>💸</Text>
                   <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
@@ -711,7 +721,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 </View>
               ) : (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                  {categories.map((cat) => {
+                  {filteredCategories.map((cat) => {
                     const emoji = categoryEmoji(cat.name);
                     const active = categoryId === cat.id;
                     return (
