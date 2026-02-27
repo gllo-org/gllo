@@ -1,21 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuthStore } from '@/stores/authStore';
 import { colors, radius, spacing } from '@/theme';
+import {
+  getLastEmail, saveLastEmail,
+  incrementPinFailures, resetPinFailures,
+  MAX_PIN_FAILURES,
+} from '@/lib/auth/pinAuth';
+import { supabase } from '@/lib/supabase';
+import { PinPad } from '@/components/ui/PinPad';
+
+type Mode = 'pin' | 'email';
 
 export default function LoginScreen() {
+  const [mode, setMode] = useState<Mode>('email');
+  const [lastEmail, setLastEmail] = useState<string | null>(null);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState(false);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { sendOtp } = useAuthStore();
+  const [hasBiometrics, setHasBiometrics] = useState(false);
+  const shakeAnim = new Animated.Value(0);
+  const { sendOtp, setSession } = useAuthStore();
   const router = useRouter();
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => {
+    async function init() {
+      const saved = await getLastEmail();
+      if (saved) {
+        setLastEmail(saved);
+        setMode('pin');
+      }
+      if (Platform.OS !== 'web') {
+        const hw = await LocalAuthentication.hasHardwareAsync();
+        const enrolled = await LocalAuthentication.isEnrolledAsync();
+        setHasBiometrics(hw && enrolled);
+      }
+    }
+    init();
+  }, []);
+
+  function shake() {
+    setPinError(true);
+    Animated.sequence([
+      Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+      Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
+    ]).start(() => setTimeout(() => setPinError(false), 400));
+  }
+
+  async function handleBiometrics() {
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: '생체인증으로 로그인',
+      cancelLabel: '취소',
+    });
+    if (!result.success) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      await resetPinFailures();
+      setSession(session);
+    } else {
+      Alert.alert('세션 만료', 'PIN을 입력해 다시 로그인해주세요.');
+    }
+  }
+
+  async function handlePinSubmit() {
+    if (!lastEmail || pin.length !== 6) return;
+    setIsLoading(true);
+    setPinError(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: lastEmail,
+        password: pin,
+      });
+      if (error) throw error;
+      await resetPinFailures();
+      await saveLastEmail(lastEmail);
+      setSession(data.session);
+    } catch {
+      setPin('');
+      shake();
+      const failures = await incrementPinFailures();
+      if (failures >= MAX_PIN_FAILURES) {
+        Alert.alert(
+          'PIN 오류 5회',
+          '보안을 위해 이메일 인증이 필요해요.',
+          [{ text: '확인', onPress: () => { setMode('email'); setPinError(false); } }],
+        );
+      } else {
+        Alert.alert('PIN 오류', `${MAX_PIN_FAILURES - failures}회 더 실패하면 이메일 인증이 필요해요.`);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function handleSendOtp() {
     if (!isValidEmail) return;
@@ -28,6 +117,79 @@ export default function LoginScreen() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (mode === 'pin' && lastEmail) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
+        <LinearGradient
+          colors={colors.gradient.light}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 220 }}
+        />
+
+        <View style={{ flex: 1, paddingHorizontal: spacing.screenPadding, alignItems: 'center' }}>
+          <View style={{ paddingTop: 64, paddingBottom: 40, alignItems: 'center' }}>
+            <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
+              글로
+            </Text>
+            <View style={{
+              paddingHorizontal: 16, paddingVertical: 8,
+              borderRadius: radius.chip,
+              backgroundColor: colors.bg.surface,
+              borderWidth: 1.5,
+              borderColor: colors.system.border,
+            }}>
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
+                {lastEmail}
+              </Text>
+            </View>
+          </View>
+
+          {hasBiometrics && (
+            <TouchableOpacity
+              onPress={handleBiometrics}
+              style={{
+                width: 64, height: 64, borderRadius: 32,
+                backgroundColor: colors.bg.surface,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: 1.5, borderColor: colors.system.border,
+                marginBottom: 32,
+              }}
+            >
+              <Text style={{ fontSize: 30 }}>🔐</Text>
+            </TouchableOpacity>
+          )}
+
+          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.primary, marginBottom: 32 }}>
+            PIN 입력
+          </Text>
+
+          <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
+            <PinPad
+              value={pin}
+              onChange={setPin}
+              onSubmit={handlePinSubmit}
+              error={pinError}
+            />
+          </Animated.View>
+
+          {isLoading && (
+            <ActivityIndicator style={{ marginTop: 24 }} color={colors.text.brand} />
+          )}
+
+          <TouchableOpacity
+            onPress={() => { setMode('email'); setPin(''); setPinError(false); }}
+            style={{ marginTop: 36 }}
+          >
+            <Text style={{ fontSize: 14, color: colors.text.secondary }}>
+              다른 계정으로 로그인
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
