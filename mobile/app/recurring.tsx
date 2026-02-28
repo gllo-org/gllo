@@ -248,7 +248,6 @@ function RecurringFormSheet({
   const isEditMode = editTarget !== null;
 
   const [name, setName] = useState('');
-  const [title, setTitle] = useState('');
   const [type, setType] = useState<RuleType>('EXPENSE');
   const [amountStr, setAmountStr] = useState('');
   const [currency, setCurrency] = useState<CurrencyCode>('KRW');
@@ -274,7 +273,6 @@ function RecurringFormSheet({
     if (visible) {
       if (isEditMode && editTarget) {
         setName(editTarget.name);
-        setTitle(editTarget.title);
         setType(editTarget.type);
         setAmountStr(String(editTarget.amount));
         setCurrency(editTarget.currency);
@@ -291,7 +289,6 @@ function RecurringFormSheet({
         setDayOfMonth(String(editTarget.dayOfMonth));
       } else {
         setName('');
-        setTitle('');
         setType('EXPENSE');
         setAmountStr('');
         setCurrency('KRW');
@@ -330,7 +327,6 @@ function RecurringFormSheet({
 
   async function handleSave() {
     if (!name.trim()) { Alert.alert('', '규칙 이름을 입력해주세요.'); return; }
-    if (!title.trim()) { Alert.alert('', '거래 제목을 입력해주세요.'); return; }
     const amount = parseFloat(amountStr);
     if (!amount || amount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
     if (!isEditMode && !selectedAccount) { Alert.alert('', '계좌를 선택해주세요.'); return; }
@@ -342,7 +338,7 @@ function RecurringFormSheet({
       if (isEditMode) {
         await updateRule({
           name: name.trim(),
-          title: title.trim(),
+          title: name.trim(),
           amount,
           categoryId: selectedCategory.id,
           frequency: 'MONTHLY',
@@ -352,7 +348,7 @@ function RecurringFormSheet({
         const today = new Date().toISOString().split('T')[0];
         await createRule({
           name: name.trim(),
-          title: title.trim(),
+          title: name.trim(),
           type,
           amount,
           currency,
@@ -389,7 +385,7 @@ function RecurringFormSheet({
               keyboardShouldPersistTaps="handled"
             >
               <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
-                {isEditMode ? '고정 지출 수정' : '고정 지출 추가'}
+                {isEditMode ? '고정 거래 수정' : '고정 거래 추가'}
               </Text>
 
               <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>규칙 이름</Text>
@@ -397,19 +393,6 @@ function RecurringFormSheet({
                 value={name}
                 onChangeText={setName}
                 placeholder="예: 월세, 넷플릭스"
-                placeholderTextColor={colors.text.tertiary}
-                style={{
-                  fontSize: 16, color: colors.text.primary,
-                  backgroundColor: colors.bg.input, borderRadius: radius.input,
-                  padding: 14, marginBottom: 16,
-                }}
-              />
-
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>거래 제목</Text>
-              <TextInput
-                value={title}
-                onChangeText={setTitle}
-                placeholder="거래 내역에 표시될 이름"
                 placeholderTextColor={colors.text.tertiary}
                 style={{
                   fontSize: 16, color: colors.text.primary,
@@ -664,7 +647,7 @@ export default function RecurringScreen() {
           <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
         </TouchableOpacity>
         <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
-          고정 지출 관리
+          고정 거래 관리
         </Text>
         <View style={{ width: 38 }} />
       </View>
@@ -679,10 +662,10 @@ export default function RecurringScreen() {
             <View style={{ alignItems: 'center', paddingVertical: 60, gap: 12 }}>
               <Text style={{ fontSize: 40 }}>🔁</Text>
               <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.secondary }}>
-                고정 지출이 없어요
+                고정 거래가 없어요
               </Text>
               <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
-                매달 반복되는 지출을{'\n'}자동으로 등록해보세요.
+                매달 반복되는 거래를{'\n'}자동으로 등록해보세요.
               </Text>
             </View>
           ) : (
@@ -822,7 +805,7 @@ export default function RecurringScreen() {
             >
               <Text style={{ fontSize: 18, color: colors.text.inverse }}>+</Text>
               <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                고정 지출 추가
+                고정 거래 추가
               </Text>
             </LinearGradient>
           </TouchableOpacity>

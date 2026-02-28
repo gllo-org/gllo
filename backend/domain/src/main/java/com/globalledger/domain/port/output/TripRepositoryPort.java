@@ -10,4 +10,5 @@ public interface TripRepositoryPort {
     Trip save(Trip trip);
     Optional<Trip> findByIdAndUserId(Long id, UUID userId);
     List<Trip> findAllByUserId(UUID userId);
+    void deleteById(Long id);
 }

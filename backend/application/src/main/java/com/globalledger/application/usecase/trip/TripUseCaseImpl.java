@@ -48,4 +48,18 @@ public class TripUseCaseImpl implements TripPort {
         Trip completedTrip = trip.complete(LocalDate.now());
         return tripRepository.save(completedTrip);
     }
+
+    @Override
+    public Trip update(UUID userId, Long tripId, String name, LocalDate startDate,
+                       LocalDate endDate, BigDecimal budget, Currency budgetCurrency) {
+        Trip trip = getById(userId, tripId);
+        Trip updatedTrip = trip.withUpdated(name, startDate, endDate, budget, budgetCurrency);
+        return tripRepository.save(updatedTrip);
+    }
+
+    @Override
+    public void delete(UUID userId, Long tripId) {
+        Trip trip = getById(userId, tripId);
+        tripRepository.deleteById(trip.id());
+    }
 }

@@ -89,7 +89,7 @@ function AccountCard({ account, onDelete }: { account: Account; onDelete: () => 
         </Text>
       )}
 
-      {account.pnlRate !== null && account.unrealizedPnl !== null && (
+      {account.pnlRate !== null && !isNaN(account.pnlRate) && account.unrealizedPnl !== null && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 6 }}>
           <Text style={{
             fontSize: 13, fontWeight: '600',

@@ -482,7 +482,8 @@ export default function TripsScreen() {
     const cc = colors.currency[trip.budgetCurrency];
     const now = new Date();
     const end = new Date(trip.endDate);
-    const daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86400000));
+    const isPast = end < now;
+    const daysLeft = Math.ceil((end.getTime() - now.getTime()) / 86400000);
 
     return (
       <TouchableOpacity
@@ -532,8 +533,8 @@ export default function TripsScreen() {
             </Text>
           </View>
           {trip.active && (
-            <Text style={{ fontSize: 12, color: daysLeft < 7 ? colors.status.warning : colors.text.tertiary }}>
-              {daysLeft === 0 ? '오늘 종료' : `D-${daysLeft}`}
+            <Text style={{ fontSize: 12, color: isPast ? colors.text.tertiary : daysLeft < 7 ? colors.status.warning : colors.text.tertiary }}>
+              {isPast ? '기간 만료' : daysLeft === 0 ? '오늘 종료' : `D-${daysLeft}`}
             </Text>
           )}
         </View>

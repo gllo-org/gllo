@@ -14,4 +14,7 @@ public interface TripPort {
     List<Trip> getList(UUID userId);
     Trip getById(UUID userId, Long tripId);
     Trip complete(UUID userId, Long tripId);
+    Trip update(UUID userId, Long tripId, String name, LocalDate startDate,
+                LocalDate endDate, BigDecimal budget, Currency budgetCurrency);
+    void delete(UUID userId, Long tripId);
 }

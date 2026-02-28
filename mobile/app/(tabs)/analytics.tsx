@@ -17,7 +17,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SHEET_H = Dimensions.get('window').height * 0.65;
 
 type AnalyticsTab = '지출 추이' | '카테고리별';
-type ViewMode = '이번달' | '3개월' | '6개월';
+type ViewMode = '이번 달' | '3개월' | '6개월';
 type AmountType = '전체' | '지출' | '수입';
 
 interface MonthlyReport {
@@ -226,30 +226,30 @@ function TrendTab({
   baseYearMonth: string;
   onChangeYearMonth: (ym: string) => void;
 }) {
-  const [viewMode, setViewMode] = useState<ViewMode>('이번달');
+  const [viewMode, setViewMode] = useState<ViewMode>('이번 달');
   const [amountType, setAmountType] = useState<AmountType>('전체');
 
   const monthCount = viewMode === '3개월' ? 3 : viewMode === '6개월' ? 6 : 1;
-  const yearMonths = viewMode === '이번달'
+  const yearMonths = viewMode === '이번 달'
     ? [baseYearMonth]
     : getYearMonthsBack(getYearMonth(), monthCount);
 
   const { data: singleReport, isLoading: isSingleLoading } = useQuery({
     queryKey: ['report', baseYearMonth],
     queryFn: () => apiClient<MonthlyReport>(`/reports/monthly/${baseYearMonth}`),
-    enabled: viewMode === '이번달',
+    enabled: viewMode === '이번 달',
   });
 
   const { data: multiReports, isLoading: isMultiLoading } = useQuery({
     queryKey: ['analytics-multi', yearMonths],
     queryFn: () => Promise.all(yearMonths.map((ym) => apiClient<MonthlyReport>(`/reports/monthly/${ym}`))),
-    enabled: viewMode !== '이번달',
+    enabled: viewMode !== '이번 달',
   });
 
   const isLoading = isSingleLoading || isMultiLoading;
 
   const barData = (() => {
-    if (viewMode === '이번달') {
+    if (viewMode === '이번 달') {
       if (amountType === '전체') {
         return [
           {
@@ -313,7 +313,7 @@ function TrendTab({
         paddingHorizontal: spacing.screenPadding,
         marginBottom: 16,
       }}>
-        {(['이번달', '3개월', '6개월'] as ViewMode[]).map((mode) => {
+        {(['이번 달', '3개월', '6개월'] as ViewMode[]).map((mode) => {
           const active = viewMode === mode;
           return (
             <TouchableOpacity
@@ -335,7 +335,7 @@ function TrendTab({
         })}
       </View>
 
-      {viewMode === '이번달' && (
+      {viewMode === '이번 달' && (
         <View style={{ paddingHorizontal: spacing.screenPadding, marginBottom: 16 }}>
           <MonthPicker yearMonth={baseYearMonth} onChange={onChangeYearMonth} />
         </View>
@@ -374,7 +374,7 @@ function TrendTab({
         })}
       </View>
 
-      {viewMode === '이번달' && (
+      {viewMode === '이번 달' && (
         <View style={{
           flexDirection: 'row', gap: 12,
           paddingHorizontal: spacing.screenPadding,
@@ -415,8 +415,8 @@ function TrendTab({
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 8 }}>
             <Text style={{ ...typography.heading.h3, color: colors.text.primary, flex: 1 }}>
-              {viewMode === '이번달' && amountType === '전체' ? '이번달 수입 vs 지출'
-                : viewMode === '이번달' ? `일별 ${amountType}`
+              {viewMode === '이번 달' && amountType === '전체' ? '이번 달 수입 vs 지출'
+                : viewMode === '이번 달' ? `일별 ${amountType}`
                 : `${viewMode} ${amountType} 추이`}
             </Text>
             {amountType === '전체' && (
@@ -435,8 +435,8 @@ function TrendTab({
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <BarChart
               data={barData}
-              barWidth={viewMode === '이번달' && amountType !== '전체' ? 18 : viewMode === '이번달' ? 60 : amountType === '전체' ? 30 : 40}
-              spacing={viewMode === '이번달' && amountType !== '전체' ? 8 : 12}
+              barWidth={viewMode === '이번 달' && amountType !== '전체' ? 18 : viewMode === '이번 달' ? 60 : amountType === '전체' ? 30 : 40}
+              spacing={viewMode === '이번 달' && amountType !== '전체' ? 8 : 12}
               hideRules
               xAxisThickness={0}
               yAxisThickness={0}

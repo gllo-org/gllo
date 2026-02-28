@@ -90,13 +90,13 @@ export default function VerifyScreen() {
   }
 
   function handlePinNext() {
-    if (pin.length !== 6) return;
+    if (pin.length !== 4) return;
     setConfirmPin('');
     setStep('pin-confirm');
   }
 
   async function handlePinConfirm() {
-    if (confirmPin.length !== 6) return;
+    if (confirmPin.length !== 4) return;
     if (confirmPin !== pin) {
       shake();
       setConfirmPin('');
@@ -154,7 +154,7 @@ export default function VerifyScreen() {
           </Text>
           <Text style={{ fontSize: 14, color: colors.text.secondary, marginBottom: 48, textAlign: 'center', lineHeight: 22 }}>
             {step === 'pin-setup'
-              ? '로그인할 때 사용할\n6자리 숫자를 입력해주세요.'
+              ? '로그인할 때 사용할\n4자리 숫자를 입력해주세요.'
               : '확인을 위해 PIN을 한 번 더 입력해주세요.'}
           </Text>
 

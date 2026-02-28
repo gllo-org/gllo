@@ -26,4 +26,17 @@ public record Trip(
         return new Trip(id, userId, name, startDate, completionDate, budget,
                 budgetCurrency, false, createdAt);
     }
+
+    public Trip withUpdated(String newName, LocalDate newStartDate, LocalDate newEndDate,
+                            BigDecimal newBudget, Currency newBudgetCurrency) {
+        return new Trip(
+                id, userId,
+                newName != null ? newName : name,
+                newStartDate != null ? newStartDate : startDate,
+                newEndDate != null ? newEndDate : endDate,
+                newBudget != null ? newBudget : budget,
+                newBudgetCurrency != null ? newBudgetCurrency : budgetCurrency,
+                active, createdAt
+        );
+    }
 }
