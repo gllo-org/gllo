@@ -47,9 +47,14 @@ public class JwtTokenProvider {
     public UUID validateTokenAndGetUserId(String token) {
         try {
             Claims claims = isEs256(token) ? verifyEs256(token) : verifyHs256(token);
-            return UUID.fromString(claims.getSubject());
+            String subject = claims.getSubject();
+            if (subject == null || subject.isBlank()) {
+                log.warn("JWT validation failed: sub claim is missing");
+                return null;
+            }
+            return UUID.fromString(subject);
         } catch (Exception e) {
-            log.warn("JWT validation failed: {}", e.getMessage());
+            log.warn("JWT validation failed [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             return null;
         }
     }

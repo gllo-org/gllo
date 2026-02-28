@@ -18,6 +18,11 @@ spring:
 server:
   port: ${PORT:8080}
 
+management:
+  health:
+    redis:
+      enabled: false
+
 supabase:
   url: ${SUPABASE_URL}
   anon-key: ${SUPABASE_ANON_KEY}
