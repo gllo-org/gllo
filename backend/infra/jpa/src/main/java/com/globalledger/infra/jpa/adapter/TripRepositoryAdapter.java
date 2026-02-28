@@ -34,4 +34,9 @@ public class TripRepositoryAdapter implements TripRepositoryPort {
                 .map(tripMapper::toDomain)
                 .toList();
     }
+
+    @Override
+    public void deleteById(Long id) {
+        tripJpaRepository.deleteById(id);
+    }
 }

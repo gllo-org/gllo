@@ -11,6 +11,7 @@ export const radius = {
   button: 14,
   input:  12,
   bottom: 28,
+  pill:   50,
 } as const;
 
 export const shadow = {

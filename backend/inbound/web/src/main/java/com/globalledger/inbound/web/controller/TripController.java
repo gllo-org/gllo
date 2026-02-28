@@ -3,6 +3,7 @@ package com.globalledger.inbound.web.controller;
 import com.globalledger.domain.model.Trip;
 import com.globalledger.domain.port.input.TripPort;
 import com.globalledger.inbound.web.dto.request.CreateTripRequest;
+import com.globalledger.inbound.web.dto.request.UpdateTripRequest;
 import com.globalledger.inbound.web.dto.response.TripResponse;
 import com.globalledger.shared.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,5 +79,35 @@ public class TripController {
         UUID userId = UUID.fromString(authentication.getName());
         Trip trip = tripUseCase.complete(userId, id);
         return ResponseEntity.ok(ApiResponse.success("여행이 완료되었습니다.", TripResponse.from(trip)));
+    }
+
+    @Operation(summary = "여행 수정", description = "여행 프로젝트의 정보를 수정합니다.")
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<TripResponse>> updateTrip(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody UpdateTripRequest request) {
+
+        UUID userId = UUID.fromString(authentication.getName());
+        Trip trip = tripUseCase.update(
+                userId, id,
+                request.name(),
+                request.startDate(),
+                request.endDate(),
+                request.budget(),
+                request.budgetCurrency()
+        );
+        return ResponseEntity.ok(ApiResponse.success("여행 정보가 수정되었습니다.", TripResponse.from(trip)));
+    }
+
+    @Operation(summary = "여행 삭제", description = "여행 프로젝트를 삭제합니다.")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteTrip(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        UUID userId = UUID.fromString(authentication.getName());
+        tripUseCase.delete(userId, id);
+        return ResponseEntity.ok(ApiResponse.success("여행이 삭제되었습니다.", null));
     }
 }

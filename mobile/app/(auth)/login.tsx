@@ -76,7 +76,7 @@ export default function LoginScreen() {
   }
 
   async function handlePinSubmit() {
-    if (!lastEmail || pin.length !== 6) return;
+    if (!lastEmail || pin.length !== 4) return;
     setIsLoading(true);
     setPinError(false);
     try {

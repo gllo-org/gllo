@@ -44,7 +44,7 @@ function AuthGuard() {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
-    const isLogoutComplete = segments[1] === 'logout-complete';
+    const isLogoutComplete = (segments as string[])[1] === 'logout-complete';
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');

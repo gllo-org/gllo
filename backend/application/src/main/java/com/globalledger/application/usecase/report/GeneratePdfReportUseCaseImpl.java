@@ -3,6 +3,7 @@ package com.globalledger.application.usecase.report;
 import com.globalledger.domain.model.*;
 import com.globalledger.domain.port.input.GeneratePdfReportPort;
 import com.globalledger.domain.port.output.AccountRepositoryPort;
+import com.globalledger.domain.port.output.CategoryRepositoryPort;
 import com.globalledger.domain.port.output.ExchangeRateRepositoryPort;
 import com.globalledger.domain.port.output.MonthlyBudgetRepositoryPort;
 import com.globalledger.domain.port.output.TransactionRepositoryPort;
@@ -29,6 +30,7 @@ public class GeneratePdfReportUseCaseImpl implements GeneratePdfReportPort {
     private final TransactionRepositoryPort transactionRepository;
     private final MonthlyBudgetRepositoryPort budgetRepository;
     private final ExchangeRateRepositoryPort exchangeRateRepository;
+    private final CategoryRepositoryPort categoryRepository;
 
     @Override
     public byte[] generateMonthlyReport(UUID userId, YearMonth yearMonth) {
@@ -79,7 +81,11 @@ public class GeneratePdfReportUseCaseImpl implements GeneratePdfReportPort {
                         tx.type(),
                         tx.amount(),
                         tx.currency(),
-                        tx.categoryId() != null ? tx.categoryId().toString() : "-",
+                        tx.categoryId() != null
+                                ? categoryRepository.findById(tx.categoryId())
+                                        .map(c -> c.name())
+                                        .orElse("-")
+                                : "-",
                         tx.note()
                 ))
                 .toList();

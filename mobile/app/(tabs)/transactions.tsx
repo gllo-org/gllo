@@ -6,7 +6,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
-import { formatDateTime } from '@/lib/utils/date';
+import { formatDate } from '@/lib/utils/date';
 import { colors, spacing, radius, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
@@ -93,7 +93,7 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
           {item.title}
         </Text>
         <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
-          {item.categoryName} · {formatDateTime(item.transactionDate)}
+          {item.categoryName} · {formatDate(item.transactionDate)}
           {item.isTrip && ' ✈️'}
         </Text>
       </View>

@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions, NativeSyntheticEvent, NativeScrollEvent, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -38,10 +38,17 @@ const SLIDES = [
 ] as const;
 
 export async function markTutorialSeen() {
+  if (Platform.OS === 'web') {
+    window.localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
+    return;
+  }
   await SecureStore.setItemAsync(TUTORIAL_SEEN_KEY, 'true');
 }
 
 export async function hasTutorialBeenSeen(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    return window.localStorage.getItem(TUTORIAL_SEEN_KEY) === 'true';
+  }
   const value = await SecureStore.getItemAsync(TUTORIAL_SEEN_KEY);
   return value === 'true';
 }

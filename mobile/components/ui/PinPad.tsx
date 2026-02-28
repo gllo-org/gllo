@@ -12,7 +12,7 @@ interface Props {
   error?: boolean;
 }
 
-export function PinPad({ value, length = 6, onChange, onSubmit, error }: Props) {
+export function PinPad({ value, length = 4, onChange, onSubmit, error }: Props) {
   function handleKey(key: Key) {
     if (key === 'del') {
       onChange(value.slice(0, -1));
