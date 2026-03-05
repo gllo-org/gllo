@@ -19,9 +19,9 @@ interface BudgetStatus {
   budgetAmount: number;
   spentAmount: number;
   remainingAmount: number;
-  spentRate: number;
+  budgetProgressRate: number;
   timeProgressRate: number;
-  dailyRecommendedAmount: number;
+  recommendedDailyAmount: number;
   currency?: CurrencyCode;
 }
 
@@ -49,7 +49,7 @@ function getBudgetStatusText(spentRate: number, timeProgressRate: number): strin
   return '글로가 보기엔 이번 달 지출 페이스가 좋아요.';
 }
 
-function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, spentRate, timeProgressRate, dailyRecommendedAmount, currency }: BudgetStatus) {
+function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgressRate: spentRate, timeProgressRate, recommendedDailyAmount: dailyRecommendedAmount, currency }: BudgetStatus) {
   const clampedSpent = Math.min(spentRate, 100);
   const clampedTime = Math.min(timeProgressRate, 98);
   const statusColor = getBudgetStatusColor(spentRate, timeProgressRate);

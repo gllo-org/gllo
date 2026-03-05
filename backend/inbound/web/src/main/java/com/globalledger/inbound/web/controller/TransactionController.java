@@ -1,6 +1,8 @@
 package com.globalledger.inbound.web.controller;
 
+import com.globalledger.domain.model.Category;
 import com.globalledger.domain.model.Transaction;
+import com.globalledger.domain.port.input.CategoryPort;
 import com.globalledger.domain.port.input.TransactionPort;
 import com.globalledger.inbound.web.dto.request.CreateTransactionRequest;
 import com.globalledger.inbound.web.dto.request.UpdateTransactionRequest;
@@ -15,7 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Tag(name = "거래 API")
 @RestController
@@ -24,6 +29,7 @@ import java.util.UUID;
 public class TransactionController {
 
     private final TransactionPort transactionUseCase;
+    private final CategoryPort categoryUseCase;
 
     @Operation(summary = "거래 생성", description = "새로운 거래를 생성합니다.")
     @PostMapping
@@ -47,9 +53,11 @@ public class TransactionController {
                 request.customConvertedAmount()
         );
 
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
         return ResponseEntity
                 .status(201)
-                .body(ApiResponse.created("거래가 생성되었습니다.", TransactionResponse.from(transaction)));
+                .body(ApiResponse.created("거래가 생성되었습니다.",
+                        TransactionResponse.from(transaction, categoryNameMap.get(transaction.categoryId()))));
     }
 
     @Operation(summary = "거래 목록 조회", description = "조건에 따라 거래 목록을 페이지 단위로 조회합니다.")
@@ -64,9 +72,12 @@ public class TransactionController {
             @RequestParam(defaultValue = "20") int size) {
 
         UUID userId = UUID.fromString(authentication.getName());
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
         var pageResult = transactionUseCase.getPage(userId, year, month, accountId, categoryId, page, size);
         var response = new TransactionPageResponse(
-                pageResult.content().stream().map(TransactionResponse::from).toList(),
+                pageResult.content().stream()
+                        .map(tx -> TransactionResponse.from(tx, categoryNameMap.get(tx.categoryId())))
+                        .toList(),
                 pageResult.hasNext(),
                 pageResult.page()
         );
@@ -81,7 +92,9 @@ public class TransactionController {
 
         UUID userId = UUID.fromString(authentication.getName());
         Transaction transaction = transactionUseCase.getById(userId, id);
-        return ResponseEntity.ok(ApiResponse.success(TransactionResponse.from(transaction)));
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
+        return ResponseEntity.ok(ApiResponse.success(
+                TransactionResponse.from(transaction, categoryNameMap.get(transaction.categoryId()))));
     }
 
     @Operation(summary = "거래 수정", description = "특정 거래의 정보를 부분 수정합니다. 수정하고 싶은 필드만 전송하면 됩니다.")
@@ -105,7 +118,9 @@ public class TransactionController {
                 request.customConvertedAmount()
         );
 
-        return ResponseEntity.ok(ApiResponse.success("거래가 수정되었습니다.", TransactionResponse.from(transaction)));
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
+        return ResponseEntity.ok(ApiResponse.success("거래가 수정되었습니다.",
+                TransactionResponse.from(transaction, categoryNameMap.get(transaction.categoryId()))));
     }
 
     @Operation(summary = "거래 삭제", description = "특정 거래를 삭제합니다.")
@@ -117,5 +132,11 @@ public class TransactionController {
         UUID userId = UUID.fromString(authentication.getName());
         transactionUseCase.delete(userId, id);
         return ResponseEntity.ok(ApiResponse.success("거래가 삭제되었습니다.", null));
+    }
+
+    private Map<Long, String> buildCategoryNameMap(UUID userId) {
+        List<Category> categories = categoryUseCase.getList(userId);
+        return categories.stream()
+                .collect(Collectors.toMap(Category::id, Category::name));
     }
 }

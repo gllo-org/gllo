@@ -16,7 +16,9 @@ public record TransactionResponse(
         BigDecimal amount,
         Currency currency,
         Long categoryId,
+        String categoryName,
         Long tripId,
+        boolean isTrip,
         LocalDate transactionDate,
         String note,
         BigDecimal systemExchangeRate,
@@ -25,6 +27,10 @@ public record TransactionResponse(
         LocalDateTime createdAt
 ) {
     public static TransactionResponse from(Transaction transaction) {
+        return from(transaction, null);
+    }
+
+    public static TransactionResponse from(Transaction transaction, String categoryName) {
         return new TransactionResponse(
                 transaction.id(),
                 transaction.accountId(),
@@ -33,7 +39,9 @@ public record TransactionResponse(
                 transaction.amount(),
                 transaction.currency(),
                 transaction.categoryId(),
+                categoryName != null ? categoryName : "",
                 transaction.tripId(),
+                transaction.tripId() != null,
                 transaction.transactionDate(),
                 transaction.note(),
                 transaction.systemExchangeRate(),

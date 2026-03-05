@@ -1,7 +1,10 @@
 package com.globalledger.inbound.web.controller;
 
 import com.globalledger.domain.model.Account;
+import com.globalledger.domain.model.Currency;
 import com.globalledger.domain.port.input.AccountPort;
+import com.globalledger.domain.port.input.UnrealizedPnlPort;
+import com.globalledger.domain.vo.UnrealizedPnl;
 import com.globalledger.inbound.web.dto.request.CreateAccountRequest;
 import com.globalledger.inbound.web.dto.response.AccountResponse;
 import com.globalledger.shared.response.ApiResponse;
@@ -14,7 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Tag(name = "계좌 API")
 @RestController
@@ -23,6 +28,7 @@ import java.util.UUID;
 public class AccountController {
 
     private final AccountPort accountUseCase;
+    private final UnrealizedPnlPort unrealizedPnlUseCase;
 
     @Operation(summary = "계좌 생성", description = "새로운 계좌를 생성합니다.")
     @PostMapping
@@ -49,11 +55,20 @@ public class AccountController {
     public ResponseEntity<ApiResponse<List<AccountResponse>>> getAccounts(Authentication authentication) {
 
         UUID userId = UUID.fromString(authentication.getName());
-        List<AccountResponse> accounts = accountUseCase.getList(userId).stream()
-                .map(AccountResponse::from)
+        List<Account> accounts = accountUseCase.getList(userId);
+
+        Map<Long, UnrealizedPnl> pnlMap = unrealizedPnlUseCase.getAllUnrealizedPnl(userId, Currency.KRW)
+                .stream()
+                .collect(Collectors.toMap(UnrealizedPnl::accountId, p -> p));
+
+        List<AccountResponse> responses = accounts.stream()
+                .map(account -> {
+                    UnrealizedPnl pnl = pnlMap.get(account.id());
+                    return pnl != null ? AccountResponse.from(account, pnl) : AccountResponse.from(account);
+                })
                 .toList();
 
-        return ResponseEntity.ok(ApiResponse.success(accounts));
+        return ResponseEntity.ok(ApiResponse.success(responses));
     }
 
     @Operation(summary = "계좌 상세 조회", description = "특정 계좌의 상세 정보를 조회합니다.")

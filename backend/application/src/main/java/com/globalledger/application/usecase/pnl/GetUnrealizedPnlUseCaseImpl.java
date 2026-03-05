@@ -1,7 +1,7 @@
 package com.globalledger.application.usecase.pnl;
 
-import com.globalledger.domain.exception.BusinessException;
 import com.globalledger.domain.exception.NotFoundException;
+import com.globalledger.shared.constants.ErrorCode;
 import com.globalledger.domain.model.Account;
 import com.globalledger.domain.model.Currency;
 import com.globalledger.domain.model.ExchangeRate;
@@ -9,7 +9,6 @@ import com.globalledger.domain.port.input.UnrealizedPnlPort;
 import com.globalledger.domain.port.output.AccountRepositoryPort;
 import com.globalledger.domain.port.output.ExchangeRateRepositoryPort;
 import com.globalledger.domain.vo.UnrealizedPnl;
-import com.globalledger.shared.constants.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,26 +46,21 @@ public class GetUnrealizedPnlUseCaseImpl implements UnrealizedPnlPort {
     private UnrealizedPnl calculatePnl(Account account, Currency baseCurrency) {
         if (account.currency() == baseCurrency) {
             return UnrealizedPnl.calculate(
-                    account.id(),
-                    account.name(),
-                    account.currency(),
-                    account.balance(),
-                    BigDecimal.ONE,
-                    BigDecimal.ONE
-            );
+                    account.id(), account.name(), account.currency(),
+                    account.balance(), BigDecimal.ONE, BigDecimal.ONE);
         }
 
-        ExchangeRate rate = exchangeRateRepository.findLatestByPair(
-                        account.currency(), baseCurrency)
-                .orElseThrow(() -> new BusinessException(ErrorCode.EXCHANGE_RATE_NOT_FOUND));
+        BigDecimal averageRate = account.averageRate() != null
+                ? account.averageRate()
+                : BigDecimal.ZERO;
+
+        BigDecimal currentRate = exchangeRateRepository
+                .findLatestByPair(account.currency(), baseCurrency)
+                .map(ExchangeRate::rate)
+                .orElse(averageRate);
 
         return UnrealizedPnl.calculate(
-                account.id(),
-                account.name(),
-                account.currency(),
-                account.balance(),
-                account.averageRate(),
-                rate.rate()
-        );
+                account.id(), account.name(), account.currency(),
+                account.balance(), averageRate, currentRate);
     }
 }

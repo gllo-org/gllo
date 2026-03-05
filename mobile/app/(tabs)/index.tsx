@@ -80,7 +80,7 @@ export default function DashboardScreen() {
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard'],
-    queryFn: () => apiClient<DashboardStats>('/dashboard/statistics'),
+    queryFn: () => apiClient<DashboardStats>('/dashboard/home'),
   });
 
   const { data: accounts, isLoading: accountsLoading } = useQuery({
