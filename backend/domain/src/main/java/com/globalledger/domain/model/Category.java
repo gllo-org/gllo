@@ -10,17 +10,18 @@ public record Category(
         CategoryType type,
         boolean systemCategory,
         String color,
+        String emoji,
         LocalDateTime createdAt
 ) {
-    public static Category createSystem(String name, CategoryType type) {
-        return new Category(null, null, name, type, true, null, LocalDateTime.now());
+    public static Category createSystem(String name, CategoryType type, String emoji) {
+        return new Category(null, null, name, type, true, null, emoji, LocalDateTime.now());
     }
 
-    public static Category createCustom(UUID userId, String name, CategoryType type, String color) {
-        return new Category(null, userId, name, type, false, color, LocalDateTime.now());
+    public static Category createCustom(UUID userId, String name, CategoryType type, String color, String emoji) {
+        return new Category(null, userId, name, type, false, color, emoji, LocalDateTime.now());
     }
 
-    public Category update(String newName, String newColor) {
-        return new Category(id, userId, newName, type, systemCategory, newColor, createdAt);
+    public Category update(String newName, String newColor, String newEmoji) {
+        return new Category(id, userId, newName, type, systemCategory, newColor, newEmoji, createdAt);
     }
 }

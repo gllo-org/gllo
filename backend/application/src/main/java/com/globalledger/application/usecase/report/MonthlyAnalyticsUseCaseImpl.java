@@ -79,22 +79,29 @@ public class MonthlyAnalyticsUseCaseImpl implements MonthlyAnalyticsPort {
     private List<MonthlyAnalyticsCategoryExpense> buildCategoryExpenses(
             List<Transaction> transactions, Currency currency, BigDecimal totalExpense) {
 
-        Map<Long, String> categoryNameCache = new HashMap<>();
+        Map<Long, Category> categoryCache = new HashMap<>();
 
-        Map<String, BigDecimal> grouped = transactions.stream()
+        Map<Long, BigDecimal> grouped = transactions.stream()
                 .filter(t -> t.type() == TransactionType.EXPENSE && t.currency() == currency)
                 .collect(Collectors.groupingBy(
-                        t -> resolveCategoryName(t.categoryId(), categoryNameCache),
+                        t -> t.categoryId() != null ? t.categoryId() : -1L,
                         Collectors.reducing(BigDecimal.ZERO, Transaction::amount, BigDecimal::add)
                 ));
 
         return grouped.entrySet().stream()
                 .map(e -> {
+                    Long categoryId = e.getKey() == -1L ? null : e.getKey();
+                    Category cat = categoryId != null
+                            ? categoryCache.computeIfAbsent(categoryId,
+                                    id -> categoryRepository.findById(id).orElse(null))
+                            : null;
+                    String name = cat != null ? cat.name() : "기타";
+                    String emoji = cat != null && cat.emoji() != null ? cat.emoji() : "";
                     BigDecimal pct = totalExpense.compareTo(BigDecimal.ZERO) == 0
                             ? BigDecimal.ZERO
                             : e.getValue().multiply(BigDecimal.valueOf(100))
                                     .divide(totalExpense, 2, RoundingMode.HALF_UP);
-                    return new MonthlyAnalyticsCategoryExpense(e.getKey(), e.getValue(), pct);
+                    return new MonthlyAnalyticsCategoryExpense(name, emoji, e.getValue(), pct);
                 })
                 .sorted(Comparator.comparing(MonthlyAnalyticsCategoryExpense::amount).reversed())
                 .toList();
@@ -115,9 +122,4 @@ public class MonthlyAnalyticsUseCaseImpl implements MonthlyAnalyticsPort {
                 .toList();
     }
 
-    private String resolveCategoryName(Long categoryId, Map<Long, String> cache) {
-        if (categoryId == null) return "기타";
-        return cache.computeIfAbsent(categoryId,
-                id -> categoryRepository.findById(id).map(Category::name).orElse("기타"));
-    }
 }

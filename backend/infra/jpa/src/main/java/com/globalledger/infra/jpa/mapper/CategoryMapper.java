@@ -16,6 +16,7 @@ public class CategoryMapper {
                 CategoryType.valueOf(entity.getType()),
                 entity.isSystemCategory(),
                 entity.getColor(),
+                entity.getEmoji(),
                 entity.getCreatedAt()
         );
     }
@@ -28,6 +29,7 @@ public class CategoryMapper {
                 .type(domain.type().name())
                 .systemCategory(domain.systemCategory())
                 .color(domain.color())
+                .emoji(domain.emoji())
                 .createdAt(domain.createdAt())
                 .build();
     }

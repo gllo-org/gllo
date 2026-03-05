@@ -22,13 +22,13 @@ public class CategoryUseCaseImpl implements CategoryPort {
     private final CategoryRepositoryPort categoryRepository;
 
     @Override
-    public Category create(UUID userId, String name, CategoryType type, String color) {
-        Category category = Category.createCustom(userId, name, type, color);
+    public Category create(UUID userId, String name, CategoryType type, String color, String emoji) {
+        Category category = Category.createCustom(userId, name, type, color, emoji);
         return categoryRepository.save(category);
     }
 
     @Override
-    public Category update(UUID userId, Long categoryId, String name, String color) {
+    public Category update(UUID userId, Long categoryId, String name, String color, String emoji) {
         Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
 
@@ -37,7 +37,7 @@ public class CategoryUseCaseImpl implements CategoryPort {
                     "시스템 카테고리는 수정할 수 없습니다.");
         }
 
-        Category updatedCategory = category.update(name, color);
+        Category updatedCategory = category.update(name, color, emoji);
         return categoryRepository.save(updatedCategory);
     }
 

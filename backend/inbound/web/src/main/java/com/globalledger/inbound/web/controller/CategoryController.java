@@ -36,7 +36,8 @@ public class CategoryController {
                 userId,
                 request.name(),
                 request.type(),
-                request.color()
+                request.color(),
+                request.emoji()
         );
 
         return ResponseEntity
@@ -65,7 +66,7 @@ public class CategoryController {
             @Valid @RequestBody UpdateCategoryRequest request) {
 
         UUID userId = UUID.fromString(authentication.getName());
-        Category category = categoryUseCase.update(userId, id, request.name(), request.color());
+        Category category = categoryUseCase.update(userId, id, request.name(), request.color(), request.emoji());
         return ResponseEntity.ok(ApiResponse.success("카테고리가 수정되었습니다.", CategoryResponse.from(category)));
     }
 

@@ -13,6 +13,7 @@ public record CategoryResponse(
         CategoryType type,
         boolean systemCategory,
         String color,
+        String emoji,
         LocalDateTime createdAt
 ) {
     public static CategoryResponse from(Category category) {
@@ -23,6 +24,7 @@ public record CategoryResponse(
                 category.type(),
                 category.systemCategory(),
                 category.color(),
+                category.emoji() != null ? category.emoji() : "",
                 category.createdAt()
         );
     }

@@ -38,11 +38,15 @@ public class CategoryEntity {
     @Column(name = "color", length = 20)
     private String color;
 
+    @Column(name = "emoji", length = 10)
+    private String emoji;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void update(String name, String color) {
+    public void update(String name, String color, String emoji) {
         this.name = name;
         this.color = color;
+        this.emoji = emoji;
     }
 }

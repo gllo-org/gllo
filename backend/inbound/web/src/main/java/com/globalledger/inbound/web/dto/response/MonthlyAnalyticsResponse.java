@@ -23,7 +23,7 @@ public record MonthlyAnalyticsResponse(
             BigDecimal percentage
     ) {
         static CategoryExpenseDto from(MonthlyAnalyticsCategoryExpense cat) {
-            return new CategoryExpenseDto(cat.categoryName(), "", cat.amount(), cat.percentage());
+            return new CategoryExpenseDto(cat.categoryName(), cat.categoryEmoji() != null ? cat.categoryEmoji() : "", cat.amount(), cat.percentage());
         }
     }
 

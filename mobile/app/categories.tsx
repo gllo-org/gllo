@@ -21,6 +21,7 @@ interface Category {
   type: CategoryType;
   systemCategory: boolean;
   color: string;
+  emoji: string;
 }
 
 const TYPE_LABELS: Record<CategoryType, string> = {
@@ -63,6 +64,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
   const [name, setName] = useState('');
   const [type, setType] = useState<CategoryType>('EXPENSE');
   const [color, setColor] = useState(PRESET_COLORS[0]);
+  const [emoji, setEmoji] = useState('');
 
   useEffect(() => {
     if (visible) {
@@ -70,10 +72,12 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
         setName(editTarget.name);
         setType(editTarget.type);
         setColor(editTarget.color);
+        setEmoji(editTarget.emoji || '');
       } else {
         setName('');
         setType('EXPENSE');
         setColor(PRESET_COLORS[0]);
+        setEmoji('');
       }
       Animated.timing(translateY, {
         toValue: 0,
@@ -107,9 +111,9 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
     if (!name.trim()) { Alert.alert('', '카테고리 이름을 입력해주세요.'); return; }
     try {
       if (isEdit && editTarget) {
-        await updateCat({ id: editTarget.id, body: { name: name.trim(), color } });
+        await updateCat({ id: editTarget.id, body: { name: name.trim(), color, emoji: emoji.trim() || null } });
       } else {
-        await createCat({ name: name.trim(), type, color });
+        await createCat({ name: name.trim(), type, color, emoji: emoji.trim() || null });
       }
       closeSheet();
     } catch {
@@ -152,6 +156,21 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
                 fontSize: 16, color: colors.text.primary,
                 backgroundColor: colors.bg.input, borderRadius: radius.input,
                 padding: 14, marginBottom: 20,
+              }}
+            />
+
+            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>이모지 (선택)</Text>
+            <TextInput
+              value={emoji}
+              onChangeText={setEmoji}
+              placeholder="🍜"
+              placeholderTextColor={colors.text.tertiary}
+              returnKeyType="done"
+              maxLength={2}
+              style={{
+                fontSize: 22, color: colors.text.primary, textAlign: 'center',
+                backgroundColor: colors.bg.input, borderRadius: radius.input,
+                padding: 14, marginBottom: 20, width: 72,
               }}
             />
 
@@ -288,7 +307,7 @@ export default function CategoriesScreen() {
                     borderBottomColor: colors.system.divider,
                   }}>
                     <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: cat.color, marginRight: 10 }} />
-                    <Text style={{ fontSize: 18, marginRight: 10 }}>{catEmoji(cat.name)}</Text>
+                    <Text style={{ fontSize: 18, marginRight: 10 }}>{cat.emoji || catEmoji(cat.name)}</Text>
                     <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{cat.name}</Text>
                     <Text style={{ fontSize: 11, color: colors.text.tertiary, marginRight: 8 }}>{TYPE_LABELS[cat.type]}</Text>
                     <Text style={{ fontSize: 16, color: colors.text.tertiary }}>🔒</Text>
@@ -318,7 +337,7 @@ export default function CategoriesScreen() {
                   borderBottomColor: colors.system.divider,
                 }}>
                   <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: cat.color, marginRight: 10 }} />
-                  <Text style={{ fontSize: 18, marginRight: 10 }}>{catEmoji(cat.name)}</Text>
+                  <Text style={{ fontSize: 18, marginRight: 10 }}>{cat.emoji || catEmoji(cat.name)}</Text>
                   <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{cat.name}</Text>
                   <Text style={{ fontSize: 11, color: colors.text.tertiary, marginRight: 12 }}>{TYPE_LABELS[cat.type]}</Text>
                   <TouchableOpacity

@@ -32,20 +32,20 @@ public class CategoryDataInitializer implements ApplicationRunner {
         }
 
         List<Category> systemCategories = List.of(
-                Category.createSystem("급여", CategoryType.INCOME),
-                Category.createSystem("용돈", CategoryType.INCOME),
-                Category.createSystem("상여금", CategoryType.INCOME),
-                Category.createSystem("기타수입", CategoryType.INCOME),
+                Category.createSystem("급여", CategoryType.INCOME, "💼"),
+                Category.createSystem("용돈", CategoryType.INCOME, "💰"),
+                Category.createSystem("상여금", CategoryType.INCOME, "🎁"),
+                Category.createSystem("기타수입", CategoryType.INCOME, "💚"),
 
-                Category.createSystem("식비", CategoryType.EXPENSE),
-                Category.createSystem("교통비", CategoryType.EXPENSE),
-                Category.createSystem("주거비", CategoryType.EXPENSE),
-                Category.createSystem("통신비", CategoryType.EXPENSE),
-                Category.createSystem("쇼핑", CategoryType.EXPENSE),
-                Category.createSystem("의료", CategoryType.EXPENSE),
-                Category.createSystem("문화생활", CategoryType.EXPENSE),
-                Category.createSystem("교육", CategoryType.EXPENSE),
-                Category.createSystem("기타지출", CategoryType.EXPENSE)
+                Category.createSystem("식비", CategoryType.EXPENSE, "🍜"),
+                Category.createSystem("교통비", CategoryType.EXPENSE, "🚌"),
+                Category.createSystem("주거비", CategoryType.EXPENSE, "🏡"),
+                Category.createSystem("통신비", CategoryType.EXPENSE, "📱"),
+                Category.createSystem("쇼핑", CategoryType.EXPENSE, "🛍️"),
+                Category.createSystem("의료", CategoryType.EXPENSE, "🏥"),
+                Category.createSystem("문화생활", CategoryType.EXPENSE, "🎭"),
+                Category.createSystem("교육", CategoryType.EXPENSE, "📚"),
+                Category.createSystem("기타지출", CategoryType.EXPENSE, "💸")
         );
 
         for (Category category : systemCategories) {
