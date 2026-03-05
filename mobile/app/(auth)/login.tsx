@@ -12,7 +12,7 @@ import { colors, radius, spacing } from '@/theme';
 import {
   getLastEmail, saveLastEmail,
   incrementPinFailures, resetPinFailures,
-  MAX_PIN_FAILURES,
+  MAX_PIN_FAILURES, toPinPassword,
 } from '@/lib/auth/pinAuth';
 import { supabase } from '@/lib/supabase';
 import { PinPad } from '@/components/ui/PinPad';
@@ -82,7 +82,7 @@ export default function LoginScreen() {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: lastEmail,
-        password: pin,
+        password: toPinPassword(pin),
       });
       if (error) throw error;
       await resetPinFailures();

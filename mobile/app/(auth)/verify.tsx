@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
 import { colors, radius, spacing } from '@/theme';
 import { supabase } from '@/lib/supabase';
-import { isPinRegistered, markPinRegistered, saveLastEmail } from '@/lib/auth/pinAuth';
+import { isPinRegistered, markPinRegistered, saveLastEmail, toPinPassword } from '@/lib/auth/pinAuth';
 import { PinPad } from '@/components/ui/PinPad';
 
 type Step = 'otp' | 'pin-setup' | 'pin-confirm';
@@ -104,7 +104,7 @@ export default function VerifyScreen() {
     }
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: pin });
+      const { error } = await supabase.auth.updateUser({ password: toPinPassword(pin) });
       if (error) throw error;
       await markPinRegistered(pendingUserId!);
       await saveLastEmail(email!);
