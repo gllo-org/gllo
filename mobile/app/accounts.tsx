@@ -17,7 +17,7 @@ const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.6;
 
 interface Account {
-  id: string;
+  id: number;
   name: string;
   type: string;
   currency: CurrencyCode;

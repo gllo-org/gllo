@@ -39,11 +39,11 @@ class CategoryUseCaseTest {
     void 커스텀_카테고리_생성_시_저장된_카테고리가_반환된다() {
         // given
         Category saved = new Category(categoryId, userId, "교통비", CategoryType.EXPENSE,
-                false, "#FF5733", LocalDateTime.now());
+                false, "#FF5733", "🚇", LocalDateTime.now());
         given(categoryRepository.save(any())).willReturn(saved);
 
         // when
-        Category result = categoryUseCase.create(userId, "교통비", CategoryType.EXPENSE, "#FF5733");
+        Category result = categoryUseCase.create(userId, "교통비", CategoryType.EXPENSE, "#FF5733", "🚇");
 
         // then
         assertThat(result.name()).isEqualTo("교통비");
@@ -56,8 +56,8 @@ class CategoryUseCaseTest {
     void 카테고리_목록_조회_시_사용자의_카테고리_목록이_반환된다() {
         // given
         List<Category> categories = List.of(
-                new Category(1L, null, "식비", CategoryType.EXPENSE, true, null, LocalDateTime.now()),
-                new Category(2L, userId, "교통비", CategoryType.EXPENSE, false, "#FF5733", LocalDateTime.now())
+                new Category(1L, null, "식비", CategoryType.EXPENSE, true, null, "🍜", LocalDateTime.now()),
+                new Category(2L, userId, "교통비", CategoryType.EXPENSE, false, "#FF5733", "🚇", LocalDateTime.now())
         );
         given(categoryRepository.findAllByUserId(userId)).willReturn(categories);
 
@@ -74,7 +74,7 @@ class CategoryUseCaseTest {
     void 커스텀_카테고리_삭제_성공() {
         // given
         Category customCategory = new Category(categoryId, userId, "교통비", CategoryType.EXPENSE,
-                false, "#FF5733", LocalDateTime.now());
+                false, "#FF5733", "🚇", LocalDateTime.now());
         given(categoryRepository.findById(categoryId)).willReturn(Optional.of(customCategory));
 
         // when
@@ -88,7 +88,7 @@ class CategoryUseCaseTest {
     void 시스템_카테고리_삭제_시_SYSTEM_CATEGORY_CANNOT_DELETE_예외가_발생한다() {
         // given
         Category systemCategory = new Category(categoryId, null, "식비", CategoryType.EXPENSE,
-                true, null, LocalDateTime.now());
+                true, null, "🍜", LocalDateTime.now());
         given(categoryRepository.findById(categoryId)).willReturn(Optional.of(systemCategory));
 
         // when & then
@@ -119,7 +119,7 @@ class CategoryUseCaseTest {
         // given
         UUID anotherUserId = UUID.randomUUID();
         Category otherUserCategory = new Category(categoryId, anotherUserId, "개인 카테고리",
-                CategoryType.EXPENSE, false, "#000000", LocalDateTime.now());
+                CategoryType.EXPENSE, false, "#000000", null, LocalDateTime.now());
         given(categoryRepository.findById(categoryId)).willReturn(Optional.of(otherUserCategory));
 
         // when & then
@@ -135,11 +135,11 @@ class CategoryUseCaseTest {
     void 시스템_카테고리_수정_시_SYSTEM_CATEGORY_CANNOT_DELETE_예외가_발생한다() {
         // given
         Category systemCategory = new Category(categoryId, null, "식비", CategoryType.EXPENSE,
-                true, null, LocalDateTime.now());
+                true, null, "🍜", LocalDateTime.now());
         given(categoryRepository.findByIdAndUserId(categoryId, userId)).willReturn(Optional.of(systemCategory));
 
         // when & then
-        assertThatThrownBy(() -> categoryUseCase.update(userId, categoryId, "새 이름", "#FF0000"))
+        assertThatThrownBy(() -> categoryUseCase.update(userId, categoryId, "새 이름", "#FF0000", null))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(ex -> {
                     BusinessException be = (BusinessException) ex;

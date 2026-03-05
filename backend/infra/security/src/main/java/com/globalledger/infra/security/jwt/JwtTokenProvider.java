@@ -35,7 +35,10 @@ public class JwtTokenProvider {
     private final SecretKey hmacKey;
     private final String supabaseUrl;
 
+    private static final long EC_KEY_TTL_MS = 24 * 60 * 60 * 1000L;
+
     private volatile PublicKey cachedEcKey;
+    private volatile long cachedEcKeyExpiresAt;
 
     public JwtTokenProvider(
             @Value("${supabase.jwt.secret}") String jwtSecret,
@@ -101,10 +104,11 @@ public class JwtTokenProvider {
     }
 
     private PublicKey resolveEcKey() throws Exception {
-        if (cachedEcKey != null) return cachedEcKey;
+        if (cachedEcKey != null && System.currentTimeMillis() < cachedEcKeyExpiresAt) return cachedEcKey;
         synchronized (this) {
-            if (cachedEcKey != null) return cachedEcKey;
+            if (cachedEcKey != null && System.currentTimeMillis() < cachedEcKeyExpiresAt) return cachedEcKey;
             cachedEcKey = fetchEcKeyFromJwks();
+            cachedEcKeyExpiresAt = System.currentTimeMillis() + EC_KEY_TTL_MS;
             return cachedEcKey;
         }
     }

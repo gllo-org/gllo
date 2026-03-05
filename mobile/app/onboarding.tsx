@@ -153,6 +153,7 @@ export default function OnboardingScreen() {
         });
       }
     } catch {
+      Alert.alert('알림', '기본 계좌 생성에 실패했어요. 계좌 탭에서 직접 추가해주세요.');
     }
   }
 
