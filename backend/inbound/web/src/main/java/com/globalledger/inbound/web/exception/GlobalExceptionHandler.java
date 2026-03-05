@@ -71,6 +71,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected exception occurred: {} - {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
+                .body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR,
+                        ex.getClass().getSimpleName() + ": " + ex.getMessage()));
     }
 }
