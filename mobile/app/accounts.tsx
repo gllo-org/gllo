@@ -365,7 +365,7 @@ export default function AccountsScreen() {
   });
 
   const { mutateAsync: deleteAccount } = useMutation({
-    mutationFn: (id: string) => apiClient(`/accounts/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => apiClient(`/accounts/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
