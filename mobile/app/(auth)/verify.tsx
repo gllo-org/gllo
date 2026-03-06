@@ -109,8 +109,9 @@ export default function VerifyScreen() {
       await markPinRegistered(pendingUserId!);
       await saveLastEmail(email!);
       setPendingPinSetup(false);
-    } catch {
-      Alert.alert('오류', 'PIN 설정에 실패했어요. 다시 시도해주세요.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      Alert.alert('PIN 설정 실패', msg);
     } finally {
       setIsLoading(false);
     }
