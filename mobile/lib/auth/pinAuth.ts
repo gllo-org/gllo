@@ -45,4 +45,7 @@ export const incrementPinFailures = async () => {
 
 export const resetPinFailures = () => del(FAILURES_KEY);
 
-export const toPinPassword = (pin: string): string => `gllo_${pin}_GLLO_${pin}`;
+const PIN_SALT = 'Gl!o@App#2o26$K';
+
+export const toPinPassword = (pin: string): string =>
+  `${PIN_SALT}${pin}${PIN_SALT.split('').reverse().join('')}`;
