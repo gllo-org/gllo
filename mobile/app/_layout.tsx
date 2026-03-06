@@ -65,6 +65,8 @@ function AuthGuard() {
     } catch (error) {
       if (error instanceof ApiError && error.code === 404) {
         router.replace('/onboarding');
+      } else if (error instanceof ApiError && (error.code === 401 || error.code === 403)) {
+        router.replace('/(auth)/login');
       } else {
         const seen = await hasTutorialBeenSeen();
         router.replace(seen ? '/(tabs)' : '/tutorial');
