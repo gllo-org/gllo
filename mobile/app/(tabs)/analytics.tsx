@@ -16,7 +16,8 @@ import type { CurrencyCode } from '@/theme';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SHEET_H = Dimensions.get('window').height * 0.65;
 
-type AnalyticsTab = '지출 추이' | '카테고리별';
+type AnalyticsTab = '추이' | '카테고리별';
+type CategoryType = '지출' | '수입';
 type ViewMode = '이번 달' | '3개월' | '6개월';
 type AmountType = '전체' | '지출' | '수입';
 
@@ -26,6 +27,7 @@ interface MonthlyReport {
   totalExpense: number;
   currency: CurrencyCode;
   categoryExpenses: CategoryExpense[];
+  categoryIncomes: CategoryExpense[];
   dailyExpenses: DailyExpense[];
 }
 
@@ -474,18 +476,27 @@ function CategoryTab({
 }) {
   const [drilldownCategory, setDrilldownCategory] = useState<CategoryExpense | null>(null);
   const [drilldownVisible, setDrilldownVisible] = useState(false);
+  const [categoryType, setCategoryType] = useState<CategoryType>('지출');
 
   const { data: report, isLoading } = useQuery({
     queryKey: ['report', yearMonth],
     queryFn: () => apiClient<MonthlyReport>(`/reports/monthly/${yearMonth}`),
   });
 
-  const pieData = report?.categoryExpenses?.map((c, i) => ({
+  const categories = categoryType === '지출'
+    ? (report?.categoryExpenses ?? [])
+    : (report?.categoryIncomes ?? []);
+
+  const totalAmount = categoryType === '지출'
+    ? (report?.totalExpense ?? 0)
+    : (report?.totalIncome ?? 0);
+
+  const pieData = categories.map((c, i) => ({
     value: c.amount,
     color: CHART_COLORS[i % CHART_COLORS.length],
     text: `${c.percentage.toFixed(0)}%`,
     label: c.categoryName,
-  })) ?? [];
+  }));
 
   const currency: CurrencyCode = report?.currency ?? 'KRW';
 
@@ -499,6 +510,35 @@ function CategoryTab({
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={{ paddingHorizontal: spacing.screenPadding, marginBottom: spacing.sectionGap }}>
           <MonthPicker yearMonth={yearMonth} onChange={onChangeYearMonth} />
+        </View>
+
+        <View style={{
+          flexDirection: 'row', gap: 8,
+          paddingHorizontal: spacing.screenPadding,
+          marginBottom: spacing.sectionGap,
+        }}>
+          {(['지출', '수입'] as CategoryType[]).map((t) => {
+            const active = categoryType === t;
+            const activeColor = t === '지출' ? colors.loss.text : colors.profit.text;
+            const activeBg = t === '지출' ? colors.loss.light : colors.profit.light;
+            return (
+              <TouchableOpacity
+                key={t}
+                onPress={() => setCategoryType(t)}
+                style={{
+                  paddingHorizontal: 18, paddingVertical: 7,
+                  borderRadius: radius.chip,
+                  backgroundColor: active ? activeBg : colors.bg.surface,
+                  borderWidth: 1,
+                  borderColor: active ? activeColor : colors.system.border,
+                }}
+              >
+                <Text style={{ fontSize: 13, fontWeight: '600', color: active ? activeColor : colors.text.secondary }}>
+                  {t}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {isLoading ? (
@@ -516,7 +556,7 @@ function CategoryTab({
               ...shadow.card,
             }}>
               <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>
-                카테고리별 지출
+                카테고리별 {categoryType}
               </Text>
               <View style={{ alignItems: 'center', marginBottom: 20 }}>
                 <PieChart
@@ -526,9 +566,9 @@ function CategoryTab({
                   innerRadius={55}
                   centerLabelComponent={() => (
                     <View style={{ alignItems: 'center' }}>
-                      <Text style={{ fontSize: 11, color: colors.text.tertiary }}>총 지출</Text>
+                      <Text style={{ fontSize: 11, color: colors.text.tertiary }}>총 {categoryType}</Text>
                       <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text.primary }}>
-                        {CURRENCY_SYMBOLS[currency]}{(report?.totalExpense ?? 0).toLocaleString()}
+                        {CURRENCY_SYMBOLS[currency]}{totalAmount.toLocaleString()}
                       </Text>
                     </View>
                   )}
@@ -548,7 +588,7 @@ function CategoryTab({
                 카테고리 상세 (탭하면 거래 목록)
               </Text>
               <View style={{ gap: 0 }}>
-                {report?.categoryExpenses?.map((cat, i) => (
+                {categories.map((cat, i) => (
                   <TouchableOpacity
                     key={cat.categoryName}
                     onPress={() => openDrilldown(cat)}
@@ -556,7 +596,7 @@ function CategoryTab({
                     style={{
                       flexDirection: 'row', alignItems: 'center', gap: 10,
                       paddingVertical: 12,
-                      borderBottomWidth: i < (report.categoryExpenses.length - 1) ? 1 : 0,
+                      borderBottomWidth: i < (categories.length - 1) ? 1 : 0,
                       borderBottomColor: colors.system.divider,
                     }}
                   >
@@ -588,7 +628,7 @@ function CategoryTab({
           }}>
             <Text style={{ fontSize: 36 }}>📊</Text>
             <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-              해당 월 거래 내역이 없어요.{'\n'}글로와 함께 가계부를 작성해볼까요?
+              해당 월 {categoryType} 내역이 없어요.{'\n'}글로와 함께 가계부를 작성해볼까요?
             </Text>
           </View>
         )}
@@ -606,20 +646,20 @@ function CategoryTab({
 }
 
 export default function AnalyticsScreen() {
-  const [tab, setTab] = useState<AnalyticsTab>('지출 추이');
+  const [tab, setTab] = useState<AnalyticsTab>('추이');
   const [trendYearMonth, setTrendYearMonth] = useState(getYearMonth());
   const [categoryYearMonth, setCategoryYearMonth] = useState(getYearMonth());
 
-  const TABS: AnalyticsTab[] = ['지출 추이', '카테고리별'];
+  const TABS: AnalyticsTab[] = ['추이', '카테고리별'];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
       <View style={{ paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 8 }}>
         <Text style={{ ...typography.heading.h2, color: colors.text.primary, marginBottom: 4 }}>
-          지출 분석
+          수입/지출 분석
         </Text>
         <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
-          글로가 이번 달 지출 흐름을 살펴봤어요.
+          글로가 이번 달 수입/지출 흐름을 살펴봤어요.
         </Text>
       </View>
 
@@ -654,7 +694,7 @@ export default function AnalyticsScreen() {
         })}
       </View>
 
-      {tab === '지출 추이' ? (
+      {tab === '추이' ? (
         <TrendTab
           baseYearMonth={trendYearMonth}
           onChangeYearMonth={setTrendYearMonth}

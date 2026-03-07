@@ -11,6 +11,7 @@ public record MonthlyAnalytics(
         BigDecimal totalExpense,
         Currency currency,
         List<MonthlyAnalyticsCategoryExpense> categoryExpenses,
+        List<MonthlyAnalyticsCategoryExpense> categoryIncomes,
         List<MonthlyAnalyticsDailyExpense> dailyExpenses
 ) {
 }

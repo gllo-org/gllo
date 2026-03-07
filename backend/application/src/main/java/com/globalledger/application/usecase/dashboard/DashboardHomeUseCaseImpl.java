@@ -40,10 +40,24 @@ public class DashboardHomeUseCaseImpl implements DashboardHomePort {
         BigDecimal totalAssetKrw = calculateTotalAssetKrw(accounts, toKrwRateMap);
 
         Optional<MonthlyBudget> budgetOpt = budgetRepository.findByUserIdAndYearMonth(userId, currentMonth);
-        Currency currency = budgetOpt.map(MonthlyBudget::currency).orElse(Currency.KRW);
 
         List<Transaction> monthlyTransactions = transactionRepository.findAllByUserIdAndFilter(
                 userId, currentMonth.getYear(), currentMonth.getMonthValue(), null, null);
+
+        if (budgetOpt.isEmpty()) {
+            BigDecimal monthlyIncomeKrw = monthlyTransactions.stream()
+                    .filter(t -> t.type() == TransactionType.INCOME)
+                    .map(t -> toKrw(t.amount(), t.currency(), toKrwRateMap))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal monthlyExpenseKrw = monthlyTransactions.stream()
+                    .filter(t -> t.type() == TransactionType.EXPENSE)
+                    .map(t -> toKrw(t.amount(), t.currency(), toKrwRateMap))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            return new DashboardHome(totalAssetKrw, monthlyIncomeKrw, monthlyExpenseKrw,
+                    null, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null, Currency.KRW);
+        }
+
+        Currency currency = budgetOpt.get().currency();
 
         BigDecimal monthlyIncome = monthlyTransactions.stream()
                 .filter(t -> t.type() == TransactionType.INCOME && t.currency() == currency)
@@ -54,11 +68,6 @@ public class DashboardHomeUseCaseImpl implements DashboardHomePort {
                 .filter(t -> t.type() == TransactionType.EXPENSE && t.currency() == currency)
                 .map(Transaction::amount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (budgetOpt.isEmpty()) {
-            return new DashboardHome(totalAssetKrw, monthlyIncome, monthlyExpense,
-                    null, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null, currency);
-        }
 
         MonthlyBudget budget = budgetOpt.get();
         BigDecimal budgetSpentRate = budget.amount().compareTo(BigDecimal.ZERO) == 0
@@ -81,6 +90,12 @@ public class DashboardHomeUseCaseImpl implements DashboardHomePort {
         return exchangeRateRepository.findLatestAll().stream()
                 .filter(r -> r.targetCurrency() == Currency.KRW)
                 .collect(Collectors.toMap(ExchangeRate::baseCurrency, ExchangeRate::rate, (a, b) -> a));
+    }
+
+    private BigDecimal toKrw(BigDecimal amount, Currency currency, Map<Currency, BigDecimal> toKrwRateMap) {
+        if (currency == Currency.KRW) return amount.setScale(0, RoundingMode.HALF_UP);
+        BigDecimal rate = toKrwRateMap.getOrDefault(currency, BigDecimal.ZERO);
+        return amount.multiply(rate).setScale(0, RoundingMode.HALF_UP);
     }
 
     private BigDecimal calculateTotalAssetKrw(List<Account> accounts, Map<Currency, BigDecimal> toKrwRateMap) {

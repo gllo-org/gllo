@@ -1,6 +1,5 @@
 package com.globalledger.application.usecase.account;
 
-import com.globalledger.domain.exception.BusinessException;
 import com.globalledger.domain.exception.NotFoundException;
 import com.globalledger.domain.model.Account;
 import com.globalledger.domain.model.AccountType;
@@ -101,34 +100,16 @@ class AccountUseCaseTest {
     }
 
     @Test
-    void 거래_내역이_없는_계좌는_삭제된다() {
+    void 계좌_삭제_시_deleteById가_호출된다() {
         // given
-        Account account = new Account(accountId, userId, "빈 계좌", AccountType.CASH,
+        Account account = new Account(accountId, userId, "삭제할 계좌", AccountType.CASH,
                 Currency.KRW, BigDecimal.ZERO, BigDecimal.ZERO, LocalDateTime.now());
         given(accountRepository.findByIdAndUserId(accountId, userId)).willReturn(Optional.of(account));
-        given(accountRepository.existsTransactionsByAccountId(accountId)).willReturn(false);
 
         // when
         accountUseCase.delete(userId, accountId);
 
         // then
         verify(accountRepository).deleteById(accountId);
-    }
-
-    @Test
-    void 거래_내역이_있는_계좌_삭제_시_ACCOUNT_HAS_TRANSACTIONS_예외가_발생한다() {
-        // given
-        Account account = new Account(accountId, userId, "거래 있는 계좌", AccountType.CASH,
-                Currency.KRW, new BigDecimal("50000"), BigDecimal.ZERO, LocalDateTime.now());
-        given(accountRepository.findByIdAndUserId(accountId, userId)).willReturn(Optional.of(account));
-        given(accountRepository.existsTransactionsByAccountId(accountId)).willReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> accountUseCase.delete(userId, accountId))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(ex -> {
-                    BusinessException be = (BusinessException) ex;
-                    assert be.getErrorCode() == ErrorCode.ACCOUNT_HAS_TRANSACTIONS;
-                });
     }
 }

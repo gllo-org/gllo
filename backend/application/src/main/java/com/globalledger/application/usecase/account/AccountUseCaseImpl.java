@@ -1,6 +1,5 @@
 package com.globalledger.application.usecase.account;
 
-import com.globalledger.domain.exception.BusinessException;
 import com.globalledger.domain.exception.NotFoundException;
 import com.globalledger.domain.model.Account;
 import com.globalledger.domain.model.AccountType;
@@ -8,6 +7,7 @@ import com.globalledger.domain.model.Currency;
 import com.globalledger.domain.port.input.AccountPort;
 import com.globalledger.domain.port.output.AccountRepositoryPort;
 import com.globalledger.shared.constants.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +45,6 @@ public class AccountUseCaseImpl implements AccountPort {
     @Override
     public void delete(UUID userId, Long accountId) {
         Account account = getById(userId, accountId);
-
-        if (accountRepository.existsTransactionsByAccountId(accountId)) {
-            throw new BusinessException(ErrorCode.ACCOUNT_HAS_TRANSACTIONS);
-        }
-
         accountRepository.deleteById(account.id());
     }
 }

@@ -17,39 +17,26 @@ import { supabase } from '@/lib/supabase';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
-interface AccountSummary {
-  accountId: number;
-  accountName: string;
-  currency: CurrencyCode;
-  balance: number;
-  averageRate: number | null;
-  currentRate: number | null;
-  unrealizedPnl: number | null;
-  unrealizedPnlPercent: number | null;
-}
-
-interface TransactionSummary {
+interface CategoryExpenseDto {
   categoryName: string;
-  totalAmount: number;
-  currency: CurrencyCode;
-  count: number;
+  categoryEmoji: string;
+  amount: number;
+  percentage: number;
 }
 
-interface ReportBudgetSummary {
-  currency: CurrencyCode;
-  budgetAmount: number;
-  spentAmount: number;
-  remainingAmount: number;
-  budgetProgressRate: number;
+interface DailyExpenseDto {
+  date: string;
+  amount: number;
 }
 
-interface MonthlyReportData {
-  userId: string;
-  period: string;
-  accounts: AccountSummary[];
-  totalAssetsKrw: number;
-  transactions: TransactionSummary[];
-  budgetSummary: ReportBudgetSummary | null;
+interface MonthlyAnalyticsData {
+  yearMonth: string;
+  totalIncome: number;
+  totalExpense: number;
+  currency: CurrencyCode;
+  categoryExpenses: CategoryExpenseDto[];
+  categoryIncomes: CategoryExpenseDto[];
+  dailyExpenses: DailyExpenseDto[];
 }
 
 function toYearMonth(date: Date): string {
@@ -93,7 +80,7 @@ export default function ReportScreen() {
 
   const { data: report, isLoading, isError } = useQuery({
     queryKey: ['report', yearMonth],
-    queryFn: () => apiClient<MonthlyReportData>(`/reports/monthly/${yearMonth}`),
+    queryFn: () => apiClient<MonthlyAnalyticsData>(`/reports/monthly/${yearMonth}`),
   });
 
   async function handleDownloadPdf() {
@@ -198,112 +185,96 @@ export default function ReportScreen() {
             marginBottom: 20,
             ...shadow.card,
           }}>
-            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 6 }}>
-              총 자산 (KRW 환산)
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 12 }}>
+              {formatYearMonth(yearMonth)} 수입/지출 요약
             </Text>
-            <Text style={{ ...typography.amount.hero, color: colors.text.primary }}>
-              {formatCurrency(report.totalAssetsKrw, 'KRW')}
-            </Text>
-          </View>
-
-          {report.accounts.length > 0 && (
-            <View style={{ marginBottom: 20 }}>
-              <SectionHeader title="계좌별 현황" />
-              <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', ...shadow.card }}>
-                {report.accounts.map((account, idx) => {
-                  const isPositive = (account.unrealizedPnl ?? 0) >= 0;
-                  return (
-                    <View
-                      key={account.accountId}
-                      style={{
-                        paddingHorizontal: 16, paddingVertical: 14,
-                        borderBottomWidth: idx < report.accounts.length - 1 ? 1 : 0,
-                        borderBottomColor: colors.system.divider,
-                      }}
-                    >
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
-                          {account.accountName}
-                        </Text>
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text.primary }}>
-                          {formatCurrency(account.balance, account.currency)}
-                        </Text>
-                      </View>
-                      {account.unrealizedPnl !== null && (
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                          <Text style={{ fontSize: 12, color: colors.text.tertiary }}>
-                            평단가 {account.averageRate != null ? formatCurrency(account.averageRate, 'KRW') : '-'}
-                          </Text>
-                          <Text style={{
-                            fontSize: 12, fontWeight: '600',
-                            color: isPositive ? colors.profit.text : colors.loss.text,
-                          }}>
-                            {isPositive ? '▲' : '▼'} {formatCurrency(Math.abs(account.unrealizedPnl), 'KRW')}
-                            {account.unrealizedPnlPercent !== null
-                              ? ` (${Math.abs(account.unrealizedPnlPercent).toFixed(2)}%)`
-                              : ''}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  );
-                })}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View>
+                <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 4 }}>수입</Text>
+                <Text style={{ ...typography.amount.small, color: colors.profit.text }}>
+                  {formatCurrency(report.totalIncome, report.currency)}
+                </Text>
               </View>
-            </View>
-          )}
-
-          {report.budgetSummary && (
-            <View style={{ marginBottom: 20 }}>
-              <SectionHeader title="예산 현황" />
-              <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, padding: 16, ...shadow.card }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <View>
-                    <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 2 }}>지출</Text>
-                    <Text style={{ ...typography.amount.small, color: colors.loss.text }}>
-                      {formatCurrency(report.budgetSummary.spentAmount, report.budgetSummary.currency)}
-                    </Text>
-                  </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 2 }}>예산</Text>
-                    <Text style={{ ...typography.amount.small, color: colors.text.secondary }}>
-                      {formatCurrency(report.budgetSummary.budgetAmount, report.budgetSummary.currency)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ height: 8, backgroundColor: colors.system.border, borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
-                  <LinearGradient
-                    colors={colors.gradient.primary}
-                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                    style={{ height: '100%', width: `${Math.min(report.budgetSummary.budgetProgressRate, 100)}%`, borderRadius: 4 }}
-                  />
-                </View>
-                <Text style={{ fontSize: 12, color: colors.text.secondary, textAlign: 'right' }}>
-                  {report.budgetSummary.budgetProgressRate.toFixed(1)}% 소진
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 4 }}>지출</Text>
+                <Text style={{ ...typography.amount.small, color: colors.loss.text }}>
+                  {formatCurrency(report.totalExpense, report.currency)}
                 </Text>
               </View>
             </View>
-          )}
+          </View>
 
-          {report.transactions.length > 0 && (
-            <View style={{ marginBottom: 24 }}>
+          {report.categoryExpenses.length > 0 && (
+            <View style={{ marginBottom: 20 }}>
               <SectionHeader title="카테고리별 지출" />
               <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', ...shadow.card }}>
-                {report.transactions.map((tx, idx) => (
+                {report.categoryExpenses.map((item, idx) => (
                   <View
-                    key={`${tx.categoryName}-${idx}`}
+                    key={`expense-${item.categoryName}-${idx}`}
                     style={{
-                      flexDirection: 'row', alignItems: 'center',
                       paddingHorizontal: 16, paddingVertical: 13,
-                      borderBottomWidth: idx < report.transactions.length - 1 ? 1 : 0,
+                      borderBottomWidth: idx < report.categoryExpenses.length - 1 ? 1 : 0,
                       borderBottomColor: colors.system.divider,
                     }}
                   >
-                    <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{tx.categoryName}</Text>
-                    <Text style={{ fontSize: 12, color: colors.text.tertiary, marginRight: 12 }}>
-                      {tx.count}건
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                      {item.categoryEmoji ? (
+                        <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
+                      ) : null}
+                      <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
+                        {formatCurrency(item.amount, report.currency)}
+                      </Text>
+                    </View>
+                    <View style={{ height: 4, backgroundColor: colors.system.border, borderRadius: 2, overflow: 'hidden' }}>
+                      <View style={{
+                        height: '100%',
+                        width: `${Math.min(item.percentage, 100)}%`,
+                        backgroundColor: colors.loss.text,
+                        borderRadius: 2,
+                      }} />
+                    </View>
+                    <Text style={{ fontSize: 11, color: colors.text.tertiary, marginTop: 3, textAlign: 'right' }}>
+                      {item.percentage.toFixed(1)}%
                     </Text>
-                    <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
-                      {formatCurrency(tx.totalAmount, tx.currency)}
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {report.categoryIncomes.length > 0 && (
+            <View style={{ marginBottom: 24 }}>
+              <SectionHeader title="카테고리별 수입" />
+              <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', ...shadow.card }}>
+                {report.categoryIncomes.map((item, idx) => (
+                  <View
+                    key={`income-${item.categoryName}-${idx}`}
+                    style={{
+                      paddingHorizontal: 16, paddingVertical: 13,
+                      borderBottomWidth: idx < report.categoryIncomes.length - 1 ? 1 : 0,
+                      borderBottomColor: colors.system.divider,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                      {item.categoryEmoji ? (
+                        <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
+                      ) : null}
+                      <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
+                        {formatCurrency(item.amount, report.currency)}
+                      </Text>
+                    </View>
+                    <View style={{ height: 4, backgroundColor: colors.system.border, borderRadius: 2, overflow: 'hidden' }}>
+                      <View style={{
+                        height: '100%',
+                        width: `${Math.min(item.percentage, 100)}%`,
+                        backgroundColor: colors.profit.text,
+                        borderRadius: 2,
+                      }} />
+                    </View>
+                    <Text style={{ fontSize: 11, color: colors.text.tertiary, marginTop: 3, textAlign: 'right' }}>
+                      {item.percentage.toFixed(1)}%
                     </Text>
                   </View>
                 ))}

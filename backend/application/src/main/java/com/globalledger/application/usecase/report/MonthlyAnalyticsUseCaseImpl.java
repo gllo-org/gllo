@@ -51,13 +51,16 @@ public class MonthlyAnalyticsUseCaseImpl implements MonthlyAnalyticsPort {
         List<MonthlyAnalyticsCategoryExpense> categoryExpenses =
                 buildCategoryExpenses(transactions, currency, totalExpense);
 
+        List<MonthlyAnalyticsCategoryExpense> categoryIncomes =
+                buildCategoryIncomes(transactions, currency, totalIncome);
+
         List<MonthlyAnalyticsDailyExpense> dailyExpenses =
                 buildDailyExpenses(transactions, currency);
 
         String yearMonthStr = String.format("%04d-%02d", yearMonth.getYear(), yearMonth.getMonthValue());
 
         return new MonthlyAnalytics(yearMonthStr, totalIncome, totalExpense, currency,
-                categoryExpenses, dailyExpenses);
+                categoryExpenses, categoryIncomes, dailyExpenses);
     }
 
     private Currency resolveCurrency(UUID userId, YearMonth yearMonth, List<Transaction> transactions) {
@@ -101,6 +104,37 @@ public class MonthlyAnalyticsUseCaseImpl implements MonthlyAnalyticsPort {
                             ? BigDecimal.ZERO
                             : e.getValue().multiply(BigDecimal.valueOf(100))
                                     .divide(totalExpense, 2, RoundingMode.HALF_UP);
+                    return new MonthlyAnalyticsCategoryExpense(name, emoji, e.getValue(), pct);
+                })
+                .sorted(Comparator.comparing(MonthlyAnalyticsCategoryExpense::amount).reversed())
+                .toList();
+    }
+
+    private List<MonthlyAnalyticsCategoryExpense> buildCategoryIncomes(
+            List<Transaction> transactions, Currency currency, BigDecimal totalIncome) {
+
+        Map<Long, Category> categoryCache = new HashMap<>();
+
+        Map<Long, BigDecimal> grouped = transactions.stream()
+                .filter(t -> t.type() == TransactionType.INCOME && t.currency() == currency)
+                .collect(Collectors.groupingBy(
+                        t -> t.categoryId() != null ? t.categoryId() : -1L,
+                        Collectors.reducing(BigDecimal.ZERO, Transaction::amount, BigDecimal::add)
+                ));
+
+        return grouped.entrySet().stream()
+                .map(e -> {
+                    Long categoryId = e.getKey() == -1L ? null : e.getKey();
+                    Category cat = categoryId != null
+                            ? categoryCache.computeIfAbsent(categoryId,
+                                    id -> categoryRepository.findById(id).orElse(null))
+                            : null;
+                    String name = cat != null ? cat.name() : "기타";
+                    String emoji = cat != null && cat.emoji() != null ? cat.emoji() : "";
+                    BigDecimal pct = totalIncome.compareTo(BigDecimal.ZERO) == 0
+                            ? BigDecimal.ZERO
+                            : e.getValue().multiply(BigDecimal.valueOf(100))
+                                    .divide(totalIncome, 2, RoundingMode.HALF_UP);
                     return new MonthlyAnalyticsCategoryExpense(name, emoji, e.getValue(), pct);
                 })
                 .sorted(Comparator.comparing(MonthlyAnalyticsCategoryExpense::amount).reversed())

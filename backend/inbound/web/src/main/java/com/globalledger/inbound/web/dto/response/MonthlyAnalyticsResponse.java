@@ -14,6 +14,7 @@ public record MonthlyAnalyticsResponse(
         BigDecimal totalExpense,
         Currency currency,
         List<CategoryExpenseDto> categoryExpenses,
+        List<CategoryExpenseDto> categoryIncomes,
         List<DailyExpenseDto> dailyExpenses
 ) {
     public record CategoryExpenseDto(
@@ -43,6 +44,7 @@ public record MonthlyAnalyticsResponse(
                 analytics.totalExpense(),
                 analytics.currency(),
                 analytics.categoryExpenses().stream().map(CategoryExpenseDto::from).toList(),
+                analytics.categoryIncomes().stream().map(CategoryExpenseDto::from).toList(),
                 analytics.dailyExpenses().stream().map(DailyExpenseDto::from).toList()
         );
     }
