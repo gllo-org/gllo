@@ -1,3 +1,18 @@
+UPDATE transactions
+SET category_id = NULL
+WHERE category_id IS NOT NULL
+  AND category_id NOT IN (SELECT id FROM categories);
+
+UPDATE transactions
+SET trip_id = NULL
+WHERE trip_id IS NOT NULL
+  AND trip_id NOT IN (SELECT id FROM trips);
+
+UPDATE recurring_rules
+SET category_id = NULL
+WHERE category_id IS NOT NULL
+  AND category_id NOT IN (SELECT id FROM categories);
+
 ALTER TABLE transactions
     DROP CONSTRAINT IF EXISTS transactions_account_id_fkey,
     DROP CONSTRAINT IF EXISTS transactions_category_id_fkey,
