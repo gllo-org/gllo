@@ -138,8 +138,14 @@ export default function VerifyScreen() {
       setSecondsLeft(OTP_EXPIRE_SECONDS);
       setOtp('');
       Alert.alert('재전송 완료', '글로가 새 인증번호를 보냈어요.');
-    } catch {
-      Alert.alert('오류', '다시 시도해주세요.');
+    } catch (err: unknown) {
+      const isRateLimit = (err as { status?: number })?.status === 429;
+      Alert.alert(
+        '전송 실패',
+        isRateLimit
+          ? '이메일 전송 한도를 초과했어요.\n잠시 후 다시 시도해주세요.'
+          : '다시 시도해주세요.',
+      );
     }
   }
 
