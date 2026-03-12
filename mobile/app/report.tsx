@@ -15,7 +15,7 @@ import { colors, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 import { supabase } from '@/lib/supabase';
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL;
+const API_BASE = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/v1`;
 
 interface CategoryExpenseDto {
   categoryName: string;

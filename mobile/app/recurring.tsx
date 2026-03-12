@@ -360,6 +360,7 @@ function RecurringFormSheet({
         });
       }
       closeSheet();
+      Alert.alert('완료', isEditMode ? '고정 거래가 수정되었습니다.' : '고정 거래가 추가되었습니다.');
     } catch {
       Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
     }
@@ -573,18 +574,13 @@ export default function RecurringScreen() {
     queryFn: () => apiClient<RecurringRule[]>('/recurring-rules'),
   });
 
-  const { mutateAsync: toggleRule } = useMutation({
-    mutationFn: (id: number) =>
-      apiClient(`/recurring-rules/${id}/toggle`, { method: 'POST' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recurring-rules'] }),
-  });
-
   const { mutateAsync: executeRule } = useMutation({
     mutationFn: (id: number) =>
       apiClient(`/recurring-rules/${id}/execute`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recurring-rules'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -594,10 +590,6 @@ export default function RecurringScreen() {
       apiClient(`/recurring-rules/${id}`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recurring-rules'] }),
   });
-
-  function handleToggle(rule: RecurringRule) {
-    toggleRule(rule.id).catch(() => Alert.alert('오류', '변경에 실패했어요.'));
-  }
 
   function handleExecute(rule: RecurringRule) {
     Alert.alert(
@@ -629,8 +621,12 @@ export default function RecurringScreen() {
         {
           text: '삭제', style: 'destructive',
           onPress: async () => {
-            try { await deleteRule(rule.id); }
-            catch { Alert.alert('오류', '삭제에 실패했어요.'); }
+            try {
+              await deleteRule(rule.id);
+              Alert.alert('완료', '고정 거래가 삭제되었습니다.');
+            } catch {
+              Alert.alert('오류', '삭제에 실패했어요.');
+            }
           },
         },
       ]
@@ -678,30 +674,12 @@ export default function RecurringScreen() {
                     borderRadius: radius.card,
                     padding: 16,
                     ...shadow.card,
-                    opacity: rule.active ? 1 : 0.6,
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text.primary }}>
-                        {rule.name}
-                      </Text>
-                      <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
-                        {rule.title}
-                      </Text>
-                    </View>
-                    <View style={{
-                      paddingHorizontal: 8, paddingVertical: 3,
-                      borderRadius: radius.chip,
-                      backgroundColor: rule.active ? colors.status.normal + '22' : colors.system.border,
-                    }}>
-                      <Text style={{
-                        fontSize: 11, fontWeight: '600',
-                        color: rule.active ? colors.status.normal : colors.text.tertiary,
-                      }}>
-                        {rule.active ? '활성' : '비활성'}
-                      </Text>
-                    </View>
+                    <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text.primary }}>
+                      {rule.name}
+                    </Text>
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
@@ -739,19 +717,6 @@ export default function RecurringScreen() {
 
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <TouchableOpacity
-                      onPress={() => handleToggle(rule)}
-                      activeOpacity={0.75}
-                      style={{
-                        flex: 1, paddingVertical: 8, borderRadius: radius.chip,
-                        backgroundColor: colors.bg.input, alignItems: 'center',
-                        borderWidth: 1, borderColor: colors.system.border,
-                      }}
-                    >
-                      <Text style={{ fontSize: 13, color: colors.text.secondary }}>
-                        {rule.active ? '비활성화' : '활성화'}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
                       onPress={() => openEdit(rule)}
                       activeOpacity={0.75}
                       style={{
@@ -771,18 +736,18 @@ export default function RecurringScreen() {
                         borderWidth: 1, borderColor: colors.system.border,
                       }}
                     >
-                      <Text style={{ fontSize: 13, color: colors.text.brand }}>실행</Text>
+                      <Text style={{ fontSize: 13, color: colors.text.brand }}>즉시 실행</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleDelete(rule)}
                       activeOpacity={0.75}
                       style={{
-                        paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.chip,
+                        paddingVertical: 8, paddingHorizontal: 14, borderRadius: radius.chip,
                         backgroundColor: colors.bg.input, alignItems: 'center',
                         borderWidth: 1, borderColor: colors.system.border,
                       }}
                     >
-                      <Text style={{ fontSize: 16 }}>🗑️</Text>
+                      <Text style={{ fontSize: 13, color: colors.loss.text }}>삭제</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

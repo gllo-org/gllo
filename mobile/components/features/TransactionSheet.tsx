@@ -218,6 +218,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
       apiClient('/transactions', { method: 'POST', body: JSON.stringify(body) }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
@@ -314,6 +315,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
         ...(krwAmount !== null ? { customConvertedAmount: krwAmount } : {}),
       });
       closeSheet();
+      Alert.alert('완료', '거래가 추가되었습니다.');
     } catch {
       Alert.alert('오류', '거래를 저장하지 못했어요. 다시 시도해주세요.');
     }
@@ -764,11 +766,34 @@ export function TransactionSheet({ visible, onClose }: Props) {
               contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 40 }}
               showsVerticalScrollIndicator={false}
             >
+              <TouchableOpacity
+                onPress={() => {
+                  closeSheet();
+                  setTimeout(() => router.push('/accounts'), 260);
+                }}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+                  gap: 6,
+                  backgroundColor: colors.bg.surface,
+                  borderRadius: radius.card,
+                  padding: 12,
+                  marginBottom: 16,
+                  borderWidth: 1,
+                  borderColor: colors.system.border,
+                  borderStyle: 'dashed',
+                }}
+              >
+                <Text style={{ fontSize: 16, color: colors.text.brand }}>+</Text>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: colors.text.brand }}>
+                  새 계좌 만들기
+                </Text>
+              </TouchableOpacity>
+
               {!accounts || accounts.length === 0 ? (
-                <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
+                <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
                   <Text style={{ fontSize: 36 }}>🏦</Text>
                   <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-                    계좌가 없어요.{'\n'}글로와 함께 첫 계좌를 만들어볼까요?
+                    계좌가 없어요.{'\n'}위 버튼으로 먼저 계좌를 만들어보세요.
                   </Text>
                 </View>
               ) : (

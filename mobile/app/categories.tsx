@@ -11,9 +11,9 @@ import { apiClient } from '@/lib/api/client';
 import { colors, spacing, radius, shadow } from '@/theme';
 
 const { height: SCREEN_H } = Dimensions.get('window');
-const SHEET_H = SCREEN_H * 0.68;
+const SHEET_H = SCREEN_H * 0.55;
 
-type CategoryType = 'EXPENSE' | 'INCOME' | 'TRIP' | 'FIXED_EXPENSE';
+type CategoryType = 'EXPENSE' | 'INCOME';
 
 interface Category {
   id: number;
@@ -27,30 +27,7 @@ interface Category {
 const TYPE_LABELS: Record<CategoryType, string> = {
   EXPENSE: '지출',
   INCOME: '수입',
-  TRIP: '여행',
-  FIXED_EXPENSE: '고정',
 };
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  '식비': '🍜', '교통': '🚇', '주거비': '🏠', '의류': '👕',
-  '의료': '🏥', '건강': '🏥', '교육': '📚', '문화': '🎭',
-  '통신': '📱', '보험': '🛡️', '용돈': '💰', '여행': '✈️',
-  '비자': '📋', '보증금': '🏦', '항공권': '✈️', '기숙사': '🏫',
-  '장학금': '🎓', '월세': '🏠', '구독': '📺', '기타': '💸',
-};
-
-function catEmoji(name: string): string {
-  for (const [k, v] of Object.entries(CATEGORY_EMOJI)) {
-    if (name.includes(k)) return v;
-  }
-  return '💸';
-}
-
-const PRESET_COLORS = [
-  '#C4B5F8', '#86EFAC', '#FCA5A5', '#93C5FD', '#FDE68A',
-  '#F0A8C8', '#A5F3FC', '#FFBDA0', '#D8B4FE', '#6EE7B7',
-  '#FB923C', '#34D399', '#60A5FA', '#F472B6', '#A78BFA',
-];
 
 function CategoryFormSheet({ visible, editTarget, onClose }: {
   visible: boolean;
@@ -63,21 +40,15 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
 
   const [name, setName] = useState('');
   const [type, setType] = useState<CategoryType>('EXPENSE');
-  const [color, setColor] = useState(PRESET_COLORS[0]);
-  const [emoji, setEmoji] = useState('');
 
   useEffect(() => {
     if (visible) {
       if (editTarget) {
         setName(editTarget.name);
-        setType(editTarget.type);
-        setColor(editTarget.color);
-        setEmoji(editTarget.emoji || '');
+        setType(editTarget.type as CategoryType);
       } else {
         setName('');
         setType('EXPENSE');
-        setColor(PRESET_COLORS[0]);
-        setEmoji('');
       }
       Animated.timing(translateY, {
         toValue: 0,
@@ -111,11 +82,12 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
     if (!name.trim()) { Alert.alert('', '카테고리 이름을 입력해주세요.'); return; }
     try {
       if (isEdit && editTarget) {
-        await updateCat({ id: editTarget.id, body: { name: name.trim(), color, emoji: emoji.trim() || null } });
+        await updateCat({ id: editTarget.id, body: { name: name.trim(), color: '#9CA3AF', emoji: null } });
       } else {
-        await createCat({ name: name.trim(), type, color, emoji: emoji.trim() || null });
+        await createCat({ name: name.trim(), type, color: '#9CA3AF', emoji: null });
       }
       closeSheet();
+      Alert.alert('완료', isEdit ? '카테고리가 수정되었습니다.' : '카테고리가 추가되었습니다.');
     } catch {
       Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
     }
@@ -159,25 +131,10 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
               }}
             />
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>이모지 (선택)</Text>
-            <TextInput
-              value={emoji}
-              onChangeText={setEmoji}
-              placeholder="🍜"
-              placeholderTextColor={colors.text.tertiary}
-              returnKeyType="done"
-              maxLength={2}
-              style={{
-                fontSize: 22, color: colors.text.primary, textAlign: 'center',
-                backgroundColor: colors.bg.input, borderRadius: radius.input,
-                padding: 14, marginBottom: 20, width: 72,
-              }}
-            />
-
             {!isEdit && (
               <>
                 <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>유형</Text>
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 28 }}>
                   {(Object.keys(TYPE_LABELS) as CategoryType[]).map((t) => {
                     const active = type === t;
                     return (
@@ -185,14 +142,14 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
                         key={t}
                         onPress={() => setType(t)}
                         style={{
-                          flex: 1, paddingVertical: 8, borderRadius: radius.chip,
+                          flex: 1, paddingVertical: 10, borderRadius: radius.chip,
                           backgroundColor: active ? colors.bg.surface : 'transparent',
                           alignItems: 'center',
                           borderWidth: 1.5,
                           borderColor: active ? colors.text.brand : colors.system.border,
                         }}
                       >
-                        <Text style={{ fontSize: 12, fontWeight: '600', color: active ? colors.text.brand : colors.text.tertiary }}>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.text.brand : colors.text.tertiary }}>
                           {TYPE_LABELS[t]}
                         </Text>
                       </TouchableOpacity>
@@ -201,25 +158,6 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
                 </View>
               </>
             )}
-
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>색상</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 28 }}>
-              {PRESET_COLORS.map((c) => (
-                <TouchableOpacity
-                  key={c}
-                  onPress={() => setColor(c)}
-                  style={{
-                    width: 36, height: 36, borderRadius: 18,
-                    backgroundColor: c,
-                    borderWidth: color === c ? 3 : 1.5,
-                    borderColor: color === c ? colors.text.primary : 'transparent',
-                    alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  {color === c && <Text style={{ fontSize: 14, color: '#fff' }}>✓</Text>}
-                </TouchableOpacity>
-              ))}
-            </View>
 
             <TouchableOpacity onPress={handleSave} disabled={isPending} activeOpacity={0.85}>
               <LinearGradient
@@ -262,15 +200,62 @@ export default function CategoriesScreen() {
       {
         text: '삭제', style: 'destructive',
         onPress: async () => {
-          try { await deleteCat(cat.id); }
-          catch { Alert.alert('오류', '삭제에 실패했어요.'); }
+          try {
+            await deleteCat(cat.id);
+            Alert.alert('완료', '카테고리가 삭제되었습니다.');
+          } catch {
+            Alert.alert('오류', '삭제에 실패했어요.');
+          }
         },
       },
     ]);
   }
 
-  const systemCats = categories.filter((c) => c.systemCategory);
-  const customCats = categories.filter((c) => !c.systemCategory);
+  const expenseCats = categories.filter((c) => c.type === 'EXPENSE');
+  const incomeCats = categories.filter((c) => c.type === 'INCOME');
+
+  function renderCategoryList(cats: Category[], label: string) {
+    if (cats.length === 0) return null;
+    return (
+      <>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.tertiary, marginBottom: 8 }}>
+          {label}
+        </Text>
+        <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', marginBottom: 20, ...shadow.card }}>
+          {cats.map((cat, idx) => (
+            <View key={cat.id} style={{
+              flexDirection: 'row', alignItems: 'center',
+              paddingHorizontal: 16, paddingVertical: 14,
+              borderBottomWidth: idx < cats.length - 1 ? 1 : 0,
+              borderBottomColor: colors.system.divider,
+            }}>
+              <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{cat.name}</Text>
+              {cat.systemCategory ? (
+                <Text style={{ fontSize: 13, color: colors.text.tertiary }}>기본</Text>
+              ) : (
+                <>
+                  <TouchableOpacity
+                    onPress={() => { setEditTarget(cat); setFormVisible(true); }}
+                    style={{ padding: 8 }}
+                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                  >
+                    <Text style={{ fontSize: 14, color: colors.text.brand }}>수정</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(cat)}
+                    style={{ padding: 8 }}
+                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                  >
+                    <Text style={{ fontSize: 14, color: colors.loss.text }}>삭제</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          ))}
+        </View>
+      </>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
@@ -293,69 +278,14 @@ export default function CategoriesScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 48 }}>
-          {systemCats.length > 0 && (
-            <>
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.tertiary, marginBottom: 8 }}>
-                기본 카테고리
-              </Text>
-              <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', marginBottom: 20, ...shadow.card }}>
-                {systemCats.map((cat, idx) => (
-                  <View key={cat.id} style={{
-                    flexDirection: 'row', alignItems: 'center',
-                    paddingHorizontal: 16, paddingVertical: 14,
-                    borderBottomWidth: idx < systemCats.length - 1 ? 1 : 0,
-                    borderBottomColor: colors.system.divider,
-                  }}>
-                    <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: cat.color, marginRight: 10 }} />
-                    <Text style={{ fontSize: 18, marginRight: 10 }}>{cat.emoji || catEmoji(cat.name)}</Text>
-                    <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{cat.name}</Text>
-                    <Text style={{ fontSize: 11, color: colors.text.tertiary, marginRight: 8 }}>{TYPE_LABELS[cat.type]}</Text>
-                    <Text style={{ fontSize: 16, color: colors.text.tertiary }}>🔒</Text>
-                  </View>
-                ))}
-              </View>
-            </>
-          )}
+          {renderCategoryList(expenseCats, '지출')}
+          {renderCategoryList(incomeCats, '수입')}
 
-          <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.tertiary, marginBottom: 8 }}>
-            내 카테고리
-          </Text>
-          {customCats.length === 0 ? (
+          {categories.length === 0 && (
             <View style={{ alignItems: 'center', paddingVertical: 32, gap: 8 }}>
-              <Text style={{ fontSize: 32 }}>🏷️</Text>
               <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center' }}>
                 아직 카테고리가 없어요.{'\n'}아래 버튼으로 추가해보세요.
               </Text>
-            </View>
-          ) : (
-            <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', marginBottom: 20, ...shadow.card }}>
-              {customCats.map((cat, idx) => (
-                <View key={cat.id} style={{
-                  flexDirection: 'row', alignItems: 'center',
-                  paddingHorizontal: 16, paddingVertical: 14,
-                  borderBottomWidth: idx < customCats.length - 1 ? 1 : 0,
-                  borderBottomColor: colors.system.divider,
-                }}>
-                  <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: cat.color, marginRight: 10 }} />
-                  <Text style={{ fontSize: 18, marginRight: 10 }}>{cat.emoji || catEmoji(cat.name)}</Text>
-                  <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{cat.name}</Text>
-                  <Text style={{ fontSize: 11, color: colors.text.tertiary, marginRight: 12 }}>{TYPE_LABELS[cat.type]}</Text>
-                  <TouchableOpacity
-                    onPress={() => { setEditTarget(cat); setFormVisible(true); }}
-                    style={{ padding: 6, marginRight: 4 }}
-                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                  >
-                    <Text style={{ fontSize: 16 }}>✏️</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleDelete(cat)}
-                    style={{ padding: 6 }}
-                    hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                  >
-                    <Text style={{ fontSize: 16 }}>🗑️</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
             </View>
           )}
 

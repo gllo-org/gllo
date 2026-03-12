@@ -34,20 +34,8 @@ const COUNTRIES: Country[] = [
   { label: '한국', flag: '🇰🇷', currency: 'KRW' },
 ];
 
-function getTemplates(purpose: Purpose, country: Country): string[] {
-  if (purpose === 'EXCHANGE_STUDENT') {
-    if (country.label === '독일') {
-      return ['비자 발급비', '초기 보증금 (Kaution)', '방송수신료 (Rundfunkbeitrag)', '항공권', '기숙사비'];
-    }
-    return ['비자 발급비', '항공권', '기숙사비', '학교 등록비', '보험료'];
-  }
-  if (purpose === 'WORKING_HOLIDAY') {
-    return ['비자 발급비', '항공권', '초기 생활비', '첫 달 주거비', '교통비'];
-  }
-  if (purpose === 'IMMIGRATION') {
-    return ['비자·영주권 비용', '항공권', '초기 보증금', '이사 비용', '생활 정착비'];
-  }
-  return ['항공권', '숙소비', '교통비', '식비', '여행 보험'];
+function getTemplates(): string[] {
+  return ['식비', '주거비', '쇼핑', '통신비', '교통비', '급여', '용돈'];
 }
 
 function ProgressDots({ current, total }: { current: number; total: number }) {
@@ -144,12 +132,12 @@ export default function OnboardingScreen() {
     try {
       await apiClient('/accounts', {
         method: 'POST',
-        body: JSON.stringify({ name: '한국 계좌', currency: 'KRW', initialBalance: 0 }),
+        body: JSON.stringify({ name: '한국 계좌', type: 'BANK', currency: 'KRW', initialBalance: 0 }),
       });
       if (country.currency !== 'KRW') {
         await apiClient('/accounts', {
           method: 'POST',
-          body: JSON.stringify({ name: `${country.label} 계좌`, currency: country.currency, initialBalance: 0 }),
+          body: JSON.stringify({ name: `${country.label} 계좌`, type: 'BANK', currency: country.currency, initialBalance: 0 }),
         });
       }
     } catch {
@@ -513,9 +501,7 @@ export default function OnboardingScreen() {
   }
 
   function renderStep4() {
-    const templates = selectedPurpose && selectedCountry
-      ? getTemplates(selectedPurpose, selectedCountry)
-      : [];
+    const templates = getTemplates();
     const purposeLabel = PURPOSES.find(p => p.value === selectedPurpose)?.label ?? '';
 
     return (

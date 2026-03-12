@@ -127,6 +127,7 @@ function CreateAccountSheet({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      Alert.alert('완료', '계좌가 추가되었습니다.');
     },
   });
 
@@ -382,8 +383,12 @@ export default function AccountsScreen() {
           text: '삭제',
           style: 'destructive',
           onPress: async () => {
-            try { await deleteAccount(account.id); }
-            catch { Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.'); }
+            try {
+              await deleteAccount(account.id);
+              Alert.alert('완료', '계좌가 삭제되었습니다.');
+            } catch {
+              Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
+            }
           },
         },
       ]
