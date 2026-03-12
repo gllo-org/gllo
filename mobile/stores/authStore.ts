@@ -35,13 +35,22 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   verifyOtp: async (email: string, token: string) => {
-    const { data, error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'email',
-    });
-    if (error) throw error;
-    set({ session: data.session, pendingEmail: null });
+    const otpTypes = ['email', 'signup'] as const;
+    let session = null;
+    let lastError: Error | null = null;
+
+    for (const type of otpTypes) {
+      const { data, error } = await supabase.auth.verifyOtp({ email, token, type });
+      if (!error) {
+        session = data.session;
+        break;
+      }
+      lastError = error as Error;
+      if ((error as { status?: number }).status !== 403) break;
+    }
+
+    if (!session) throw lastError ?? new Error('인증 실패');
+    set({ session, pendingEmail: null });
   },
 
   signOut: async () => {

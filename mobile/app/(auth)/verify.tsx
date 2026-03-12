@@ -56,32 +56,46 @@ export default function VerifyScreen() {
   }
 
   async function handleVerify() {
-    if (otp.length !== 6) return;
+    if (otp.length !== 6 || isLoading) return;
     setIsLoading(true);
     setPendingPinSetup(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email!,
-        token: otp,
-        type: 'email',
-      });
-      if (error) throw error;
+      const otpTypes = ['email', 'signup'] as const;
+      let session = null;
+      let lastError: Error | null = null;
 
-      const userId = data.session?.user?.id;
+      for (const type of otpTypes) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          email: email!,
+          token: otp,
+          type,
+        });
+        if (!error) {
+          session = data.session;
+          break;
+        }
+        lastError = error as Error;
+        if ((error as { status?: number }).status !== 403) break;
+      }
+
+      if (!session) throw lastError ?? new Error('인증 실패');
+
+      const userId = session.user?.id;
       if (!userId) throw new Error('사용자 정보 없음');
 
       if (await isPinRegistered(userId)) {
         await saveLastEmail(email!);
         setPendingPinSetup(false);
-        setSession(data.session);
+        setSession(session);
       } else {
         setPendingUserId(userId);
-        setSession(data.session);
+        setSession(session);
         setStep('pin-setup');
       }
-    } catch {
+    } catch (err: unknown) {
       setPendingPinSetup(false);
-      Alert.alert('인증 실패', '인증번호를 다시 확인해주세요.');
+      const msg = err instanceof Error ? err.message : String(err);
+      Alert.alert('인증 실패', msg || '인증번호를 다시 확인해주세요.');
       setOtp('');
       inputRef.current?.focus();
     } finally {
