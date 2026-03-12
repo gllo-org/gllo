@@ -112,8 +112,14 @@ export default function LoginScreen() {
     try {
       await sendOtp(email);
       router.push({ pathname: '/(auth)/verify', params: { email } });
-    } catch {
-      Alert.alert('오류', '글로가 이메일을 전송하지 못했어요. 잠시 후 다시 시도해주세요.');
+    } catch (err: unknown) {
+      const isRateLimit = (err as { status?: number })?.status === 429;
+      Alert.alert(
+        '전송 실패',
+        isRateLimit
+          ? '이메일 전송 한도를 초과했어요.\n잠시 후 다시 시도해주세요.'
+          : '글로가 이메일을 전송하지 못했어요. 잠시 후 다시 시도해주세요.',
+      );
     } finally {
       setIsLoading(false);
     }

@@ -44,9 +44,14 @@ export async function apiClient<T>(
     if (error instanceof ApiError && (error.code === 401 || error.code === 403)) {
       const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
       if (!refreshError && refreshed.session) {
-        return await doFetch<T>(endpoint, refreshed.session.access_token, options);
+        try {
+          return await doFetch<T>(endpoint, refreshed.session.access_token, options);
+        } catch {
+          await supabase.auth.signOut();
+        }
+      } else {
+        await supabase.auth.signOut();
       }
-      await supabase.auth.signOut();
     }
     throw error;
   }
