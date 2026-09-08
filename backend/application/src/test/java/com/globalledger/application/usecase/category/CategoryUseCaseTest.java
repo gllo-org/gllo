@@ -75,7 +75,7 @@ class CategoryUseCaseTest {
         // given
         Category customCategory = new Category(categoryId, userId, "교통비", CategoryType.EXPENSE,
                 false, "#FF5733", "🚇", LocalDateTime.now());
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(customCategory));
+        given(categoryRepository.findByIdAndUserId(categoryId, userId)).willReturn(Optional.of(customCategory));
 
         // when
         categoryUseCase.delete(userId, categoryId);
@@ -89,7 +89,7 @@ class CategoryUseCaseTest {
         // given
         Category systemCategory = new Category(categoryId, null, "식비", CategoryType.EXPENSE,
                 true, null, "🍜", LocalDateTime.now());
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(systemCategory));
+        given(categoryRepository.findByIdAndUserId(categoryId, userId)).willReturn(Optional.of(systemCategory));
 
         // when & then
         assertThatThrownBy(() -> categoryUseCase.delete(userId, categoryId))
@@ -103,7 +103,7 @@ class CategoryUseCaseTest {
     @Test
     void 존재하지_않는_카테고리_삭제_시_CATEGORY_NOT_FOUND_예외가_발생한다() {
         // given
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
+        given(categoryRepository.findByIdAndUserId(categoryId, userId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> categoryUseCase.delete(userId, categoryId))
@@ -115,19 +115,16 @@ class CategoryUseCaseTest {
     }
 
     @Test
-    void 다른_사용자의_카테고리_삭제_시_FORBIDDEN_예외가_발생한다() {
+    void 다른_사용자의_카테고리_삭제_시_CATEGORY_NOT_FOUND_예외가_발생한다() {
         // given
-        UUID anotherUserId = UUID.randomUUID();
-        Category otherUserCategory = new Category(categoryId, anotherUserId, "개인 카테고리",
-                CategoryType.EXPENSE, false, "#000000", null, LocalDateTime.now());
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(otherUserCategory));
+        given(categoryRepository.findByIdAndUserId(categoryId, userId)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> categoryUseCase.delete(userId, categoryId))
-                .isInstanceOf(BusinessException.class)
+                .isInstanceOf(NotFoundException.class)
                 .satisfies(ex -> {
-                    BusinessException be = (BusinessException) ex;
-                    assert be.getErrorCode() == ErrorCode.FORBIDDEN;
+                    NotFoundException ne = (NotFoundException) ex;
+                    assert ne.getErrorCode() == ErrorCode.CATEGORY_NOT_FOUND;
                 });
     }
 

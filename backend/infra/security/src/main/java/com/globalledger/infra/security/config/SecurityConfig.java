@@ -52,7 +52,9 @@ public class SecurityConfig {
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
                 "https://*.globalledger.app",
-                "https://gllo.onrender.com"
+                "https://gllo.onrender.com",
+                "https://gllo.org",
+                "https://*.gllo.org"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-User-Id"));

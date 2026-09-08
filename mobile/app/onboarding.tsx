@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -122,7 +123,7 @@ export default function OnboardingScreen() {
       await createDefaultAccounts(selectedCountry);
       setStep(4);
     } catch {
-      Alert.alert('오류', '글로가 정보를 저장하지 못했어요. 잠시 후 다시 시도해주세요.');
+      showAlert('오류', '글로가 정보를 저장하지 못했어요. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -141,7 +142,7 @@ export default function OnboardingScreen() {
         });
       }
     } catch {
-      Alert.alert('알림', '기본 계좌 생성에 실패했어요. 계좌 탭에서 직접 추가해주세요.');
+      showAlert('알림', '기본 계좌 생성에 실패했어요. 계좌 탭에서 직접 추가해주세요.');
     }
   }
 
@@ -506,6 +507,11 @@ export default function OnboardingScreen() {
 
     return (
       <View style={{ flex: 1, alignItems: 'center' }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1, width: '100%' }}
+          contentContainerStyle={{ alignItems: 'center' }}
+        >
         <LinearGradient
           colors={colors.gradient.light}
           start={{ x: 0, y: 0 }}
@@ -580,12 +586,11 @@ export default function OnboardingScreen() {
             </Text>
           </View>
         </View>
-
-        <View style={{ flex: 1 }} />
+        </ScrollView>
 
         <TouchableOpacity
           onPress={() => router.replace('/(tabs)')}
-          style={{ width: '100%' }}
+          style={{ width: '100%', marginTop: 16 }}
         >
           <LinearGradient
             colors={colors.gradient.primary}

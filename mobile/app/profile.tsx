@@ -4,12 +4,12 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  Alert,
   ScrollView,
   Platform,
   ActivityIndicator,
   Image,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -70,7 +70,7 @@ export default function ProfileScreen() {
     if (Platform.OS !== 'web') {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('권한 필요', '사진 라이브러리 접근 권한이 필요해요.');
+        showAlert('권한 필요', '사진 라이브러리 접근 권한이 필요해요.');
         return;
       }
     }
@@ -106,16 +106,16 @@ export default function ProfileScreen() {
         .getPublicUrl(path);
 
       await updateImage(publicUrl);
-      Alert.alert('완료', '프로필 사진이 업데이트됐어요 ✓');
+      showAlert('완료', '프로필 사진이 업데이트됐어요 ✓');
     } catch {
-      Alert.alert('오류', '글로가 사진을 업로드하지 못했어요. 다시 시도해볼까요?');
+      showAlert('오류', '글로가 사진을 업로드하지 못했어요. 다시 시도해볼까요?');
     } finally {
       setUploadingImage(false);
     }
   }
 
   function handleRemoveImage() {
-    Alert.alert('사진 제거', '프로필 사진을 제거할까요?', [
+    showAlert('사진 제거', '프로필 사진을 제거할까요?', [
       { text: '취소', style: 'cancel' },
       {
         text: '제거',
@@ -124,7 +124,7 @@ export default function ProfileScreen() {
           try {
             await removeImage();
           } catch {
-            Alert.alert('오류', '사진 제거에 실패했어요.');
+            showAlert('오류', '사진 제거에 실패했어요.');
           }
         },
       },
@@ -137,7 +137,7 @@ export default function ProfileScreen() {
     try {
       await updateName(trimmed);
     } catch {
-      Alert.alert('오류', '닉네임 변경에 실패했어요.');
+      showAlert('오류', '닉네임 변경에 실패했어요.');
     }
   }
 

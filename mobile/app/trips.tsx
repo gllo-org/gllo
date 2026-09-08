@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -82,7 +83,7 @@ function TripDetailSheet({
 
   function handleComplete() {
     if (!trip) return;
-    Alert.alert(
+    showAlert(
       '여행 완료',
       `"${trip.name}" 여행을 완료 처리할까요?`,
       [
@@ -93,9 +94,9 @@ function TripDetailSheet({
             try {
               await completeTrip(trip.id);
               closeSheet();
-              Alert.alert('완료', '여행이 완료 처리되었어요.');
+              showAlert('완료', '여행이 완료 처리되었어요.');
             } catch {
-              Alert.alert('오류', '처리에 실패했어요. 다시 시도해주세요.');
+              showAlert('오류', '처리에 실패했어요. 다시 시도해주세요.');
             }
           },
         },
@@ -105,7 +106,7 @@ function TripDetailSheet({
 
   function handleDelete() {
     if (!trip) return;
-    Alert.alert(
+    showAlert(
       '여행 삭제',
       `"${trip.name}" 여행을 삭제할까요?`,
       [
@@ -118,7 +119,7 @@ function TripDetailSheet({
               await deleteTrip(trip.id);
               closeSheet();
             } catch {
-              Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
+              showAlert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
             }
           },
         },
@@ -320,12 +321,12 @@ function TripFormSheet({
   }
 
   async function handleSave() {
-    if (!name.trim()) { Alert.alert('', '여행 이름을 입력해주세요.'); return; }
-    if (!validateDate(startDate)) { Alert.alert('', '시작일을 YYYY-MM-DD 형식으로 입력해주세요.'); return; }
-    if (!validateDate(endDate)) { Alert.alert('', '종료일을 YYYY-MM-DD 형식으로 입력해주세요.'); return; }
-    if (new Date(endDate) <= new Date(startDate)) { Alert.alert('', '종료일이 시작일보다 늦어야 해요.'); return; }
+    if (!name.trim()) { showAlert('', '여행 이름을 입력해주세요.'); return; }
+    if (!validateDate(startDate)) { showAlert('', '시작일을 YYYY-MM-DD 형식으로 입력해주세요.'); return; }
+    if (!validateDate(endDate)) { showAlert('', '종료일을 YYYY-MM-DD 형식으로 입력해주세요.'); return; }
+    if (new Date(endDate) <= new Date(startDate)) { showAlert('', '종료일이 시작일보다 늦어야 해요.'); return; }
     const budget = parseFloat(budgetStr);
-    if (!budget || budget <= 0) { Alert.alert('', '예산을 입력해주세요.'); return; }
+    if (!budget || budget <= 0) { showAlert('', '예산을 입력해주세요.'); return; }
 
     try {
       await saveTrip({
@@ -337,7 +338,7 @@ function TripFormSheet({
       });
       closeSheet();
     } catch {
-      Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '저장에 실패했어요. 다시 시도해주세요.');
     }
   }
 
@@ -464,7 +465,28 @@ function TripFormSheet({
   );
 }
 
+const TRIPS_ENABLED = false;
+
 export default function TripsScreen() {
+  if (!TRIPS_ENABLED) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: spacing.screenPadding }}>
+          <Text style={{ fontSize: 40 }}>✈️</Text>
+          <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            여행 기능은 준비 중이에요
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 20 }}>
+            더 나은 경험을 위해 다듬고 있어요.{'\n'}곧 만나볼 수 있어요!
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  return <TripsScreenImpl />;
+}
+
+function TripsScreenImpl() {
   const router = useRouter();
   const [formVisible, setFormVisible] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);

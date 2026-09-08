@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  ActivityIndicator, Alert, Platform,
+  ActivityIndicator, Platform,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -116,11 +117,11 @@ export default function ReportScreen() {
             dialogTitle: `글로 ${formatYearMonth(yearMonth)} 리포트`,
           });
         } else {
-          Alert.alert('다운로드 완료', `${fileUri}에 저장되었어요.`);
+          showAlert('다운로드 완료', `${fileUri}에 저장되었어요.`);
         }
       }
     } catch {
-      Alert.alert('오류', 'PDF 다운로드에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', 'PDF 다운로드에 실패했어요. 다시 시도해주세요.');
     } finally {
       setIsDownloading(false);
     }

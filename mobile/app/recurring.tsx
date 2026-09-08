@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -326,13 +327,13 @@ function RecurringFormSheet({
   const isPending = isCreating || isUpdating;
 
   async function handleSave() {
-    if (!name.trim()) { Alert.alert('', '규칙 이름을 입력해주세요.'); return; }
+    if (!name.trim()) { showAlert('', '규칙 이름을 입력해주세요.'); return; }
     const amount = parseFloat(amountStr);
-    if (!amount || amount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
-    if (!isEditMode && !selectedAccount) { Alert.alert('', '계좌를 선택해주세요.'); return; }
-    if (!selectedCategory) { Alert.alert('', '카테고리를 선택해주세요.'); return; }
+    if (!amount || amount <= 0) { showAlert('', '금액을 입력해주세요.'); return; }
+    if (!isEditMode && !selectedAccount) { showAlert('', '계좌를 선택해주세요.'); return; }
+    if (!selectedCategory) { showAlert('', '카테고리를 선택해주세요.'); return; }
     const day = parseInt(dayOfMonth, 10);
-    if (!day || day < 1 || day > 28) { Alert.alert('', '실행일은 1~28 사이로 입력해주세요.'); return; }
+    if (!day || day < 1 || day > 28) { showAlert('', '실행일은 1~28 사이로 입력해주세요.'); return; }
 
     try {
       if (isEditMode) {
@@ -360,9 +361,9 @@ function RecurringFormSheet({
         });
       }
       closeSheet();
-      Alert.alert('완료', isEditMode ? '고정 거래가 수정되었습니다.' : '고정 거래가 추가되었습니다.');
+      showAlert('완료', isEditMode ? '고정 거래가 수정되었습니다.' : '고정 거래가 추가되었습니다.');
     } catch {
-      Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '저장에 실패했어요. 다시 시도해주세요.');
     }
   }
 
@@ -592,7 +593,7 @@ export default function RecurringScreen() {
   });
 
   function handleExecute(rule: RecurringRule) {
-    Alert.alert(
+    showAlert(
       '즉시 실행',
       `"${rule.name}" 규칙을 지금 실행할까요?`,
       [
@@ -602,9 +603,9 @@ export default function RecurringScreen() {
           onPress: async () => {
             try {
               await executeRule(rule.id);
-              Alert.alert('완료', '거래가 등록되었어요.');
+              showAlert('완료', '거래가 등록되었어요.');
             } catch {
-              Alert.alert('오류', '실행에 실패했어요.');
+              showAlert('오류', '실행에 실패했어요.');
             }
           },
         },
@@ -613,7 +614,7 @@ export default function RecurringScreen() {
   }
 
   function handleDelete(rule: RecurringRule) {
-    Alert.alert(
+    showAlert(
       '삭제',
       `"${rule.name}"을(를) 삭제할까요?`,
       [
@@ -623,9 +624,9 @@ export default function RecurringScreen() {
           onPress: async () => {
             try {
               await deleteRule(rule.id);
-              Alert.alert('완료', '고정 거래가 삭제되었습니다.');
+              showAlert('완료', '고정 거래가 삭제되었습니다.');
             } catch {
-              Alert.alert('오류', '삭제에 실패했어요.');
+              showAlert('오류', '삭제에 실패했어요.');
             }
           },
         },
