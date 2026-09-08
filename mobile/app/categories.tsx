@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -79,7 +80,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
   });
 
   async function handleSave() {
-    if (!name.trim()) { Alert.alert('', '카테고리 이름을 입력해주세요.'); return; }
+    if (!name.trim()) { showAlert('', '카테고리 이름을 입력해주세요.'); return; }
     try {
       if (isEdit && editTarget) {
         await updateCat({ id: editTarget.id, body: { name: name.trim(), color: '#9CA3AF', emoji: null } });
@@ -87,9 +88,9 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
         await createCat({ name: name.trim(), type, color: '#9CA3AF', emoji: null });
       }
       closeSheet();
-      Alert.alert('완료', isEdit ? '카테고리가 수정되었습니다.' : '카테고리가 추가되었습니다.');
+      showAlert('완료', isEdit ? '카테고리가 수정되었습니다.' : '카테고리가 추가되었습니다.');
     } catch {
-      Alert.alert('오류', '저장에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '저장에 실패했어요. 다시 시도해주세요.');
     }
   }
 
@@ -195,16 +196,16 @@ export default function CategoriesScreen() {
   });
 
   function handleDelete(cat: Category) {
-    Alert.alert('카테고리 삭제', `"${cat.name}"을(를) 삭제할까요?`, [
+    showAlert('카테고리 삭제', `"${cat.name}"을(를) 삭제할까요?`, [
       { text: '취소', style: 'cancel' },
       {
         text: '삭제', style: 'destructive',
         onPress: async () => {
           try {
             await deleteCat(cat.id);
-            Alert.alert('완료', '카테고리가 삭제되었습니다.');
+            showAlert('완료', '카테고리가 삭제되었습니다.');
           } catch {
-            Alert.alert('오류', '삭제에 실패했어요.');
+            showAlert('오류', '삭제에 실패했어요.');
           }
         },
       },

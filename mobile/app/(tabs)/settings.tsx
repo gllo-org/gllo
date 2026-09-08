@@ -1,4 +1,5 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { colors, spacing, radius } from '@/theme';
@@ -46,7 +47,7 @@ export default function SettingsScreen() {
       }
       return;
     }
-    Alert.alert('로그아웃', '로그아웃 하시겠어요?', [
+    showAlert('로그아웃', '로그아웃 하시겠어요?', [
       { text: '취소', style: 'cancel' },
       {
         text: '로그아웃',

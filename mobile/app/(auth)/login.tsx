@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Animated,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -71,7 +72,7 @@ export default function LoginScreen() {
       await resetPinFailures();
       setSession(session);
     } else {
-      Alert.alert('세션 만료', 'PIN을 입력해 다시 로그인해주세요.');
+      showAlert('세션 만료', 'PIN을 입력해 다시 로그인해주세요.');
     }
   }
 
@@ -93,13 +94,13 @@ export default function LoginScreen() {
       shake();
       const failures = await incrementPinFailures();
       if (failures >= MAX_PIN_FAILURES) {
-        Alert.alert(
+        showAlert(
           'PIN 오류 5회',
           '보안을 위해 이메일 인증이 필요해요.',
           [{ text: '확인', onPress: () => { setMode('email'); setPinError(false); } }],
         );
       } else {
-        Alert.alert('PIN 오류', `${MAX_PIN_FAILURES - failures}회 더 실패하면 이메일 인증이 필요해요.`);
+        showAlert('PIN 오류', `${MAX_PIN_FAILURES - failures}회 더 실패하면 이메일 인증이 필요해요.`);
       }
     } finally {
       setIsLoading(false);
@@ -114,7 +115,7 @@ export default function LoginScreen() {
       router.push({ pathname: '/(auth)/verify', params: { email } });
     } catch (err: unknown) {
       const isRateLimit = (err as { status?: number })?.status === 429;
-      Alert.alert(
+      showAlert(
         '전송 실패',
         isRateLimit
           ? '이메일 전송 한도를 초과했어요.\n잠시 후 다시 시도해주세요.'

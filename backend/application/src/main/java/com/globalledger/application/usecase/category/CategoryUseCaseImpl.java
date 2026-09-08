@@ -49,15 +49,11 @@ public class CategoryUseCaseImpl implements CategoryPort {
 
     @Override
     public void delete(UUID userId, Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
+        Category category = categoryRepository.findByIdAndUserId(categoryId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CATEGORY_NOT_FOUND));
 
         if (category.systemCategory()) {
             throw new BusinessException(ErrorCode.SYSTEM_CATEGORY_CANNOT_DELETE);
-        }
-
-        if (category.userId() != null && !category.userId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "다른 사용자의 카테고리는 삭제할 수 없습니다.");
         }
 
         categoryRepository.deleteById(categoryId);

@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -127,7 +128,7 @@ function CreateAccountSheet({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      Alert.alert('완료', '계좌가 추가되었습니다.');
+      showAlert('완료', '계좌가 추가되었습니다.');
     },
   });
 
@@ -163,7 +164,7 @@ function CreateAccountSheet({
   async function handleCreate() {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert('', '계좌 이름을 입력해주세요.');
+      showAlert('', '계좌 이름을 입력해주세요.');
       return;
     }
     const balance = parseFloat(initialBalance) || 0;
@@ -176,7 +177,7 @@ function CreateAccountSheet({
       });
       closeSheet();
     } catch {
-      Alert.alert('오류', '계좌를 만들지 못했어요. 다시 시도해주세요.');
+      showAlert('오류', '계좌를 만들지 못했어요. 다시 시도해주세요.');
     }
   }
 
@@ -374,7 +375,7 @@ export default function AccountsScreen() {
   });
 
   function handleDelete(account: Account) {
-    Alert.alert(
+    showAlert(
       '계좌 삭제',
       `"${account.name}"을(를) 삭제할까요?\n계좌와 관련된 모든 데이터가 삭제돼요.`,
       [
@@ -385,9 +386,9 @@ export default function AccountsScreen() {
           onPress: async () => {
             try {
               await deleteAccount(account.id);
-              Alert.alert('완료', '계좌가 삭제되었습니다.');
+              showAlert('완료', '계좌가 삭제되었습니다.');
             } catch {
-              Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
+              showAlert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
             }
           },
         },

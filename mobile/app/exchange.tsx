@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -253,19 +254,19 @@ export default function ExchangeScreen() {
   async function handleSubmit() {
     const amount = parseFloat(amountStr);
     if (!fromAccount || !toAccount) {
-      Alert.alert('', '출금 계좌와 입금 계좌를 선택해주세요.');
+      showAlert('', '출금 계좌와 입금 계좌를 선택해주세요.');
       return;
     }
     if (!amount || amount <= 0) {
-      Alert.alert('', '환전 금액을 입력해주세요.');
+      showAlert('', '환전 금액을 입력해주세요.');
       return;
     }
     if (fromAccount.id === toAccount.id) {
-      Alert.alert('', '출금 계좌와 입금 계좌는 달라야 해요.');
+      showAlert('', '출금 계좌와 입금 계좌는 달라야 해요.');
       return;
     }
     if (amount > fromAccount.balance) {
-      Alert.alert('', '잔액이 부족해요.');
+      showAlert('', '잔액이 부족해요.');
       return;
     }
     try {
@@ -274,11 +275,11 @@ export default function ExchangeScreen() {
         toAccountId: toAccount.id,
         amount,
       });
-      Alert.alert('완료', '환전이 완료되었어요.', [
+      showAlert('완료', '환전이 완료되었어요.', [
         { text: '확인', onPress: () => router.back() },
       ]);
     } catch {
-      Alert.alert('오류', '환전에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '환전에 실패했어요. 다시 시도해주세요.');
     }
   }
 

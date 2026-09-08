@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -306,7 +307,7 @@ export default function TransactionDetailScreen() {
   async function handleSave() {
     const amount = parseFloat(editAmount);
     if (!amount || amount <= 0) {
-      Alert.alert('', '금액을 올바르게 입력해주세요.');
+      showAlert('', '금액을 올바르게 입력해주세요.');
       return;
     }
     try {
@@ -320,12 +321,12 @@ export default function TransactionDetailScreen() {
       });
       setIsEditing(false);
     } catch {
-      Alert.alert('오류', '수정에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '수정에 실패했어요. 다시 시도해주세요.');
     }
   }
 
   function handleDelete() {
-    Alert.alert(
+    showAlert(
       '거래 삭제',
       '이 거래를 삭제할까요? 계좌 잔액이 원래대로 돌아가요.',
       [
@@ -338,7 +339,7 @@ export default function TransactionDetailScreen() {
               await deleteTx();
               router.back();
             } catch {
-              Alert.alert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
+              showAlert('오류', '삭제에 실패했어요. 다시 시도해주세요.');
             }
           },
         },

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Animated,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Animated,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -95,7 +96,7 @@ export default function VerifyScreen() {
     } catch (err: unknown) {
       setPendingPinSetup(false);
       const msg = err instanceof Error ? err.message : String(err);
-      Alert.alert('인증 실패', msg || '인증번호를 다시 확인해주세요.');
+      showAlert('인증 실패', msg || '인증번호를 다시 확인해주세요.');
       setOtp('');
       inputRef.current?.focus();
     } finally {
@@ -125,7 +126,7 @@ export default function VerifyScreen() {
       setPendingPinSetup(false);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      Alert.alert('PIN 설정 실패', msg);
+      showAlert('PIN 설정 실패', msg);
     } finally {
       setIsLoading(false);
     }
@@ -137,10 +138,10 @@ export default function VerifyScreen() {
       await sendOtp(email);
       setSecondsLeft(OTP_EXPIRE_SECONDS);
       setOtp('');
-      Alert.alert('재전송 완료', '글로가 새 인증번호를 보냈어요.');
+      showAlert('재전송 완료', '글로가 새 인증번호를 보냈어요.');
     } catch (err: unknown) {
       const isRateLimit = (err as { status?: number })?.status === 429;
-      Alert.alert(
+      showAlert(
         '전송 실패',
         isRateLimit
           ? '이메일 전송 한도를 초과했어요.\n잠시 후 다시 시도해주세요.'

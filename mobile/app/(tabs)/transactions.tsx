@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatDate } from '@/lib/utils/date';
@@ -114,6 +114,7 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
 
 export default function TransactionsScreen() {
   const [sheetVisible, setSheetVisible] = useState(false);
+  const { accountId } = useLocalSearchParams<{ accountId?: string }>();
 
   const { data: exchangeRates = [] } = useQuery({
     queryKey: ['exchange-rates'],
@@ -123,9 +124,11 @@ export default function TransactionsScreen() {
   const krwRateMap = buildKrwRateMap(exchangeRates);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ['transactions'],
+    queryKey: ['transactions', accountId ?? null],
     queryFn: ({ pageParam = 0 }) =>
-      apiClient<TransactionPage>(`/transactions?page=${pageParam}&size=20`),
+      apiClient<TransactionPage>(
+        `/transactions?page=${pageParam}&size=20${accountId ? `&accountId=${accountId}` : ''}`
+      ),
     getNextPageParam: (last) => last.hasNext ? last.page + 1 : undefined,
     initialPageParam: 0,
   });

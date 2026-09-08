@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
 import {
   Modal, View, Text, TouchableOpacity, TextInput,
-  Animated, Easing, Dimensions, ScrollView, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, ScrollView, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -14,7 +15,7 @@ import type { CurrencyCode } from '@/theme';
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.92;
 
-type TxType = 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'EXCHANGE';
+type TxType = 'EXPENSE' | 'INCOME' | 'EXCHANGE';
 type SheetView = 'main' | 'category' | 'account';
 
 interface Category {
@@ -46,7 +47,6 @@ interface Props {
 const TYPE_CONFIG: Record<TxType, { label: string; color: string; prefix: string }> = {
   EXPENSE:  { label: '지출',   color: colors.loss.text,   prefix: '-' },
   INCOME:   { label: '수입',   color: colors.profit.text, prefix: '+' },
-  TRANSFER: { label: '이체',   color: colors.text.brand,  prefix: '' },
   EXCHANGE: { label: '환전',   color: colors.currency.EUR.text, prefix: '⇄' },
 };
 
@@ -161,6 +161,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
   const [editingKrw, setEditingKrw]   = useState(false);
   const [newCatName, setNewCatName]   = useState('');
   const [addingCat, setAddingCat]     = useState(false);
+  const [currencyTouched, setCurrencyTouched] = useState(false);
 
   const { data: categories, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
@@ -271,6 +272,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
     setKrwOverride(null);
     setEditingKrw(false);
     setNewCatName('');
+    setCurrencyTouched(false);
     setAddingCat(false);
   }
 
@@ -298,9 +300,9 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
   async function handleSave() {
     const numAmount = parseFloat(amountStr);
-    if (numAmount <= 0) { Alert.alert('', '금액을 입력해주세요.'); return; }
-    if (!categoryId)  { Alert.alert('', '카테고리를 선택해주세요.'); return; }
-    if (!accountId)   { Alert.alert('', '계좌를 선택해주세요.'); return; }
+    if (numAmount <= 0) { showAlert('', '금액을 입력해주세요.'); return; }
+    if (!categoryId)  { showAlert('', '카테고리를 선택해주세요.'); return; }
+    if (!accountId)   { showAlert('', '계좌를 선택해주세요.'); return; }
     const krwAmount = krwDisplayStr ? parseInt(krwDisplayStr.replace(/,/g, '')) : null;
     try {
       await save({
@@ -315,9 +317,9 @@ export function TransactionSheet({ visible, onClose }: Props) {
         ...(krwAmount !== null ? { customConvertedAmount: krwAmount } : {}),
       });
       closeSheet();
-      Alert.alert('완료', '거래가 추가되었습니다.');
+      showAlert('완료', '거래가 추가되었습니다.');
     } catch {
-      Alert.alert('오류', '거래를 저장하지 못했어요. 다시 시도해주세요.');
+      showAlert('오류', '거래를 저장하지 못했어요. 다시 시도해주세요.');
     }
   }
 
@@ -330,7 +332,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
   function pickAccount(acc: Account) {
     setAccountId(acc.id);
     setAccountLbl(`${CURRENCY_FLAGS[acc.currency]} ${acc.name}`);
-    setCurrency(acc.currency);
+    if (!currencyTouched) setCurrency(acc.currency);
     setView('main');
   }
 
@@ -340,7 +342,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
     try {
       await createCategory(name);
     } catch {
-      Alert.alert('오류', '카테고리를 추가하지 못했어요.');
+      showAlert('오류', '카테고리를 추가하지 못했어요.');
     }
   }
 
@@ -416,7 +418,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 padding: 3,
                 marginBottom: 10,
               }}>
-                {(['EXPENSE', 'INCOME', 'TRANSFER', 'EXCHANGE'] as TxType[]).map((t) => {
+                {(['EXPENSE', 'INCOME', 'EXCHANGE'] as TxType[]).map((t) => {
                   const active = txType === t;
                   return (
                     <TouchableOpacity
@@ -461,7 +463,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   return (
                     <TouchableOpacity
                       key={c}
-                      onPress={() => setCurrency(c)}
+                      onPress={() => { setCurrency(c); setCurrencyTouched(true); }}
                       style={{
                         flex: 1, paddingVertical: 7,
                         borderRadius: radius.chip,

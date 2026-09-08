@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity, DimensionValue, Alert } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, DimensionValue } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -71,33 +72,24 @@ export default function DashboardScreen() {
     },
   });
 
-  function handleAccountActions(account: Account) {
-    Alert.alert(account.name, undefined, [
+  function openAccountTransactions(account: Account) {
+    router.push(`/(tabs)/transactions?accountId=${account.id}`);
+  }
+
+  function confirmDeleteAccount(account: Account) {
+    showAlert('계좌 삭제', `"${account.name}"을(를) 삭제할까요?\n관련 거래 내역도 함께 삭제돼요.`, [
+      { text: '취소', style: 'cancel' },
       {
-        text: '거래 내역 보기',
-        onPress: () => router.push('/(tabs)/transactions'),
-      },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: () => {
-          Alert.alert('계좌 삭제', `"${account.name}"을(를) 삭제할까요?\n관련 거래 내역도 함께 삭제돼요.`, [
-            { text: '취소', style: 'cancel' },
-            {
-              text: '삭제', style: 'destructive',
-              onPress: async () => {
-                try {
-                  await deleteAccount(account.id);
-                  Alert.alert('완료', '계좌가 삭제되었습니다.');
-                } catch {
-                  Alert.alert('오류', '삭제에 실패했어요.');
-                }
-              },
-            },
-          ]);
+        text: '삭제', style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteAccount(account.id);
+            showAlert('완료', '계좌가 삭제되었습니다.');
+          } catch {
+            showAlert('오류', '삭제에 실패했어요.');
+          }
         },
       },
-      { text: '취소', style: 'cancel' },
     ]);
   }
 
@@ -148,23 +140,32 @@ export default function DashboardScreen() {
                   return (
                     <TouchableOpacity
                       key={account.id}
-                      onPress={() => handleAccountActions(account)}
+                      onPress={() => openAccountTransactions(account)}
+                      onLongPress={() => confirmDeleteAccount(account)}
                       activeOpacity={0.85}
                     >
                       <View style={{
                         backgroundColor: currencyColor.bg,
                         borderRadius: radius.card,
                         padding: spacing.cardPadding,
-                        minWidth: 160,
+                        width: 160,
                         ...shadow.card,
                       }}>
                         <Text style={{ fontSize: 20, marginBottom: 4 }}>
                           {CURRENCY_FLAGS[account.currency]}
                         </Text>
-                        <Text style={{ ...typography.label, color: currencyColor.text, marginBottom: 8 }}>
+                        <Text
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          style={{ ...typography.label, color: currencyColor.text, marginBottom: 8 }}
+                        >
                           {account.name}
                         </Text>
-                        <Text style={{ ...typography.amount.medium, color: colors.text.primary }}>
+                        <Text
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          style={{ ...typography.amount.medium, color: colors.text.primary }}
+                        >
                           {formatCurrency(account.balance, account.currency)}
                         </Text>
                         {!!account.averageRate && (

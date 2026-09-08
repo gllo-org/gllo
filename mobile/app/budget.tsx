@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, TextInput,
-  Animated, Easing, Dimensions, Modal, ActivityIndicator, Alert,
+  Animated, Easing, Dimensions, Modal, ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -195,14 +196,14 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
   async function handleSave() {
     const amount = parseFloat(amountStr);
     if (!amount || amount <= 0) {
-      Alert.alert('', '예산 금액을 입력해주세요.');
+      showAlert('', '예산 금액을 입력해주세요.');
       return;
     }
     try {
       await saveBudget({ yearMonth, amount, currency });
       closeSheet();
     } catch {
-      Alert.alert('오류', '예산 설정에 실패했어요. 다시 시도해주세요.');
+      showAlert('오류', '예산 설정에 실패했어요. 다시 시도해주세요.');
     }
   }
 

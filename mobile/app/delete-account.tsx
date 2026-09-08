@@ -3,10 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Alert,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
@@ -25,7 +25,7 @@ export default function DeleteAccountScreen() {
   const [deleting, setDeleting] = useState(false);
 
   function handleDeletePress() {
-    Alert.alert(
+    showAlert(
       '정말 탈퇴하시겠어요?',
       '탈퇴 후 30일 이내 재로그인하면 계정을 복구할 수 있어요.',
       [
@@ -42,7 +42,7 @@ export default function DeleteAccountScreen() {
       await signOut();
     } catch {
       setDeleting(false);
-      Alert.alert('오류', '글로가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
+      showAlert('오류', '글로가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
