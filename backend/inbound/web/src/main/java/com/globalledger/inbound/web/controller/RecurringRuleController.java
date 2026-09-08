@@ -1,7 +1,9 @@
 package com.globalledger.inbound.web.controller;
 
+import com.globalledger.domain.model.Category;
 import com.globalledger.domain.model.RecurringRule;
 import com.globalledger.domain.model.Transaction;
+import com.globalledger.domain.port.input.CategoryPort;
 import com.globalledger.domain.port.input.RecurringRulePort;
 import com.globalledger.inbound.web.dto.request.CreateRecurringRuleRequest;
 import com.globalledger.inbound.web.dto.request.ExecuteBatchRequest;
@@ -18,7 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Tag(name = "고정 지출/수익 API")
 @RestController
@@ -27,6 +31,7 @@ import java.util.UUID;
 public class RecurringRuleController {
 
     private final RecurringRulePort recurringRuleUseCase;
+    private final CategoryPort categoryUseCase;
 
     @Operation(summary = "고정 규칙 생성", description = "새로운 고정 지출/수익 규칙을 생성합니다.")
     @PostMapping
@@ -126,7 +131,9 @@ public class RecurringRuleController {
 
         UUID userId = UUID.fromString(authentication.getName());
         Transaction transaction = recurringRuleUseCase.executeNow(userId, id);
-        return ResponseEntity.ok(ApiResponse.success("고정 규칙이 실행되었습니다.", TransactionResponse.from(transaction)));
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
+        return ResponseEntity.ok(ApiResponse.success("고정 규칙이 실행되었습니다.",
+                TransactionResponse.from(transaction, categoryNameMap.get(transaction.categoryId()))));
     }
 
     @Operation(summary = "고정 규칙 일괄 실행", description = "여러 고정 규칙을 한 번에 실행하여 오늘 날짜로 거래 내역들을 생성합니다.")
@@ -136,11 +143,18 @@ public class RecurringRuleController {
             @Valid @RequestBody ExecuteBatchRequest request) {
 
         UUID userId = UUID.fromString(authentication.getName());
+        Map<Long, String> categoryNameMap = buildCategoryNameMap(userId);
         List<TransactionResponse> transactions = recurringRuleUseCase.executeBatch(userId, request.ruleIds()).stream()
-                .map(TransactionResponse::from)
+                .map(tx -> TransactionResponse.from(tx, categoryNameMap.get(tx.categoryId())))
                 .toList();
 
         return ResponseEntity.ok(ApiResponse.success("고정 규칙들이 실행되었습니다.", transactions));
+    }
+
+    private Map<Long, String> buildCategoryNameMap(UUID userId) {
+        List<Category> categories = categoryUseCase.getList(userId);
+        return categories.stream()
+                .collect(Collectors.toMap(Category::id, Category::name));
     }
 
     @Operation(summary = "고정 규칙 활성화/비활성화 토글", description = "특정 고정 규칙의 활성화 상태를 토글합니다. 비활성화된 규칙은 스케줄러가 실행하지 않습니다.")
