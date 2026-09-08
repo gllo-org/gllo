@@ -31,6 +31,11 @@ public record Account(
                 this.balance.subtract(amount), averageRate, createdAt);
     }
 
+    public Account credit(BigDecimal amount) {
+        return new Account(id, userId, name, type, currency,
+                this.balance.add(amount), averageRate, createdAt);
+    }
+
     private BigDecimal computeNewAverageRate(BigDecimal newAmount, BigDecimal newRate, BigDecimal newBalance) {
         if (newBalance.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;

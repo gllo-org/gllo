@@ -17,8 +17,11 @@ public record UnrealizedPnl(
     public static UnrealizedPnl calculate(Long accountId, String accountName, Currency currency,
                                            BigDecimal balance, BigDecimal averageRate,
                                            BigDecimal currentRate) {
-        BigDecimal pnl = balance.multiply(currentRate.subtract(averageRate));
-        BigDecimal pnlPercentage = averageRate.compareTo(BigDecimal.ZERO) == 0
+        boolean noCostBasis = averageRate.compareTo(BigDecimal.ZERO) == 0;
+        BigDecimal pnl = noCostBasis
+                ? BigDecimal.ZERO
+                : balance.multiply(currentRate.subtract(averageRate));
+        BigDecimal pnlPercentage = noCostBasis
                 ? BigDecimal.ZERO
                 : currentRate.subtract(averageRate)
                 .divide(averageRate, 4, java.math.RoundingMode.HALF_UP)

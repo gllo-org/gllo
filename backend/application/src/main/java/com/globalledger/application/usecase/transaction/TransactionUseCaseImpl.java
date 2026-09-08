@@ -45,7 +45,7 @@ public class TransactionUseCaseImpl implements TransactionPort {
                 categoryId, tripId, transactionDate, note, systemExchangeRate,
                 customExchangeRate, customConvertedAmount);
 
-        Account updatedAccount = updateAccountBalance(account, type, amount, BigDecimal.ONE);
+        Account updatedAccount = updateAccountBalance(account, type, amount);
         accountRepository.save(updatedAccount);
 
         return transactionRepository.save(transaction);
@@ -92,7 +92,7 @@ public class TransactionUseCaseImpl implements TransactionPort {
                 existingTransaction.createdAt()
         );
 
-        Account newUpdatedAccount = updateAccountBalance(restoredAccount, updatedTransaction.type(), updatedAmount, BigDecimal.ONE);
+        Account newUpdatedAccount = updateAccountBalance(restoredAccount, updatedTransaction.type(), updatedAmount);
         accountRepository.save(newUpdatedAccount);
 
         return transactionRepository.save(updatedTransaction);
@@ -132,9 +132,9 @@ public class TransactionUseCaseImpl implements TransactionPort {
         transactionRepository.deleteById(transactionId);
     }
 
-    private Account updateAccountBalance(Account account, TransactionType type, BigDecimal amount, BigDecimal rate) {
+    private Account updateAccountBalance(Account account, TransactionType type, BigDecimal amount) {
         return switch (type) {
-            case INCOME -> account.deposit(amount, rate);
+            case INCOME -> account.credit(amount);
             case EXPENSE -> account.withdraw(amount);
             case TRANSFER, EXCHANGE -> account;
         };
@@ -143,7 +143,7 @@ public class TransactionUseCaseImpl implements TransactionPort {
     private Account restoreAccountBalance(Account account, TransactionType type, BigDecimal amount) {
         return switch (type) {
             case INCOME -> account.withdraw(amount);
-            case EXPENSE -> account.deposit(amount, BigDecimal.ONE);
+            case EXPENSE -> account.credit(amount);
             case TRANSFER, EXCHANGE -> account;
         };
     }
