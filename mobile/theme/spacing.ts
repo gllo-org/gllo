@@ -6,26 +6,26 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  card:   20,
-  chip:   12,
-  button: 14,
+  card:   16,
+  chip:   10,
+  button: 12,
   input:  12,
-  bottom: 28,
-  pill:   50,
+  bottom: 24,
+  pill:   999,
 } as const;
 
 export const shadow = {
   card: {
-    shadowColor:   '#C4B5F8',
-    shadowOffset:  { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius:  16,
-    elevation:     4,
+    shadowColor:   '#0F172A',
+    shadowOffset:  { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius:  12,
+    elevation:     3,
   },
   float: {
-    shadowColor:   '#9B7CF8',
+    shadowColor:   '#0F172A',
     shadowOffset:  { width: 0, height: 8 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.16,
     shadowRadius:  20,
     elevation:     8,
   },

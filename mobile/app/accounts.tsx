@@ -11,8 +11,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
+import { Flag, type FlagCode } from '@/components/ui/Flag';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { ArrowLeft, X, Trash2, ArrowRightLeft, Landmark, Plus, TrendingUp, TrendingDown } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.6;
@@ -28,11 +30,11 @@ interface Account {
   pnlRate: number | null;
 }
 
-const CURRENCIES: { code: CurrencyCode; flag: string; label: string }[] = [
-  { code: 'EUR', flag: '🇪🇺', label: '유로' },
-  { code: 'USD', flag: '🇺🇸', label: '달러' },
-  { code: 'GBP', flag: '🇬🇧', label: '파운드' },
-  { code: 'KRW', flag: '🇰🇷', label: '원화' },
+const CURRENCIES: { code: CurrencyCode; flag: FlagCode; label: string }[] = [
+  { code: 'EUR', flag: 'EU', label: '유로' },
+  { code: 'USD', flag: 'US', label: '달러' },
+  { code: 'GBP', flag: 'GB', label: '파운드' },
+  { code: 'KRW', flag: 'KR', label: '원화' },
 ];
 
 const ACCOUNT_TYPES = [
@@ -42,6 +44,7 @@ const ACCOUNT_TYPES = [
 ];
 
 function AccountCard({ account, onDelete }: { account: Account; onDelete: () => void }) {
+  const { colors } = useTheme();
   const cc = colors.currency[account.currency];
   const isPositive = (account.pnlRate ?? 0) >= 0;
 
@@ -54,9 +57,9 @@ function AccountCard({ account, onDelete }: { account: Account; onDelete: () => 
       ...shadow.card,
     }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-        <Text style={{ fontSize: 26, marginRight: 10 }}>{CURRENCY_FLAGS[account.currency]}</Text>
+        <View style={{ marginRight: 10 }}><Flag code={CURRENCY_FLAGS[account.currency]} size={30} /></View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>
+          <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
             {account.name}
           </Text>
           <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 1 }}>
@@ -69,14 +72,14 @@ function AccountCard({ account, onDelete }: { account: Account; onDelete: () => 
           backgroundColor: cc.primary + '20',
           marginRight: 8,
         }}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: cc.text }}>{account.currency}</Text>
+          <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: cc.text }}>{account.currency}</Text>
         </View>
         <TouchableOpacity
           onPress={onDelete}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={{ padding: 4 }}
         >
-          <Text style={{ fontSize: 16, color: colors.text.tertiary }}>🗑️</Text>
+          <Trash2 size={17} color={colors.text.tertiary} strokeWidth={2} />
         </TouchableOpacity>
       </View>
 
@@ -92,12 +95,17 @@ function AccountCard({ account, onDelete }: { account: Account; onDelete: () => 
 
       {account.pnlRate !== null && !isNaN(account.pnlRate) && account.unrealizedPnl !== null && (
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 6 }}>
-          <Text style={{
-            fontSize: 13, fontWeight: '600',
-            color: isPositive ? colors.profit.text : colors.loss.text,
-          }}>
-            {isPositive ? '▲' : '▼'} {Math.abs(account.pnlRate).toFixed(2)}%
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+            {isPositive
+              ? <TrendingUp size={13} color={colors.profit.text} strokeWidth={2.4} />
+              : <TrendingDown size={13} color={colors.loss.text} strokeWidth={2.4} />}
+            <Text style={{
+              fontSize: 13, fontFamily: 'Pretendard-SemiBold',
+              color: isPositive ? colors.profit.text : colors.loss.text,
+            }}>
+              {Math.abs(account.pnlRate).toFixed(2)}%
+            </Text>
+          </View>
           <Text style={{ fontSize: 12, color: colors.text.secondary }}>
             ({isPositive ? '+' : ''}{formatCurrency(account.unrealizedPnl, 'KRW')})
           </Text>
@@ -114,6 +122,7 @@ function CreateAccountSheet({
   visible: boolean;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
 
@@ -206,11 +215,11 @@ function CreateAccountSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               새 계좌 추가
             </Text>
             <TouchableOpacity onPress={closeSheet} style={{ padding: 6 }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary, lineHeight: 26 }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
@@ -220,7 +229,7 @@ function CreateAccountSheet({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 6, fontWeight: '500' }}>
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 6, fontFamily: 'Pretendard-Medium' }}>
               계좌 이름
             </Text>
             <TextInput
@@ -242,7 +251,7 @@ function CreateAccountSheet({
               }}
             />
 
-            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontWeight: '500' }}>
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontFamily: 'Pretendard-Medium' }}>
               통화 선택
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -262,8 +271,8 @@ function CreateAccountSheet({
                       borderColor: active ? cc.primary : colors.system.border,
                     }}
                   >
-                    <Text style={{ fontSize: 16, marginBottom: 2 }}>{c.flag}</Text>
-                    <Text style={{ fontSize: 11, fontWeight: '600', color: active ? cc.text : colors.text.tertiary }}>
+                    <View style={{ marginBottom: 4 }}><Flag code={c.flag} size={20} /></View>
+                    <Text style={{ fontSize: 11, fontFamily: 'Pretendard-SemiBold', color: active ? cc.text : colors.text.tertiary }}>
                       {c.code}
                     </Text>
                   </TouchableOpacity>
@@ -271,7 +280,7 @@ function CreateAccountSheet({
               })}
             </View>
 
-            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontWeight: '500' }}>
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontFamily: 'Pretendard-Medium' }}>
               계좌 종류
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -284,13 +293,13 @@ function CreateAccountSheet({
                     style={{
                       flex: 1, paddingVertical: 10,
                       borderRadius: radius.chip,
-                      backgroundColor: active ? colors.gradient.primary[0] + '20' : colors.bg.surface,
+                      backgroundColor: active ? colors.accent.light : colors.bg.surface,
                       alignItems: 'center',
                       borderWidth: active ? 1.5 : 1,
                       borderColor: active ? colors.text.brand : colors.system.border,
                     }}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: active ? '600' : '400', color: active ? colors.text.brand : colors.text.secondary }}>
+                    <Text style={{ fontSize: 13, fontFamily: active ? 'Pretendard-SemiBold' : 'Pretendard-Regular', color: active ? colors.text.brand : colors.text.secondary }}>
                       {t.label}
                     </Text>
                   </TouchableOpacity>
@@ -298,7 +307,7 @@ function CreateAccountSheet({
               })}
             </View>
 
-            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 6, fontWeight: '500' }}>
+            <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 6, fontFamily: 'Pretendard-Medium' }}>
               초기 잔액 (선택)
             </Text>
             <TextInput
@@ -334,20 +343,18 @@ function CreateAccountSheet({
               onPress={handleCreate}
               disabled={!name.trim() || isPending}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              style={{
+                backgroundColor: name.trim() && !isPending ? colors.accent.primary : colors.bg.input,
+                borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+              }}
             >
-              <LinearGradient
-                colors={name.trim() && !isPending ? colors.gradient.primary : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-              >
-                {isPending
-                  ? <ActivityIndicator color={colors.text.inverse} />
-                  : <Text style={{ fontSize: 16, fontWeight: '600', color: name.trim() ? colors.text.inverse : colors.text.tertiary }}>
-                      계좌 만들기
-                    </Text>
-                }
-              </LinearGradient>
+              {isPending
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: name.trim() ? colors.text.inverse : colors.text.tertiary }}>
+                    계좌 만들기
+                  </Text>
+              }
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -357,6 +364,7 @@ function CreateAccountSheet({
 }
 
 export default function AccountsScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [createVisible, setCreateVisible] = useState(false);
@@ -403,16 +411,16 @@ export default function AccountsScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           계좌 관리
         </Text>
         <TouchableOpacity
           onPress={() => setCreateVisible(true)}
           style={{ padding: 8, marginRight: -8 }}
         >
-          <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.brand }}>+ 추가</Text>
+          <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>+ 추가</Text>
         </TouchableOpacity>
       </View>
 
@@ -430,8 +438,8 @@ export default function AccountsScreen() {
           gap: 6,
         }}
       >
-        <Text style={{ fontSize: 15 }}>⇄</Text>
-        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>환전 기록</Text>
+        <ArrowRightLeft size={16} color={colors.accent.primary} strokeWidth={2} />
+        <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>환전 기록</Text>
       </TouchableOpacity>
 
       <ScrollView
@@ -470,37 +478,38 @@ export default function AccountsScreen() {
                 marginTop: 4,
               }}
             >
-              <Text style={{ fontSize: 22, marginBottom: 6 }}>+</Text>
+              <View style={{ marginBottom: 6 }}><Plus size={22} color={colors.text.secondary} strokeWidth={2.2} /></View>
               <Text style={{ fontSize: 14, color: colors.text.secondary }}>새 계좌 추가</Text>
             </TouchableOpacity>
           </>
         ) : (
           <View style={{ alignItems: 'center', paddingTop: 80, gap: 16 }}>
             <LinearGradient
-              colors={colors.gradient.light}
+              colors={colors.gradient.hero}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{ width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Text style={{ fontSize: 36 }}>🏦</Text>
+              <Landmark size={36} color={colors.text.tertiary} strokeWidth={1.6} />
             </LinearGradient>
-            <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ fontSize: 18, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               아직 계좌가 없어요
             </Text>
             <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-              글로와 함께 첫 계좌를 만들어볼까요?{'\n'}통화별로 자산을 관리할 수 있어요.
+              GLLO와 함께 첫 계좌를 만들어볼까요?{'\n'}통화별로 자산을 관리할 수 있어요.
             </Text>
-            <TouchableOpacity onPress={() => setCreateVisible(true)} style={{ marginTop: 8 }}>
-              <LinearGradient
-                colors={colors.gradient.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ borderRadius: radius.button, paddingVertical: 14, paddingHorizontal: 32 }}
-              >
-                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                  첫 계좌 만들기
-                </Text>
-              </LinearGradient>
+            <TouchableOpacity
+              onPress={() => setCreateVisible(true)}
+              accessibilityRole="button"
+              style={{
+                marginTop: 8,
+                backgroundColor: colors.accent.primary,
+                borderRadius: radius.button, paddingVertical: 14, paddingHorizontal: 32,
+              }}
+            >
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+                첫 계좌 만들기
+              </Text>
             </TouchableOpacity>
           </View>
         )}

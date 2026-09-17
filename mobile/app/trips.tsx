@@ -10,8 +10,10 @@ import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow } from '@/theme';
+import { Flag } from '@/components/ui/Flag';
+import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { ArrowLeft, X, Plane, Plus } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.85;
@@ -46,6 +48,7 @@ function TripDetailSheet({
   onClose: () => void;
   onEdit: (trip: Trip) => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(DETAIL_H)).current;
   const queryClient = useQueryClient();
 
@@ -160,7 +163,7 @@ function TripDetailSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 14,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               여행 상세
             </Text>
             <TouchableOpacity
@@ -168,30 +171,30 @@ function TripDetailSheet({
               style={{ marginRight: 16 }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>수정</Text>
+              <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>수정</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleDelete}
               style={{ marginRight: 16 }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.loss.text }}>삭제</Text>
+              <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.loss.text }}>삭제</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={closeSheet} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
           <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 32 }}>
             <LinearGradient
-              colors={colors.gradient.light}
+              colors={colors.gradient.hero}
               start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
               style={{ borderRadius: radius.card, padding: 20, marginBottom: 16 }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <Text style={{ fontSize: 32 }}>✈️</Text>
+                <Plane size={32} color={colors.accent.primary} strokeWidth={1.7} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text.primary }}>
+                  <Text style={{ fontSize: 18, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
                     {trip.name}
                   </Text>
                   <View style={{
@@ -202,7 +205,7 @@ function TripDetailSheet({
                     backgroundColor: trip.active ? colors.status.normal + '22' : colors.neutral.bg,
                   }}>
                     <Text style={{
-                      fontSize: 11, fontWeight: '600',
+                      fontSize: 11, fontFamily: 'Pretendard-SemiBold',
                       color: trip.active ? colors.status.normal : colors.neutral.text,
                     }}>
                       {trip.active ? '진행 중' : '완료'}
@@ -214,13 +217,13 @@ function TripDetailSheet({
               <View style={{ gap: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: colors.text.secondary }}>기간</Text>
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.primary }}>
+                  <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                     {formatDate(trip.startDate)} ~ {formatDate(trip.endDate)}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: colors.text.secondary }}>총 기간</Text>
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.primary }}>
+                  <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                     {totalDays}일
                   </Text>
                 </View>
@@ -228,7 +231,7 @@ function TripDetailSheet({
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={{ fontSize: 13, color: colors.text.secondary }}>남은 날</Text>
                     <Text style={{
-                      fontSize: 13, fontWeight: '600',
+                      fontSize: 13, fontFamily: 'Pretendard-SemiBold',
                       color: daysLeft < 7 ? colors.status.warning : colors.text.primary,
                     }}>
                       {daysLeft}일
@@ -238,25 +241,31 @@ function TripDetailSheet({
                 <View style={{ height: 1, backgroundColor: colors.system.divider }} />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text style={{ fontSize: 13, color: colors.text.secondary }}>예산</Text>
-                  <Text style={{ fontSize: 15, fontWeight: '700', color: cc.text }}>
-                    {CURRENCY_FLAGS[trip.budgetCurrency]} {formatCurrency(trip.budget, trip.budgetCurrency)}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Flag code={CURRENCY_FLAGS[trip.budgetCurrency]} size={20} />
+                    <Text style={{ fontSize: 15, fontFamily: 'Pretendard-Bold', color: cc.text }}>
+                      {formatCurrency(trip.budget, trip.budgetCurrency)}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </LinearGradient>
 
             {trip.active && (
-              <TouchableOpacity onPress={handleComplete} disabled={isPending} activeOpacity={0.85}>
-                <LinearGradient
-                  colors={isPending ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                  style={{ borderRadius: radius.button, paddingVertical: 14, alignItems: 'center' }}
-                >
-                  {isPending
-                    ? <ActivityIndicator color={colors.text.inverse} />
-                    : <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>여행 완료 처리</Text>
-                  }
-                </LinearGradient>
+              <TouchableOpacity
+                onPress={handleComplete}
+                disabled={isPending}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                style={{
+                  backgroundColor: isPending ? colors.bg.input : colors.accent.primary,
+                  borderRadius: radius.button, paddingVertical: 14, alignItems: 'center',
+                }}
+              >
+                {isPending
+                  ? <ActivityIndicator color={colors.text.inverse} />
+                  : <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>여행 완료 처리</Text>
+                }
               </TouchableOpacity>
             )}
           </ScrollView>
@@ -275,6 +284,7 @@ function TripFormSheet({
   editTrip?: Trip | null;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
 
@@ -362,11 +372,11 @@ function TripFormSheet({
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
+            <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 20 }}>
               {editTrip ? '여행 수정' : '새 여행 추가'}
             </Text>
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>여행 이름</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>여행 이름</Text>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -379,7 +389,7 @@ function TripFormSheet({
               }}
             />
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>시작일</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>시작일</Text>
             <TextInput
               value={startDate}
               onChangeText={setStartDate}
@@ -394,7 +404,7 @@ function TripFormSheet({
               }}
             />
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>종료일</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>종료일</Text>
             <TextInput
               value={endDate}
               onChangeText={setEndDate}
@@ -409,7 +419,7 @@ function TripFormSheet({
               }}
             />
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>예산 통화</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>예산 통화</Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               {CURRENCIES.map((c) => {
                 const active = budgetCurrency === c;
@@ -424,7 +434,7 @@ function TripFormSheet({
                       borderColor: active ? colors.currency[c].primary : colors.system.border,
                     }}
                   >
-                    <Text style={{ fontSize: 11, fontWeight: '700', color: active ? colors.currency[c].text : colors.text.tertiary }}>
+                    <Text style={{ fontSize: 11, fontFamily: 'Pretendard-Bold', color: active ? colors.currency[c].text : colors.text.tertiary }}>
                       {c}
                     </Text>
                   </TouchableOpacity>
@@ -432,7 +442,7 @@ function TripFormSheet({
               })}
             </View>
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>예산</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>예산</Text>
             <TextInput
               value={budgetStr}
               onChangeText={setBudgetStr}
@@ -446,17 +456,20 @@ function TripFormSheet({
               }}
             />
 
-            <TouchableOpacity onPress={handleSave} disabled={isPending} activeOpacity={0.85}>
-              <LinearGradient
-                colors={isPending ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-              >
-                {isPending
-                  ? <ActivityIndicator color={colors.text.inverse} />
-                  : <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>저장하기</Text>
-                }
-              </LinearGradient>
+            <TouchableOpacity
+              onPress={handleSave}
+              disabled={isPending}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              style={{
+                backgroundColor: isPending ? colors.bg.input : colors.accent.primary,
+                borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+              }}
+            >
+              {isPending
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>저장하기</Text>
+              }
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>
@@ -468,12 +481,13 @@ function TripFormSheet({
 const TRIPS_ENABLED = false;
 
 export default function TripsScreen() {
+  const { colors } = useTheme();
   if (!TRIPS_ENABLED) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: spacing.screenPadding }}>
-          <Text style={{ fontSize: 40 }}>✈️</Text>
-          <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+          <Plane size={40} color={colors.text.tertiary} strokeWidth={1.6} />
+          <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
             여행 기능은 준비 중이에요
           </Text>
           <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 20 }}>
@@ -487,6 +501,7 @@ export default function TripsScreen() {
 }
 
 function TripsScreenImpl() {
+  const { colors } = useTheme();
   const router = useRouter();
   const [formVisible, setFormVisible] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
@@ -520,10 +535,10 @@ function TripsScreenImpl() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 }}>
-          <Text style={{ fontSize: 28, marginRight: 12 }}>✈️</Text>
+          <View style={{ marginRight: 12 }}><Plane size={28} color={colors.accent.primary} strokeWidth={1.7} /></View>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text.primary, flex: 1 }}>
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-Bold', color: colors.text.primary, flex: 1 }}>
                 {trip.name}
               </Text>
               <View style={{
@@ -532,7 +547,7 @@ function TripsScreenImpl() {
                 backgroundColor: trip.active ? colors.status.normal + '22' : colors.neutral.bg,
               }}>
                 <Text style={{
-                  fontSize: 11, fontWeight: '600',
+                  fontSize: 11, fontFamily: 'Pretendard-SemiBold',
                   color: trip.active ? colors.status.normal : colors.neutral.text,
                 }}>
                   {trip.active ? '진행 중' : '완료'}
@@ -549,9 +564,11 @@ function TripsScreenImpl() {
           <View style={{
             backgroundColor: cc.bg, borderRadius: radius.chip,
             paddingHorizontal: 10, paddingVertical: 5,
+            flexDirection: 'row', alignItems: 'center', gap: 6,
           }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: cc.text }}>
-              {CURRENCY_FLAGS[trip.budgetCurrency]} {formatCurrency(trip.budget, trip.budgetCurrency)}
+            <Flag code={CURRENCY_FLAGS[trip.budgetCurrency]} size={18} />
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: cc.text }}>
+              {formatCurrency(trip.budget, trip.budgetCurrency)}
             </Text>
           </View>
           {trip.active && (
@@ -571,9 +588,9 @@ function TripsScreenImpl() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           여행 기록
         </Text>
         <View style={{ width: 38 }} />
@@ -587,19 +604,19 @@ function TripsScreenImpl() {
         <ScrollView contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 48 }}>
           {trips.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 60, gap: 12 }}>
-              <Text style={{ fontSize: 48 }}>✈️</Text>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.secondary }}>
+              <Plane size={48} color={colors.text.tertiary} strokeWidth={1.5} />
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary }}>
                 여행이 없어요
               </Text>
               <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
-                글로와 함께 여행 지출을{'\n'}일상 예산과 분리해 관리해보세요.
+                GLLO와 함께 여행 지출을{'\n'}일상 예산과 분리해 관리해보세요.
               </Text>
             </View>
           ) : (
             <>
               {activeTrips.length > 0 && (
                 <>
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.secondary, marginBottom: 10 }}>
+                  <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary, marginBottom: 10 }}>
                     진행 중
                   </Text>
                   {activeTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}
@@ -608,7 +625,7 @@ function TripsScreenImpl() {
               {completedTrips.length > 0 && (
                 <>
                   <Text style={{
-                    fontSize: 13, fontWeight: '600', color: colors.text.secondary,
+                    fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary,
                     marginTop: activeTrips.length > 0 ? 8 : 0, marginBottom: 10,
                   }}>
                     완료된 여행
@@ -622,22 +639,19 @@ function TripsScreenImpl() {
           <TouchableOpacity
             onPress={() => setFormVisible(true)}
             activeOpacity={0.85}
-            style={{ marginTop: trips.length === 0 ? 8 : 4 }}
+            accessibilityRole="button"
+            style={{
+              marginTop: trips.length === 0 ? 8 : 4,
+              backgroundColor: colors.accent.primary,
+              borderRadius: radius.button, paddingVertical: 14,
+              alignItems: 'center', flexDirection: 'row',
+              justifyContent: 'center', gap: 6,
+            }}
           >
-            <LinearGradient
-              colors={colors.gradient.primary}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: radius.button, paddingVertical: 14,
-                alignItems: 'center', flexDirection: 'row',
-                justifyContent: 'center', gap: 6,
-              }}
-            >
-              <Text style={{ fontSize: 18, color: colors.text.inverse }}>+</Text>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                새 여행 추가
-              </Text>
-            </LinearGradient>
+            <Plus size={18} color={colors.text.inverse} strokeWidth={2.4} />
+            <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+              새 여행 추가
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       )}

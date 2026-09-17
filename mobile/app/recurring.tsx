@@ -5,13 +5,14 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow } from '@/theme';
+import { Flag } from '@/components/ui/Flag';
+import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { ArrowLeft, X, Repeat, Plus, ChevronRight } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.82;
@@ -72,6 +73,7 @@ function AccountPickerSheet({
   onSelect: (account: Account) => void;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(PICKER_H)).current;
 
   useEffect(() => {
@@ -115,9 +117,9 @@ function AccountPickerSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>계좌 선택</Text>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>계좌 선택</Text>
             <TouchableOpacity onPress={closeSheet} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 32 }}>
@@ -134,9 +136,9 @@ function AccountPickerSheet({
                     padding: 16, marginBottom: 10, ...shadow.card,
                   }}
                 >
-                  <Text style={{ fontSize: 24, marginRight: 12 }}>{CURRENCY_FLAGS[account.currency]}</Text>
+                  <View style={{ marginRight: 12 }}><Flag code={CURRENCY_FLAGS[account.currency]} size={28} /></View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>{account.name}</Text>
+                    <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>{account.name}</Text>
                     <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
                       {formatCurrency(account.balance, account.currency)}
                     </Text>
@@ -164,6 +166,7 @@ function CategoryPickerSheet({
   onSelect: (cat: Category) => void;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(PICKER_H)).current;
 
   useEffect(() => {
@@ -204,9 +207,9 @@ function CategoryPickerSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>카테고리 선택</Text>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>카테고리 선택</Text>
             <TouchableOpacity onPress={closeSheet} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 32 }}>
@@ -244,6 +247,7 @@ function RecurringFormSheet({
   editTarget: RecurringRule | null;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
   const isEditMode = editTarget !== null;
@@ -386,11 +390,11 @@ function RecurringFormSheet({
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-              <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
+              <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 20 }}>
                 {isEditMode ? '고정 거래 수정' : '고정 거래 추가'}
               </Text>
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>규칙 이름</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>규칙 이름</Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
@@ -403,7 +407,7 @@ function RecurringFormSheet({
                 }}
               />
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>유형</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>유형</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
                 {(['EXPENSE', 'INCOME'] as RuleType[]).map((t) => {
                   const active = type === t;
@@ -419,7 +423,7 @@ function RecurringFormSheet({
                         opacity: isEditMode ? 0.5 : 1,
                       }}
                     >
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.text.brand : colors.text.tertiary }}>
+                      <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: active ? colors.text.brand : colors.text.tertiary }}>
                         {TYPE_LABELS[t]}
                       </Text>
                     </TouchableOpacity>
@@ -427,7 +431,7 @@ function RecurringFormSheet({
                 })}
               </View>
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>금액</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>금액</Text>
               <TextInput
                 value={amountStr}
                 onChangeText={setAmountStr}
@@ -441,7 +445,7 @@ function RecurringFormSheet({
                 }}
               />
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>통화</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>통화</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
                 {CURRENCIES.map((c) => {
                   const active = currency === c;
@@ -456,7 +460,7 @@ function RecurringFormSheet({
                         borderColor: active ? colors.currency[c].primary : colors.system.border,
                       }}
                     >
-                      <Text style={{ fontSize: 11, fontWeight: '700', color: active ? colors.currency[c].text : colors.text.tertiary }}>
+                      <Text style={{ fontSize: 11, fontFamily: 'Pretendard-Bold', color: active ? colors.currency[c].text : colors.text.tertiary }}>
                         {c}
                       </Text>
                     </TouchableOpacity>
@@ -464,7 +468,7 @@ function RecurringFormSheet({
                 })}
               </View>
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>계좌</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>계좌</Text>
               <TouchableOpacity
                 onPress={() => setShowAccountPicker(true)}
                 style={{
@@ -475,16 +479,16 @@ function RecurringFormSheet({
               >
                 {selectedAccount ? (
                   <>
-                    <Text style={{ fontSize: 18, marginRight: 8 }}>{CURRENCY_FLAGS[selectedAccount.currency]}</Text>
+                    <View style={{ marginRight: 8 }}><Flag code={CURRENCY_FLAGS[selectedAccount.currency]} size={22} /></View>
                     <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary }}>{selectedAccount.name}</Text>
                   </>
                 ) : (
                   <Text style={{ flex: 1, fontSize: 15, color: colors.text.tertiary }}>계좌 선택</Text>
                 )}
-                <Text style={{ color: colors.text.tertiary }}>›</Text>
+                <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
               </TouchableOpacity>
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>카테고리</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>카테고리</Text>
               <TouchableOpacity
                 onPress={() => setShowCategoryPicker(true)}
                 style={{
@@ -501,10 +505,10 @@ function RecurringFormSheet({
                 ) : (
                   <Text style={{ flex: 1, fontSize: 15, color: colors.text.tertiary }}>카테고리 선택</Text>
                 )}
-                <Text style={{ color: colors.text.tertiary }}>›</Text>
+                <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
               </TouchableOpacity>
 
-              <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>매월 실행일</Text>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>매월 실행일</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 28 }}>
                 <TextInput
                   value={dayOfMonth}
@@ -520,17 +524,20 @@ function RecurringFormSheet({
                 <Text style={{ fontSize: 14, color: colors.text.secondary, marginLeft: 10 }}>일 (1~28)</Text>
               </View>
 
-              <TouchableOpacity onPress={handleSave} disabled={isPending} activeOpacity={0.85}>
-                <LinearGradient
-                  colors={isPending ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                  style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-                >
-                  {isPending
-                    ? <ActivityIndicator color={colors.text.inverse} />
-                    : <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>저장하기</Text>
-                  }
-                </LinearGradient>
+              <TouchableOpacity
+                onPress={handleSave}
+                disabled={isPending}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                style={{
+                  backgroundColor: isPending ? colors.bg.input : colors.accent.primary,
+                  borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+                }}
+              >
+                {isPending
+                  ? <ActivityIndicator color={colors.text.inverse} />
+                  : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>저장하기</Text>
+                }
               </TouchableOpacity>
             </ScrollView>
           </Animated.View>
@@ -555,6 +562,7 @@ function RecurringFormSheet({
 }
 
 export default function RecurringScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [formVisible, setFormVisible] = useState(false);
@@ -641,9 +649,9 @@ export default function RecurringScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           고정 거래 관리
         </Text>
         <View style={{ width: 38 }} />
@@ -657,8 +665,8 @@ export default function RecurringScreen() {
         <ScrollView contentContainerStyle={{ padding: spacing.screenPadding, paddingBottom: 48 }}>
           {rules.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 60, gap: 12 }}>
-              <Text style={{ fontSize: 40 }}>🔁</Text>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.secondary }}>
+              <Repeat size={40} color={colors.text.tertiary} strokeWidth={1.6} />
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary }}>
                 고정 거래가 없어요
               </Text>
               <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
@@ -678,7 +686,7 @@ export default function RecurringScreen() {
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-                    <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text.primary }}>
+                    <Text style={{ flex: 1, fontSize: 15, fontFamily: 'Pretendard-Bold', color: colors.text.primary }}>
                       {rule.name}
                     </Text>
                   </View>
@@ -712,7 +720,7 @@ export default function RecurringScreen() {
                     )}
                   </View>
 
-                  <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text.primary, marginBottom: 14 }}>
+                  <Text style={{ fontSize: 18, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 14 }}>
                     {formatCurrency(rule.amount, rule.currency)}
                   </Text>
 
@@ -759,21 +767,18 @@ export default function RecurringScreen() {
           <TouchableOpacity
             onPress={openCreate}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            style={{
+              backgroundColor: colors.accent.primary,
+              borderRadius: radius.button, paddingVertical: 14,
+              alignItems: 'center', flexDirection: 'row',
+              justifyContent: 'center', gap: 6,
+            }}
           >
-            <LinearGradient
-              colors={colors.gradient.primary}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: radius.button, paddingVertical: 14,
-                alignItems: 'center', flexDirection: 'row',
-                justifyContent: 'center', gap: 6,
-              }}
-            >
-              <Text style={{ fontSize: 18, color: colors.text.inverse }}>+</Text>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                고정 거래 추가
-              </Text>
-            </LinearGradient>
+            <Plus size={18} color={colors.text.inverse} strokeWidth={2.4} />
+            <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+              고정 거래 추가
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       )}

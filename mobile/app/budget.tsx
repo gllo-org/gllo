@@ -5,13 +5,13 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
-import type { CurrencyCode } from '@/theme';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
+import type { CurrencyCode, ThemeColors } from '@/theme';
+import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const FORM_H = SCREEN_H * 0.52;
@@ -38,7 +38,7 @@ function monthLabel(ym: string): string {
   return `${y}년 ${parseInt(m)}월`;
 }
 
-function getBudgetStatusColor(spentRate: number, timeProgressRate: number): string {
+function getBudgetStatusColor(spentRate: number, timeProgressRate: number, colors: ThemeColors): string {
   if (spentRate > timeProgressRate + 5) return colors.status.danger;
   if (spentRate > timeProgressRate) return colors.status.warning;
   return colors.status.normal;
@@ -47,13 +47,14 @@ function getBudgetStatusColor(spentRate: number, timeProgressRate: number): stri
 function getBudgetStatusText(spentRate: number, timeProgressRate: number): string {
   if (spentRate > timeProgressRate + 5) return '이번 달 예산 소진율이 시간 진행율보다 높아요.';
   if (spentRate > timeProgressRate) return '이번 달 예산 소진이 조금 빠른 편이에요.';
-  return '글로가 보기엔 이번 달 지출 페이스가 좋아요.';
+  return 'GLLO가 보기엔 이번 달 지출 페이스가 좋아요.';
 }
 
 function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgressRate: spentRate, timeProgressRate, recommendedDailyAmount: dailyRecommendedAmount, currency }: BudgetStatus) {
+  const { colors } = useTheme();
   const clampedSpent = Math.min(spentRate, 100);
   const clampedTime = Math.min(timeProgressRate, 98);
-  const statusColor = getBudgetStatusColor(spentRate, timeProgressRate);
+  const statusColor = getBudgetStatusColor(spentRate, timeProgressRate, colors);
   const cur = currency ?? 'KRW';
 
   return (
@@ -81,7 +82,7 @@ function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgres
           borderRadius: radius.chip,
           backgroundColor: statusColor + '18',
         }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: statusColor }}>
+          <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Bold', color: statusColor }}>
             {spentRate.toFixed(1)}%
           </Text>
         </View>
@@ -94,11 +95,11 @@ function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgres
           borderRadius: 6,
           overflow: 'hidden',
         }}>
-          <LinearGradient
-            colors={colors.gradient.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ height: '100%', width: `${clampedSpent}%`, borderRadius: 6 }}
+          <View
+            style={{
+              backgroundColor: colors.accent.primary,
+              height: '100%', width: `${clampedSpent}%`, borderRadius: 6,
+            }}
           />
         </View>
         <View style={{
@@ -127,7 +128,7 @@ function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgres
           borderWidth: 1, borderColor: colors.system.border,
         }}>
           <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 4 }}>남은 예산</Text>
-          <Text style={{ ...typography.amount.small, color: colors.text.primary, fontWeight: '600' }}>
+          <Text style={{ ...typography.amount.small, color: colors.text.primary }}>
             {formatCurrency(remainingAmount, cur)}
           </Text>
         </View>
@@ -137,14 +138,14 @@ function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgres
           borderWidth: 1, borderColor: colors.system.border,
         }}>
           <Text style={{ fontSize: 12, color: colors.text.tertiary, marginBottom: 4 }}>하루 권장 지출</Text>
-          <Text style={{ ...typography.amount.small, color: colors.text.brand, fontWeight: '600' }}>
+          <Text style={{ ...typography.amount.small, color: colors.text.brand }}>
             {formatCurrency(dailyRecommendedAmount, cur)}
           </Text>
         </View>
       </View>
 
       <Text style={{ fontSize: 11, color: colors.text.tertiary, marginTop: 12, textAlign: 'center' }}>
-        글로가 계산한 오늘의 적정 지출이에요.
+        GLLO가 계산한 오늘의 적정 지출이에요.
       </Text>
     </View>
   );
@@ -156,6 +157,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
   yearMonth: string;
   initialCurrency?: CurrencyCode;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(FORM_H)).current;
   const queryClient = useQueryClient();
   const [currency, setCurrency] = useState<CurrencyCode>(initialCurrency ?? 'EUR');
@@ -235,14 +237,14 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 4 }}>
+            <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 4 }}>
               {monthLabel(yearMonth)} 예산 설정
             </Text>
             <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 24 }}>
-              예산을 설정하면 글로가 매일 적정 지출을 계산해드려요.
+              예산을 설정하면 GLLO가 매일 적정 지출을 계산해드려요.
             </Text>
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>
               통화
             </Text>
             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
@@ -262,7 +264,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
                       borderColor: active ? cc.primary : colors.system.border,
                     }}
                   >
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: active ? cc.text : colors.text.tertiary }}>
+                    <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: active ? cc.text : colors.text.tertiary }}>
                       {c}
                     </Text>
                   </TouchableOpacity>
@@ -270,7 +272,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
               })}
             </View>
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>
               예산 금액
             </Text>
             <TextInput
@@ -281,7 +283,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
               keyboardType="decimal-pad"
               returnKeyType="done"
               style={{
-                fontSize: 24, fontWeight: '700',
+                fontSize: 24, fontFamily: 'SUIT-Bold',
                 color: colors.text.primary,
                 backgroundColor: colors.bg.input,
                 borderRadius: radius.input,
@@ -290,20 +292,22 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
               }}
             />
 
-            <TouchableOpacity onPress={handleSave} disabled={isPending} activeOpacity={0.85}>
-              <LinearGradient
-                colors={isPending ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-              >
-                {isPending
-                  ? <ActivityIndicator color={colors.text.inverse} />
-                  : <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>
-                      설정하기
-                    </Text>
-                }
-              </LinearGradient>
+            <TouchableOpacity
+              onPress={handleSave}
+              disabled={isPending}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              style={{
+                backgroundColor: isPending ? colors.bg.input : colors.accent.primary,
+                borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+              }}
+            >
+              {isPending
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+                    설정하기
+                  </Text>
+              }
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>
@@ -313,6 +317,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
 }
 
 export default function BudgetScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const [yearMonth] = useState(currentYearMonth);
   const [showForm, setShowForm] = useState(false);
@@ -338,9 +343,9 @@ export default function BudgetScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           예산 관리
         </Text>
         <View style={{ width: 38 }} />
@@ -352,11 +357,11 @@ export default function BudgetScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={{ alignItems: 'center', marginBottom: 24 }}>
-          <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary }}>
+          <Text style={{ fontSize: 22, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
             {monthLabel(yearMonth)}
           </Text>
           <Text style={{ fontSize: 13, color: colors.text.secondary, marginTop: 4 }}>
-            글로가 이번 달 예산을 계산해봤어요.
+            GLLO가 이번 달 예산을 계산해봤어요.
           </Text>
         </View>
 
@@ -364,14 +369,14 @@ export default function BudgetScreen() {
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
             <ActivityIndicator color={colors.text.brand} />
             <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
-              글로가 데이터를 불러오고 있어요...
+              GLLO가 데이터를 불러오고 있어요...
             </Text>
           </View>
         ) : isError ? (
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
-            <Text style={{ fontSize: 36 }}>⚠️</Text>
+            <AlertTriangle size={36} color={colors.status.warning} strokeWidth={1.8} />
             <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center' }}>
-              글로가 데이터를 불러오지 못했어요.{'\n'}다시 시도해볼까요?
+              GLLO가 데이터를 불러오지 못했어요.{'\n'}다시 시도해볼까요?
             </Text>
           </View>
         ) : status ? (
@@ -389,7 +394,7 @@ export default function BudgetScreen() {
                 paddingVertical: 14,
                 alignItems: 'center',
               }}>
-                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.brand }}>
+                <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>
                   예산 수정하기
                 </Text>
               </View>
@@ -398,30 +403,29 @@ export default function BudgetScreen() {
         ) : (
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 16 }}>
             <Text style={{ fontSize: 48 }}>💜</Text>
-            <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               예산이 없어요
             </Text>
             <Text style={{
               fontSize: 14, color: colors.text.secondary,
               textAlign: 'center', lineHeight: 22,
             }}>
-              이번 달 예산을 아직 설정하지 않았어요.{'\n'}글로와 함께 예산을 정해볼까요?
+              이번 달 예산을 아직 설정하지 않았어요.{'\n'}GLLO와 함께 예산을 정해볼까요?
             </Text>
-            <TouchableOpacity onPress={() => setShowForm(true)} activeOpacity={0.85}>
-              <LinearGradient
-                colors={colors.gradient.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: radius.button,
-                  paddingVertical: 14, paddingHorizontal: 36,
-                  alignItems: 'center',
-                }}
-              >
-                <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                  예산 설정하기
-                </Text>
-              </LinearGradient>
+            <TouchableOpacity
+              onPress={() => setShowForm(true)}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              style={{
+                backgroundColor: colors.accent.primary,
+                borderRadius: radius.button,
+                paddingVertical: 14, paddingHorizontal: 36,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+                예산 설정하기
+              </Text>
             </TouchableOpacity>
           </View>
         )}

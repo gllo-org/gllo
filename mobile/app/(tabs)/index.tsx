@@ -7,9 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
+import { Flag } from '@/components/ui/Flag';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
+import { Landmark, Plus, TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface DashboardStats {
   totalAssetKrw: number;
@@ -34,6 +36,7 @@ interface Account {
 }
 
 function SkeletonBox({ width, height }: { width: DimensionValue; height: number }) {
+  const { colors } = useTheme();
   return (
     <View style={{
       width, height,
@@ -44,12 +47,13 @@ function SkeletonBox({ width, height }: { width: DimensionValue; height: number 
 }
 
 function BudgetStatusText(spentRate: number, timeRate: number): string {
-  if (spentRate > timeRate + 5) return '글로가 보기엔 이번 달 지출 페이스가 조금 빠른 편이에요.';
-  if (spentRate < timeRate - 5) return '글로가 보기엔 이번 달 지출 페이스가 좋아요.';
-  return '글로가 이번 달 지출 흐름을 살펴봤어요.';
+  if (spentRate > timeRate + 5) return 'GLLO가 보기엔 이번 달 지출 페이스가 조금 빠른 편이에요.';
+  if (spentRate < timeRate - 5) return 'GLLO가 보기엔 이번 달 지출 페이스가 좋아요.';
+  return 'GLLO가 이번 달 지출 흐름을 살펴봤어요.';
 }
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -100,13 +104,13 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <LinearGradient
-          colors={colors.gradient.light}
+          colors={colors.gradient.hero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: spacing.screenPadding, paddingTop: 20, paddingBottom: 28 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ ...typography.heading.h2, color: colors.text.primary }}>글로</Text>
+            <Text style={{ ...typography.heading.h2, color: colors.text.primary }}>GLLO</Text>
           </View>
 
           <Text style={{ ...typography.body.small, color: colors.text.secondary, marginBottom: 4 }}>
@@ -151,9 +155,9 @@ export default function DashboardScreen() {
                         width: 160,
                         ...shadow.card,
                       }}>
-                        <Text style={{ fontSize: 20, marginBottom: 4 }}>
-                          {CURRENCY_FLAGS[account.currency]}
-                        </Text>
+                        <View style={{ marginBottom: 4 }}>
+                          <Flag code={CURRENCY_FLAGS[account.currency]} size={24} />
+                        </View>
                         <Text
                           numberOfLines={1}
                           ellipsizeMode="tail"
@@ -174,14 +178,18 @@ export default function DashboardScreen() {
                           </Text>
                         )}
                         {account.pnlRate != null && (
-                          <Text style={{
-                            ...typography.caption,
-                            fontFamily: 'Pretendard-SemiBold',
-                            color: isPositive ? colors.profit.text : colors.loss.text,
-                            marginTop: 4,
-                          }}>
-                            {isPositive ? '▲' : '▼'} {Math.abs(account.pnlRate).toFixed(2)}%
-                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }}>
+                            {isPositive
+                              ? <TrendingUp size={12} color={colors.profit.text} strokeWidth={2.4} />
+                              : <TrendingDown size={12} color={colors.loss.text} strokeWidth={2.4} />}
+                            <Text style={{
+                              ...typography.caption,
+                              fontFamily: 'Pretendard-SemiBold',
+                              color: isPositive ? colors.profit.text : colors.loss.text,
+                            }}>
+                              {Math.abs(account.pnlRate).toFixed(2)}%
+                            </Text>
+                          </View>
                         )}
                       </View>
                     </TouchableOpacity>
@@ -203,8 +211,8 @@ export default function DashboardScreen() {
                     borderStyle: 'dashed',
                     ...shadow.card,
                   }}>
-                    <Text style={{ fontSize: 22, marginBottom: 6 }}>+</Text>
-                    <Text style={{ fontSize: 12, color: colors.text.brand, fontWeight: '600' }}>계좌 추가</Text>
+                    <View style={{ marginBottom: 6 }}><Plus size={22} color={colors.text.brand} strokeWidth={2.2} /></View>
+                    <Text style={{ fontSize: 12, color: colors.text.brand, fontFamily: 'Pretendard-SemiBold' }}>계좌 추가</Text>
                   </View>
                 </TouchableOpacity>
               </View>
@@ -223,12 +231,12 @@ export default function DashboardScreen() {
                 borderColor: colors.system.border,
                 borderStyle: 'dashed',
               }}>
-                <Text style={{ fontSize: 24, marginBottom: 8 }}>🏦</Text>
+                <View style={{ marginBottom: 8 }}><Landmark size={26} color={colors.text.tertiary} strokeWidth={1.7} /></View>
                 <Text style={{ ...typography.body.medium, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>
                   + 계좌 추가하기
                 </Text>
                 <Text style={{ ...typography.caption, color: colors.text.tertiary, marginTop: 4 }}>
-                  글로와 함께 첫 계좌를 만들어볼까요?
+                  GLLO와 함께 첫 계좌를 만들어볼까요?
                 </Text>
               </View>
             </TouchableOpacity>
@@ -273,14 +281,12 @@ export default function DashboardScreen() {
               overflow: 'hidden',
               marginBottom: 8,
             }}>
-              <LinearGradient
-                colors={colors.gradient.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              <View
                 style={{
                   height: '100%',
                   width: `${Math.min(stats.budgetSpentRate, 100)}%`,
                   borderRadius: 5,
+                  backgroundColor: colors.accent.primary,
                 }}
               />
             </View>
@@ -354,6 +360,8 @@ export default function DashboardScreen() {
 
       <TouchableOpacity
         onPress={() => setSheetVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel="거래 추가"
         style={{
           position: 'absolute',
           bottom: 88,
@@ -361,30 +369,14 @@ export default function DashboardScreen() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          overflow: 'hidden',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.accent.primary,
           ...shadow.float,
         }}
         activeOpacity={0.85}
       >
-        <LinearGradient
-          colors={colors.gradient.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: 56,
-            height: 56,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{
-            fontSize: 28,
-            color: colors.text.inverse,
-            lineHeight: 32,
-            textAlign: 'center',
-            includeFontPadding: false,
-          }}>+</Text>
-        </LinearGradient>
+        <Plus size={28} color={colors.text.inverse} strokeWidth={2.4} />
       </TouchableOpacity>
 
       <TransactionSheet

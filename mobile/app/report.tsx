@@ -5,16 +5,16 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 import { supabase } from '@/lib/supabase';
+import { ArrowLeft, Inbox, FileText, ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 const API_BASE = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/v1`;
 
@@ -64,14 +64,16 @@ function nextMonth(ym: string): string {
 }
 
 function SectionHeader({ title }: { title: string }) {
+  const { colors } = useTheme();
   return (
-    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.tertiary, marginBottom: 10 }}>
+    <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.tertiary, marginBottom: 10 }}>
       {title}
     </Text>
   );
 }
 
 export default function ReportScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const [yearMonth, setYearMonth] = useState(() => toYearMonth(new Date()));
   const [isDownloading, setIsDownloading] = useState(false);
@@ -114,7 +116,7 @@ export default function ReportScreen() {
         if (canShare) {
           await Sharing.shareAsync(downloadResult.uri, {
             mimeType: 'application/pdf',
-            dialogTitle: `글로 ${formatYearMonth(yearMonth)} 리포트`,
+            dialogTitle: `GLLO ${formatYearMonth(yearMonth)} 리포트`,
           });
         } else {
           showAlert('다운로드 완료', `${fileUri}에 저장되었어요.`);
@@ -134,9 +136,9 @@ export default function ReportScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           월간 리포트
         </Text>
         <View style={{ width: 38 }} />
@@ -151,9 +153,9 @@ export default function ReportScreen() {
           style={{ padding: 10 }}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={{ fontSize: 20, color: colors.text.primary }}>‹</Text>
+          <ChevronLeft size={20} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text.primary, minWidth: 120, textAlign: 'center' }}>
+        <Text style={{ fontSize: 16, fontFamily: 'Pretendard-Bold', color: colors.text.primary, minWidth: 120, textAlign: 'center' }}>
           {formatYearMonth(yearMonth)}
         </Text>
         <TouchableOpacity
@@ -162,7 +164,7 @@ export default function ReportScreen() {
           disabled={isCurrentMonth}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={{ fontSize: 20, color: colors.text.primary }}>›</Text>
+          <ChevronRight size={20} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
       </View>
 
@@ -172,7 +174,7 @@ export default function ReportScreen() {
         </View>
       ) : isError || !report ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 36 }}>📭</Text>
+          <Inbox size={36} color={colors.text.tertiary} strokeWidth={1.6} />
           <Text style={{ fontSize: 15, color: colors.text.secondary }}>
             해당 월의 리포트가 없어요.
           </Text>
@@ -223,7 +225,7 @@ export default function ReportScreen() {
                         <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
                       ) : null}
                       <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
-                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
+                      <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                         {formatCurrency(item.amount, report.currency)}
                       </Text>
                     </View>
@@ -262,7 +264,7 @@ export default function ReportScreen() {
                         <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
                       ) : null}
                       <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
-                      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.primary }}>
+                      <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                         {formatCurrency(item.amount, report.currency)}
                       </Text>
                     </View>
@@ -287,27 +289,24 @@ export default function ReportScreen() {
             onPress={handleDownloadPdf}
             disabled={isDownloading}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            style={{
+              backgroundColor: isDownloading ? colors.bg.input : colors.accent.primary,
+              borderRadius: radius.button, paddingVertical: 15,
+              alignItems: 'center', flexDirection: 'row',
+              justifyContent: 'center', gap: 8,
+            }}
           >
-            <LinearGradient
-              colors={isDownloading ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: radius.button, paddingVertical: 15,
-                alignItems: 'center', flexDirection: 'row',
-                justifyContent: 'center', gap: 8,
-              }}
-            >
-              {isDownloading ? (
-                <ActivityIndicator color={colors.text.inverse} />
-              ) : (
-                <>
-                  <Text style={{ fontSize: 16 }}>📄</Text>
-                  <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>
-                    PDF로 내보내기
-                  </Text>
-                </>
-              )}
-            </LinearGradient>
+            {isDownloading ? (
+              <ActivityIndicator color={colors.text.inverse} />
+            ) : (
+              <>
+                <FileText size={17} color={colors.accent.primary} strokeWidth={2} />
+                <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
+                  PDF로 내보내기
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         </ScrollView>
       )}

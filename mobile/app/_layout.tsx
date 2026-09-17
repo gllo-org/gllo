@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { useFonts } from 'expo-font';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient, ApiError } from '@/lib/api/client';
+import { ThemeProvider } from '@/theme';
 import { hasTutorialBeenSeen } from './tutorial';
 import '../global.css';
 
@@ -26,6 +27,7 @@ function AuthGuard() {
   const { session, isLoading, setSession, setLoading, pendingPinSetup } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
+  const rootNavigationState = useRootNavigationState();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,7 +43,7 @@ function AuthGuard() {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !rootNavigationState?.key) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const isLogoutComplete = (segments as string[])[1] === 'logout-complete';
@@ -51,7 +53,7 @@ function AuthGuard() {
     } else if (session && inAuthGroup && !isLogoutComplete && !pendingPinSetup) {
       checkOnboardingAndRoute();
     }
-  }, [session, isLoading, segments, pendingPinSetup]);
+  }, [session, isLoading, segments, pendingPinSetup, rootNavigationState?.key]);
 
   async function checkOnboardingAndRoute() {
     try {
@@ -99,6 +101,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthGuard />
@@ -160,6 +163,7 @@ export default function RootLayout() {
           </Stack>
         </QueryClientProvider>
       </SafeAreaProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

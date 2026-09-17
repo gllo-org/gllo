@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatDate } from '@/lib/utils/date';
-import { colors, spacing, radius, typography } from '@/theme';
+import { useTheme, spacing, radius, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
+import { Plane } from 'lucide-react-native';
 
 type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'EXCHANGE';
 
@@ -57,6 +57,7 @@ function buildKrwRateMap(rates: ExchangeRate[]): Record<string, number> {
 }
 
 function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number | null }) {
+  const { colors } = useTheme();
   const router = useRouter();
   const isPositive = item.type === 'INCOME';
   const isExchange = item.type === 'EXCHANGE';
@@ -89,17 +90,19 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
       </View>
 
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 15, fontWeight: '500', color: colors.text.primary }}>
+        <Text style={{ fontSize: 15, fontFamily: 'Pretendard-Medium', color: colors.text.primary }}>
           {item.title}
         </Text>
-        <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
-          {item.categoryName} · {formatDate(item.transactionDate)}
-          {item.isTrip && ' ✈️'}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+          <Text style={{ fontSize: 12, color: colors.text.tertiary }}>
+            {item.categoryName} · {formatDate(item.transactionDate)}
+          </Text>
+          {item.isTrip && <Plane size={12} color={colors.text.tertiary} strokeWidth={2} />}
+        </View>
       </View>
 
       <View style={{ alignItems: 'flex-end' }}>
-        <Text style={{ ...typography.amount.small, color: amountColor, fontWeight: '600' }}>
+        <Text style={{ ...typography.amount.small, color: amountColor }}>
           {prefix}{formatCurrency(item.amount, item.currency)}
         </Text>
         {showKrw && (
@@ -113,6 +116,7 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
 }
 
 export default function TransactionsScreen() {
+  const { colors } = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
   const { accountId } = useLocalSearchParams<{ accountId?: string }>();
 
@@ -151,19 +155,15 @@ export default function TransactionsScreen() {
         <TouchableOpacity
           onPress={() => setSheetVisible(true)}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          style={{
+            paddingHorizontal: 14, paddingVertical: 7,
+            borderRadius: radius.chip,
+            flexDirection: 'row', alignItems: 'center', gap: 4,
+            backgroundColor: colors.accent.primary,
+          }}
         >
-          <LinearGradient
-            colors={colors.gradient.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{
-              paddingHorizontal: 14, paddingVertical: 7,
-              borderRadius: radius.chip,
-              flexDirection: 'row', alignItems: 'center', gap: 4,
-            }}
-          >
-            <Text style={{ fontSize: 14, color: colors.text.inverse, fontWeight: '600' }}>+ 추가</Text>
-          </LinearGradient>
+          <Text style={{ fontSize: 14, color: colors.text.inverse, fontFamily: 'Pretendard-SemiBold' }}>+ 추가</Text>
         </TouchableOpacity>
       </View>
 

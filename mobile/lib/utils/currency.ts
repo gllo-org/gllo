@@ -30,11 +30,13 @@ export function formatAmount(amount: number, currency: CurrencyCode): string {
   }).format(amount);
 }
 
-export const CURRENCY_FLAGS: Record<CurrencyCode, string> = {
-  EUR: '🇪🇺',
-  USD: '🇺🇸',
-  GBP: '🇬🇧',
-  KRW: '🇰🇷',
+export type FlagCode = 'DE' | 'FR' | 'NL' | 'ES' | 'AT' | 'EU' | 'US' | 'GB' | 'KR';
+
+export const CURRENCY_FLAGS: Record<CurrencyCode, FlagCode> = {
+  EUR: 'EU',
+  USD: 'US',
+  GBP: 'GB',
+  KRW: 'KR',
 };
 
 export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {

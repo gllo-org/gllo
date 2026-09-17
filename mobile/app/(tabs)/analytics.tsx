@@ -12,6 +12,7 @@ import { formatCurrency, CURRENCY_SYMBOLS } from '@/lib/utils/currency';
 import { getYearMonth } from '@/lib/utils/date';
 import { colors, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { X, Inbox, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SHEET_H = Dimensions.get('window').height * 0.65;
@@ -87,13 +88,13 @@ function MonthPicker({ yearMonth, onChange }: { yearMonth: string; onChange: (ym
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
       <TouchableOpacity onPress={() => shift(-1)} style={{ padding: 8 }}>
-        <Text style={{ fontSize: 18, color: colors.text.primary }}>‹</Text>
+        <ChevronLeft size={20} color={colors.text.primary} strokeWidth={2} />
       </TouchableOpacity>
-      <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+      <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
         {year}년 {Number(month)}월
       </Text>
       <TouchableOpacity onPress={() => shift(1)} disabled={isFuture} style={{ padding: 8 }}>
-        <Text style={{ fontSize: 18, color: isFuture ? colors.text.tertiary : colors.text.primary }}>›</Text>
+        <ChevronRight size={20} color={isFuture ? colors.text.tertiary : colors.text.primary} strokeWidth={2} />
       </TouchableOpacity>
     </View>
   );
@@ -166,7 +167,7 @@ function CategoryDrilldownSheet({
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+              <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
                 {category?.categoryEmoji} {category?.categoryName}
               </Text>
               <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
@@ -174,7 +175,7 @@ function CategoryDrilldownSheet({
               </Text>
             </View>
             <TouchableOpacity onPress={closeSheet} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
 
@@ -184,7 +185,7 @@ function CategoryDrilldownSheet({
             </View>
           ) : filtered.length === 0 ? (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-              <Text style={{ fontSize: 32 }}>📭</Text>
+              <Inbox size={32} color={colors.text.tertiary} strokeWidth={1.6} />
               <Text style={{ fontSize: 14, color: colors.text.secondary }}>해당 카테고리 거래가 없어요.</Text>
             </View>
           ) : (
@@ -201,14 +202,14 @@ function CategoryDrilldownSheet({
                 }}>
                   <Text style={{ fontSize: 20, marginRight: 12 }}>{item.categoryEmoji || '💸'}</Text>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 14, fontWeight: '500', color: colors.text.primary }}>
+                    <Text style={{ fontSize: 14, fontFamily: 'Pretendard-Medium', color: colors.text.primary }}>
                       {item.title}
                     </Text>
                     <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
                       {item.transactionDate}
                     </Text>
                   </View>
-                  <Text style={{ fontSize: 14, fontWeight: '600', color: colors.loss.text }}>
+                  <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.loss.text }}>
                     -{formatCurrency(item.amount, item.currency)}
                   </Text>
                 </View>
@@ -329,7 +330,7 @@ function TrendTab({
                 borderColor: active ? colors.text.brand : colors.system.border,
               }}
             >
-              <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.text.inverse : colors.text.secondary }}>
+              <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: active ? colors.text.inverse : colors.text.secondary }}>
                 {mode}
               </Text>
             </TouchableOpacity>
@@ -387,7 +388,7 @@ function TrendTab({
             style={{ flex: 1, borderRadius: radius.card, padding: 16 }}
           >
             <Text style={{ fontSize: 12, color: colors.text.secondary, marginBottom: 6 }}>수입</Text>
-            <Text style={{ ...typography.amount.small, color: colors.profit.text, fontWeight: '700' }}>
+            <Text style={{ ...typography.amount.small, color: colors.profit.text }}>
               +{formatCurrency(report?.totalIncome ?? 0, currency)}
             </Text>
           </LinearGradient>
@@ -396,7 +397,7 @@ function TrendTab({
             style={{ flex: 1, borderRadius: radius.card, padding: 16 }}
           >
             <Text style={{ fontSize: 12, color: colors.text.secondary, marginBottom: 6 }}>지출</Text>
-            <Text style={{ ...typography.amount.small, color: colors.loss.text, fontWeight: '700' }}>
+            <Text style={{ ...typography.amount.small, color: colors.loss.text }}>
               -{formatCurrency(report?.totalExpense ?? 0, currency)}
             </Text>
           </LinearGradient>
@@ -457,7 +458,7 @@ function TrendTab({
           borderRadius: radius.card,
           padding: 32, alignItems: 'center', gap: 12,
         }}>
-          <Text style={{ fontSize: 36 }}>📊</Text>
+          <BarChart3 size={36} color={colors.text.tertiary} strokeWidth={1.6} />
           <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
             해당 기간 거래 내역이 없어요.
           </Text>
@@ -533,7 +534,7 @@ function CategoryTab({
                   borderColor: active ? activeColor : colors.system.border,
                 }}
               >
-                <Text style={{ fontSize: 13, fontWeight: '600', color: active ? activeColor : colors.text.secondary }}>
+                <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: active ? activeColor : colors.text.secondary }}>
                   {t}
                 </Text>
               </TouchableOpacity>
@@ -555,7 +556,7 @@ function CategoryTab({
               marginBottom: spacing.sectionGap,
               ...shadow.card,
             }}>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary, marginBottom: 16 }}>
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary, marginBottom: 16 }}>
                 카테고리별 {categoryType}
               </Text>
               <View style={{ alignItems: 'center', marginBottom: 20 }}>
@@ -567,7 +568,7 @@ function CategoryTab({
                   centerLabelComponent={() => (
                     <View style={{ alignItems: 'center' }}>
                       <Text style={{ fontSize: 11, color: colors.text.tertiary }}>총 {categoryType}</Text>
-                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text.primary }}>
+                      <Text style={{ fontSize: 14, fontFamily: 'Pretendard-Bold', color: colors.text.primary }}>
                         {CURRENCY_SYMBOLS[currency]}{totalAmount.toLocaleString()}
                       </Text>
                     </View>
@@ -584,7 +585,7 @@ function CategoryTab({
               padding: spacing.cardPadding,
               ...shadow.card,
             }}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.secondary, marginBottom: 12 }}>
+              <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary, marginBottom: 12 }}>
                 카테고리 상세 (탭하면 거래 목록)
               </Text>
               <View style={{ gap: 0 }}>
@@ -610,10 +611,10 @@ function CategoryTab({
                     <Text style={{ fontSize: 13, color: colors.text.secondary }}>
                       {cat.percentage.toFixed(1)}%
                     </Text>
-                    <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.primary, minWidth: 80, textAlign: 'right' }}>
+                    <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.primary, minWidth: 80, textAlign: 'right' }}>
                       {formatCurrency(cat.amount, currency)}
                     </Text>
-                    <Text style={{ fontSize: 14, color: colors.text.tertiary }}>›</Text>
+                    <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={2} />
                   </TouchableOpacity>
                 ))}
               </View>
@@ -626,9 +627,9 @@ function CategoryTab({
             borderRadius: radius.card,
             padding: 32, alignItems: 'center', gap: 12,
           }}>
-            <Text style={{ fontSize: 36 }}>📊</Text>
+            <BarChart3 size={36} color={colors.text.tertiary} strokeWidth={1.6} />
             <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-              해당 월 {categoryType} 내역이 없어요.{'\n'}글로와 함께 가계부를 작성해볼까요?
+              해당 월 {categoryType} 내역이 없어요.{'\n'}GLLO와 함께 가계부를 작성해볼까요?
             </Text>
           </View>
         )}
@@ -659,7 +660,7 @@ export default function AnalyticsScreen() {
           수입/지출 분석
         </Text>
         <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
-          글로가 이번 달 수입/지출 흐름을 살펴봤어요.
+          GLLO가 이번 달 수입/지출 흐름을 살펴봤어요.
         </Text>
       </View>
 
@@ -684,7 +685,7 @@ export default function AnalyticsScreen() {
               }}
             >
               <Text style={{
-                fontSize: 14, fontWeight: '600',
+                fontSize: 14, fontFamily: 'Pretendard-SemiBold',
                 color: active ? colors.text.inverse : colors.text.secondary,
               }}>
                 {t}

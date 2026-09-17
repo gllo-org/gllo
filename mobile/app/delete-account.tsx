@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { useAuthStore } from '@/stores/authStore';
 import { colors, spacing, radius } from '@/theme';
+import { ArrowLeft, AlertTriangle } from 'lucide-react-native';
 
 const WARNINGS = [
   '탈퇴 후 30일 이내 같은 이메일로 재로그인하면 계정을 복구할 수 있어요.',
@@ -42,7 +43,7 @@ export default function DeleteAccountScreen() {
       await signOut();
     } catch {
       setDeleting(false);
-      showAlert('오류', '글로가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
+      showAlert('오류', 'GLLO가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
@@ -55,9 +56,9 @@ export default function DeleteAccountScreen() {
         paddingVertical: 16,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12, padding: 4 }}>
-          <Text style={{ fontSize: 20, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={20} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ fontSize: 20, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           계정 탈퇴
         </Text>
       </View>
@@ -71,10 +72,10 @@ export default function DeleteAccountScreen() {
           borderWidth: 1,
           borderColor: colors.loss.bg,
         }}>
-          <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 12 }}>⚠️</Text>
+          <View style={{ alignItems: 'center', marginBottom: 12 }}><AlertTriangle size={28} color={colors.status.danger} strokeWidth={1.8} /></View>
           <Text style={{
             fontSize: 17,
-            fontWeight: '700',
+            fontFamily: 'SUIT-Bold',
             color: colors.loss.text,
             textAlign: 'center',
             marginBottom: 16,
@@ -100,7 +101,7 @@ export default function DeleteAccountScreen() {
           marginBottom: 40,
         }}>
           <Text style={{ fontSize: 14, color: colors.text.secondary, lineHeight: 22 }}>
-            탈퇴 후에도 30일 동안은 같은 이메일로 로그인하면 계정을 그대로 사용할 수 있어요. 글로와 함께한 시간이 소중하니, 다시 돌아와주세요 💜
+            탈퇴 후에도 30일 동안은 같은 이메일로 로그인하면 계정을 그대로 사용할 수 있어요. GLLO와 함께한 시간이 소중하니, 다시 돌아와주세요 💜
           </Text>
         </View>
 
@@ -119,7 +120,7 @@ export default function DeleteAccountScreen() {
           {deleting ? (
             <ActivityIndicator color={colors.loss.text} />
           ) : (
-            <Text style={{ fontSize: 16, fontWeight: '700', color: colors.loss.text }}>
+            <Text style={{ fontSize: 16, fontFamily: 'Pretendard-Bold', color: colors.loss.text }}>
               계정 탈퇴하기
             </Text>
           )}
