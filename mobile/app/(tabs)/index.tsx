@@ -7,9 +7,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
+import { Flag } from '@/components/ui/Flag';
 import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
+import { Landmark, Plus, TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface DashboardStats {
   totalAssetKrw: number;
@@ -153,9 +155,9 @@ export default function DashboardScreen() {
                         width: 160,
                         ...shadow.card,
                       }}>
-                        <Text style={{ fontSize: 20, marginBottom: 4 }}>
-                          {CURRENCY_FLAGS[account.currency]}
-                        </Text>
+                        <View style={{ marginBottom: 4 }}>
+                          <Flag code={CURRENCY_FLAGS[account.currency]} size={24} />
+                        </View>
                         <Text
                           numberOfLines={1}
                           ellipsizeMode="tail"
@@ -176,14 +178,18 @@ export default function DashboardScreen() {
                           </Text>
                         )}
                         {account.pnlRate != null && (
-                          <Text style={{
-                            ...typography.caption,
-                            fontFamily: 'Pretendard-SemiBold',
-                            color: isPositive ? colors.profit.text : colors.loss.text,
-                            marginTop: 4,
-                          }}>
-                            {isPositive ? '▲' : '▼'} {Math.abs(account.pnlRate).toFixed(2)}%
-                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 }}>
+                            {isPositive
+                              ? <TrendingUp size={12} color={colors.profit.text} strokeWidth={2.4} />
+                              : <TrendingDown size={12} color={colors.loss.text} strokeWidth={2.4} />}
+                            <Text style={{
+                              ...typography.caption,
+                              fontFamily: 'Pretendard-SemiBold',
+                              color: isPositive ? colors.profit.text : colors.loss.text,
+                            }}>
+                              {Math.abs(account.pnlRate).toFixed(2)}%
+                            </Text>
+                          </View>
                         )}
                       </View>
                     </TouchableOpacity>
@@ -205,8 +211,8 @@ export default function DashboardScreen() {
                     borderStyle: 'dashed',
                     ...shadow.card,
                   }}>
-                    <Text style={{ fontSize: 22, marginBottom: 6 }}>+</Text>
-                    <Text style={{ fontSize: 12, color: colors.text.brand, fontWeight: '600' }}>계좌 추가</Text>
+                    <View style={{ marginBottom: 6 }}><Plus size={22} color={colors.text.brand} strokeWidth={2.2} /></View>
+                    <Text style={{ fontSize: 12, color: colors.text.brand, fontFamily: 'Pretendard-SemiBold' }}>계좌 추가</Text>
                   </View>
                 </TouchableOpacity>
               </View>
@@ -225,7 +231,7 @@ export default function DashboardScreen() {
                 borderColor: colors.system.border,
                 borderStyle: 'dashed',
               }}>
-                <Text style={{ fontSize: 24, marginBottom: 8 }}>🏦</Text>
+                <View style={{ marginBottom: 8 }}><Landmark size={26} color={colors.text.tertiary} strokeWidth={1.7} /></View>
                 <Text style={{ ...typography.body.medium, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>
                   + 계좌 추가하기
                 </Text>
@@ -370,13 +376,7 @@ export default function DashboardScreen() {
         }}
         activeOpacity={0.85}
       >
-        <Text style={{
-          fontSize: 28,
-          color: colors.text.inverse,
-          lineHeight: 32,
-          textAlign: 'center',
-          includeFontPadding: false,
-        }}>+</Text>
+        <Plus size={28} color={colors.text.inverse} strokeWidth={2.4} />
       </TouchableOpacity>
 
       <TransactionSheet

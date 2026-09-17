@@ -5,13 +5,14 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
+import { Flag } from '@/components/ui/Flag';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { ArrowLeft, X, ArrowUpDown, Delete } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const PICKER_H = SCREEN_H * 0.55;
@@ -37,9 +38,10 @@ const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   CARD: '카드',
 };
 
-const PAD_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'];
+const PAD_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'del'];
 
 function NumberPad({ onPress }: { onPress: (key: string) => void }) {
+  const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
       {PAD_KEYS.map((key) => (
@@ -54,13 +56,17 @@ function NumberPad({ onPress }: { onPress: (key: string) => void }) {
             justifyContent: 'center',
           }}
         >
-          <Text style={{
-            fontSize: key === '⌫' ? 20 : 22,
-            fontWeight: key === '⌫' ? '400' : '500',
-            color: key === '⌫' ? colors.text.secondary : colors.text.primary,
-          }}>
-            {key}
-          </Text>
+          {key === 'del' ? (
+            <Delete size={22} color={colors.text.secondary} strokeWidth={2} />
+          ) : (
+            <Text style={{
+              fontSize: 22,
+              fontFamily: 'SUIT-Medium',
+              color: colors.text.primary,
+            }}>
+              {key}
+            </Text>
+          )}
         </TouchableOpacity>
       ))}
     </View>
@@ -82,6 +88,7 @@ function AccountPickerSheet({
   onClose: () => void;
   onAddAccount?: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(PICKER_H)).current;
 
   useEffect(() => {
@@ -130,11 +137,11 @@ function AccountPickerSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               계좌 선택
             </Text>
             <TouchableOpacity onPress={closeSheet} style={{ padding: 6 }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary, lineHeight: 26 }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -158,16 +165,16 @@ function AccountPickerSheet({
                     ...shadow.card,
                   }}
                 >
-                  <Text style={{ fontSize: 26, marginRight: 12 }}>{CURRENCY_FLAGS[account.currency]}</Text>
+                  <View style={{ marginRight: 12 }}><Flag code={CURRENCY_FLAGS[account.currency]} size={30} /></View>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>
+                    <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                       {account.name}
                     </Text>
                     <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
                       {ACCOUNT_TYPE_LABELS[account.type] ?? account.type}
                     </Text>
                   </View>
-                  <Text style={{ fontSize: 14, fontWeight: '600', color: cc.text }}>
+                  <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: cc.text }}>
                     {formatCurrency(account.balance, account.currency)}
                   </Text>
                 </TouchableOpacity>
@@ -193,7 +200,7 @@ function AccountPickerSheet({
                   marginTop: 8,
                 }}
               >
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.brand }}>
+                <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>
                   + 계좌 추가하기
                 </Text>
               </TouchableOpacity>
@@ -206,6 +213,7 @@ function AccountPickerSheet({
 }
 
 export default function ExchangeScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -241,7 +249,7 @@ export default function ExchangeScreen() {
 
   function handlePad(key: string) {
     setAmountStr((prev) => {
-      if (key === '⌫') {
+      if (key === 'del') {
         const next = prev.length > 1 ? prev.slice(0, -1) : '0';
         return next;
       }
@@ -296,9 +304,9 @@ export default function ExchangeScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           환전 기록
         </Text>
         <View style={{ width: 38 }} />
@@ -311,7 +319,7 @@ export default function ExchangeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={{ paddingHorizontal: spacing.screenPadding }}>
-          <Text style={{ fontSize: 13, color: colors.text.secondary, fontWeight: '500', marginBottom: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.text.secondary, fontFamily: 'Pretendard-Medium', marginBottom: 8 }}>
             출금 계좌
           </Text>
           <TouchableOpacity
@@ -331,9 +339,9 @@ export default function ExchangeScreen() {
           >
             {fromAccount ? (
               <>
-                <Text style={{ fontSize: 26, marginRight: 12 }}>{CURRENCY_FLAGS[fromAccount.currency]}</Text>
+                <View style={{ marginRight: 12 }}><Flag code={CURRENCY_FLAGS[fromAccount.currency]} size={30} /></View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>
+                  <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                     {fromAccount.name}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
@@ -345,7 +353,7 @@ export default function ExchangeScreen() {
                   borderRadius: radius.chip,
                   backgroundColor: fromCc!.primary + '20',
                 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: fromCc!.text }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: fromCc!.text }}>
                     {fromAccount.currency}
                   </Text>
                 </View>
@@ -367,11 +375,11 @@ export default function ExchangeScreen() {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Text style={{ fontSize: 16, color: colors.text.secondary }}>⇅</Text>
+              <ArrowUpDown size={18} color={colors.text.secondary} strokeWidth={2} />
             </View>
           </View>
 
-          <Text style={{ fontSize: 13, color: colors.text.secondary, fontWeight: '500', marginBottom: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.text.secondary, fontFamily: 'Pretendard-Medium', marginBottom: 8 }}>
             입금 계좌
           </Text>
           <TouchableOpacity
@@ -391,9 +399,9 @@ export default function ExchangeScreen() {
           >
             {toAccount ? (
               <>
-                <Text style={{ fontSize: 26, marginRight: 12 }}>{CURRENCY_FLAGS[toAccount.currency]}</Text>
+                <View style={{ marginRight: 12 }}><Flag code={CURRENCY_FLAGS[toAccount.currency]} size={30} /></View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.primary }}>
+                  <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                     {toAccount.name}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
@@ -405,7 +413,7 @@ export default function ExchangeScreen() {
                   borderRadius: radius.chip,
                   backgroundColor: toCc!.primary + '20',
                 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: toCc!.text }}>
+                  <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: toCc!.text }}>
                     {toAccount.currency}
                   </Text>
                 </View>
@@ -437,7 +445,7 @@ export default function ExchangeScreen() {
                 <Text style={{ fontSize: 12, color: colors.text.tertiary }}>
                   현재 환율 1 {fromAccount?.currency} = {rateData.rate.toFixed(4)} {toAccount?.currency}
                 </Text>
-                <Text style={{ fontSize: 15, fontWeight: '600', color: toCc?.text ?? colors.text.brand }}>
+                <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: toCc?.text ?? colors.text.brand }}>
                   ≈ {formatCurrency(convertedAmount, toAccount!.currency)}
                 </Text>
               </View>
@@ -452,20 +460,18 @@ export default function ExchangeScreen() {
             onPress={handleSubmit}
             disabled={!isValid || isPending || accountsLoading}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            style={{
+              backgroundColor: isValid && !isPending ? colors.accent.primary : colors.bg.input,
+              borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+            }}
           >
-            <LinearGradient
-              colors={isValid && !isPending ? colors.gradient.primary : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-            >
-              {isPending
-                ? <ActivityIndicator color={colors.text.inverse} />
-                : <Text style={{ fontSize: 16, fontWeight: '600', color: isValid ? colors.text.inverse : colors.text.tertiary }}>
-                    환전하기
-                  </Text>
-              }
-            </LinearGradient>
+            {isPending
+              ? <ActivityIndicator color={colors.text.inverse} />
+              : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: isValid ? colors.text.inverse : colors.text.tertiary }}>
+                  환전하기
+                </Text>
+            }
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -7,32 +7,34 @@ import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { GraduationCap, Briefcase, Home, Map, Check, ArrowLeft, type LucideIcon } from 'lucide-react-native';
 import { apiClient } from '@/lib/api/client';
+import { Flag, type FlagCode } from '@/components/ui/Flag';
 import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 
 type Purpose = 'EXCHANGE_STUDENT' | 'WORKING_HOLIDAY' | 'IMMIGRATION' | 'LONG_TERM_TRAVEL';
 type Step = 1 | 2 | 3 | 4;
 
-const PURPOSES = [
-  { value: 'EXCHANGE_STUDENT' as Purpose, emoji: '🎓', label: '교환학생', desc: '대학 파견·방문학생 프로그램' },
-  { value: 'WORKING_HOLIDAY' as Purpose, emoji: '🧳', label: '워킹홀리데이', desc: '일하며 여행하는 생활' },
-  { value: 'IMMIGRATION' as Purpose, emoji: '🏡', label: '이민', desc: '장기 거주·영주권 준비' },
-  { value: 'LONG_TERM_TRAVEL' as Purpose, emoji: '🗺️', label: '장기여행', desc: '자유롭게 여행하는 삶' },
+const PURPOSES: { value: Purpose; icon: LucideIcon; label: string; desc: string }[] = [
+  { value: 'EXCHANGE_STUDENT', icon: GraduationCap, label: '교환학생', desc: '대학 파견·방문학생 프로그램' },
+  { value: 'WORKING_HOLIDAY', icon: Briefcase, label: '워킹홀리데이', desc: '일하며 여행하는 생활' },
+  { value: 'IMMIGRATION', icon: Home, label: '이민', desc: '장기 거주·영주권 준비' },
+  { value: 'LONG_TERM_TRAVEL', icon: Map, label: '장기여행', desc: '자유롭게 여행하는 삶' },
 ];
 
-type Country = { label: string; flag: string; currency: CurrencyCode };
+type Country = { label: string; flag: FlagCode; currency: CurrencyCode };
 
 const COUNTRIES: Country[] = [
-  { label: '독일', flag: '🇩🇪', currency: 'EUR' },
-  { label: '프랑스', flag: '🇫🇷', currency: 'EUR' },
-  { label: '네덜란드', flag: '🇳🇱', currency: 'EUR' },
-  { label: '스페인', flag: '🇪🇸', currency: 'EUR' },
-  { label: '오스트리아', flag: '🇦🇹', currency: 'EUR' },
-  { label: '기타 유럽', flag: '🇪🇺', currency: 'EUR' },
-  { label: '미국', flag: '🇺🇸', currency: 'USD' },
-  { label: '영국', flag: '🇬🇧', currency: 'GBP' },
-  { label: '한국', flag: '🇰🇷', currency: 'KRW' },
+  { label: '독일', flag: 'DE', currency: 'EUR' },
+  { label: '프랑스', flag: 'FR', currency: 'EUR' },
+  { label: '네덜란드', flag: 'NL', currency: 'EUR' },
+  { label: '스페인', flag: 'ES', currency: 'EUR' },
+  { label: '오스트리아', flag: 'AT', currency: 'EUR' },
+  { label: '기타 유럽', flag: 'EU', currency: 'EUR' },
+  { label: '미국', flag: 'US', currency: 'USD' },
+  { label: '영국', flag: 'GB', currency: 'GBP' },
+  { label: '한국', flag: 'KR', currency: 'KRW' },
 ];
 
 function getTemplates(): string[] {
@@ -152,7 +154,7 @@ export default function OnboardingScreen() {
     return (
       <View style={{ flex: 1 }}>
         <ProgressDots current={1} total={3} />
-        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary, marginBottom: 8 }}>
+        <Text style={{ fontSize: 22, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 8 }}>
           해외 생활 목적이 무엇인가요?
         </Text>
         <Text style={{ fontSize: 15, color: colors.text.secondary, marginBottom: 28, lineHeight: 22 }}>
@@ -162,6 +164,7 @@ export default function OnboardingScreen() {
         <View style={{ gap: 12 }}>
           {PURPOSES.map((p) => {
             const selected = selectedPurpose === p.value;
+            const PurposeIcon = p.icon;
             return (
               <TouchableOpacity
                 key={p.value}
@@ -178,11 +181,17 @@ export default function OnboardingScreen() {
                   backgroundColor: selected ? colors.bg.surface : colors.bg.screen,
                   ...(selected ? shadow.card : {}),
                 }}>
-                  <Text style={{ fontSize: 28, marginRight: 14 }}>{p.emoji}</Text>
+                  <View style={{ marginRight: 14 }}>
+                    <PurposeIcon
+                      size={28}
+                      color={selected ? colors.accent.primary : colors.text.secondary}
+                      strokeWidth={1.8}
+                    />
+                  </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{
                       fontSize: 16,
-                      fontWeight: '600',
+                      fontFamily: 'Pretendard-SemiBold',
                       color: selected ? colors.text.brand : colors.text.primary,
                       marginBottom: 2,
                     }}>
@@ -198,7 +207,7 @@ export default function OnboardingScreen() {
                       backgroundColor: colors.text.brand,
                       alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Text style={{ fontSize: 12, color: colors.text.inverse, fontWeight: '700' }}>✓</Text>
+                      <Check size={13} color={colors.text.inverse} strokeWidth={3} />
                     </View>
                   )}
                 </View>
@@ -222,7 +231,7 @@ export default function OnboardingScreen() {
           }}
         >
           <Text style={{
-            fontSize: 16, fontWeight: '600',
+            fontSize: 16, fontFamily: 'Pretendard-SemiBold',
             color: selectedPurpose ? colors.text.inverse : colors.text.tertiary,
           }}>
             다음
@@ -236,7 +245,7 @@ export default function OnboardingScreen() {
     return (
       <View style={{ flex: 1 }}>
         <ProgressDots current={2} total={3} />
-        <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary, marginBottom: 8 }}>
+        <Text style={{ fontSize: 22, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 8 }}>
           어느 나라로 가시나요?
         </Text>
         <Text style={{ fontSize: 15, color: colors.text.secondary, marginBottom: 20, lineHeight: 22 }}>
@@ -263,10 +272,12 @@ export default function OnboardingScreen() {
                     borderColor: selected ? colors.text.brand : colors.system.border,
                     backgroundColor: selected ? colors.bg.surface : colors.bg.screen,
                   }}>
-                    <Text style={{ fontSize: 26, marginRight: 12 }}>{c.flag}</Text>
+                    <View style={{ marginRight: 12 }}>
+                      <Flag code={c.flag} size={30} />
+                    </View>
                     <Text style={{
                       flex: 1,
-                      fontSize: 16, fontWeight: '500',
+                      fontSize: 16, fontFamily: 'Pretendard-Medium',
                       color: selected ? colors.text.brand : colors.text.primary,
                     }}>
                       {c.label}
@@ -276,7 +287,7 @@ export default function OnboardingScreen() {
                       borderRadius: radius.chip,
                       backgroundColor: currencyColor.bg,
                     }}>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: currencyColor.text }}>
+                      <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: currencyColor.text }}>
                         {c.currency}
                       </Text>
                     </View>
@@ -287,7 +298,7 @@ export default function OnboardingScreen() {
                         alignItems: 'center', justifyContent: 'center',
                         marginLeft: 10,
                       }}>
-                        <Text style={{ fontSize: 12, color: colors.text.inverse, fontWeight: '700' }}>✓</Text>
+                        <Check size={13} color={colors.text.inverse} strokeWidth={3} />
                       </View>
                     )}
                   </View>
@@ -311,7 +322,7 @@ export default function OnboardingScreen() {
           }}
         >
           <Text style={{
-            fontSize: 16, fontWeight: '600',
+            fontSize: 16, fontFamily: 'Pretendard-SemiBold',
             color: selectedCountry ? colors.text.inverse : colors.text.tertiary,
           }}>
             다음
@@ -345,13 +356,13 @@ export default function OnboardingScreen() {
       borderColor: colors.system.border,
       paddingVertical: 12,
       fontSize: 16,
-      fontWeight: '600' as const,
+      fontFamily: 'Pretendard-SemiBold',
       color: colors.text.primary,
       textAlign: 'center' as const,
     };
     return (
       <View style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontWeight: '500' }}>
+        <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 8, fontFamily: 'Pretendard-Medium' }}>
           {label}
         </Text>
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
@@ -415,7 +426,7 @@ export default function OnboardingScreen() {
       >
         <View style={{ flex: 1 }}>
           <ProgressDots current={3} total={3} />
-          <Text style={{ fontSize: 22, fontWeight: '700', color: colors.text.primary, marginBottom: 8 }}>
+          <Text style={{ fontSize: 22, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 8 }}>
             체류 기간을 알려주세요
           </Text>
           <Text style={{ fontSize: 15, color: colors.text.secondary, marginBottom: 28, lineHeight: 22 }}>
@@ -460,12 +471,12 @@ export default function OnboardingScreen() {
               alignItems: 'center',
               gap: 10,
             }}>
-              <Text style={{ fontSize: 20 }}>{selectedCountry.flag}</Text>
+              <Flag code={selectedCountry.flag} size={24} />
               <View>
-                <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary }}>
+                <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary }}>
                   기본 통화
                 </Text>
-                <Text style={{ fontSize: 16, fontWeight: '700', color: colors.currency[selectedCountry.currency].text }}>
+                <Text style={{ fontSize: 16, fontFamily: 'Pretendard-Bold', color: colors.currency[selectedCountry.currency].text }}>
                   {selectedCountry.currency} — {selectedCountry.label}
                 </Text>
               </View>
@@ -490,7 +501,7 @@ export default function OnboardingScreen() {
               ? <ActivityIndicator color={colors.text.inverse} />
               : (
                 <Text style={{
-                  fontSize: 16, fontWeight: '600',
+                  fontSize: 16, fontFamily: 'Pretendard-SemiBold',
                   color: valid ? colors.text.inverse : colors.text.tertiary,
                 }}>
                   GLLO 시작하기
@@ -527,11 +538,11 @@ export default function OnboardingScreen() {
           <Text style={{ fontSize: 40 }}>🎉</Text>
         </View>
 
-        <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text.primary, textAlign: 'center', marginBottom: 10 }}>
+        <Text style={{ fontSize: 24, fontFamily: 'SUIT-Bold', color: colors.text.primary, textAlign: 'center', marginBottom: 10 }}>
           GLLO에 오신 걸 환영해요!
         </Text>
         <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22, marginBottom: 32 }}>
-          GLLO가 {selectedCountry?.flag} {selectedCountry?.label} {purposeLabel}에게{'\n'}꼭 필요한 카테고리를 준비해뒀어요.
+          GLLO가 {selectedCountry?.label} {purposeLabel}에게{'\n'}꼭 필요한 카테고리를 준비해뒀어요.
         </Text>
 
         <View style={{
@@ -541,7 +552,7 @@ export default function OnboardingScreen() {
           padding: spacing.cardPadding,
           marginBottom: 24,
         }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text.secondary, marginBottom: 12 }}>
+          <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary, marginBottom: 12 }}>
             초기 예산 카테고리
           </Text>
           {templates.map((t, i) => (
@@ -558,7 +569,7 @@ export default function OnboardingScreen() {
                 alignItems: 'center', justifyContent: 'center',
                 marginRight: 12,
               }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.accent.primary }}>✓</Text>
+                <Check size={12} color={colors.accent.primary} strokeWidth={3} />
               </View>
               <Text style={{ fontSize: 15, color: colors.text.primary }}>{t}</Text>
             </View>
@@ -575,11 +586,11 @@ export default function OnboardingScreen() {
           gap: 10,
           marginBottom: 32,
         }}>
-          <Text style={{ fontSize: 20 }}>{selectedCountry?.flag}</Text>
+          {selectedCountry ? <Flag code={selectedCountry.flag} size={24} /> : null}
           <View>
             <Text style={{ fontSize: 12, color: colors.text.secondary }}>설정된 기본 통화</Text>
             <Text style={{
-              fontSize: 15, fontWeight: '700',
+              fontSize: 15, fontFamily: 'Pretendard-Bold',
               color: colors.currency[selectedCountry?.currency ?? 'EUR'].text,
             }}>
               {selectedCountry?.currency} — {selectedCountry?.label}
@@ -597,7 +608,7 @@ export default function OnboardingScreen() {
             backgroundColor: colors.accent.primary,
           }}
         >
-          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>
+          <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>
             대시보드로 이동
           </Text>
         </TouchableOpacity>
@@ -623,14 +634,14 @@ export default function OnboardingScreen() {
               onPress={() => setStep((prev) => (prev - 1) as Step)}
               style={{ padding: 8, marginLeft: -8 }}
             >
-              <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+              <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
             </TouchableOpacity>
           ) : canGoBackRoute ? (
             <TouchableOpacity
               onPress={() => router.back()}
               style={{ padding: 8, marginLeft: -8 }}
             >
-              <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+              <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
             </TouchableOpacity>
           ) : (
             <View style={{ width: 36 }} />
@@ -638,7 +649,7 @@ export default function OnboardingScreen() {
           {headerTitle ? (
             <Text style={{
               flex: 1, textAlign: 'center',
-              fontSize: 16, fontWeight: '600', color: colors.text.primary,
+              fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary,
             }}>
               {headerTitle}
             </Text>

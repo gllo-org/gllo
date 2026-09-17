@@ -7,7 +7,9 @@ import { showAlert } from '@/lib/ui/alert';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
+import { Delete, Check, X, ArrowLeft, Tag, Landmark, Calendar, FileText, Receipt, type LucideIcon, Plus, ChevronRight } from 'lucide-react-native';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
+import { Flag } from '@/components/ui/Flag';
 import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode, ThemeColors } from '@/theme';
 
@@ -77,7 +79,7 @@ function todayStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-const PAD_ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['.', '0', '⌫']] as const;
+const PAD_ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['.', '0', 'del']] as const;
 
 function NumberPad({ onKey }: { onKey: (k: string) => void }) {
   const { colors } = useTheme();
@@ -91,7 +93,7 @@ function NumberPad({ onKey }: { onKey: (k: string) => void }) {
               onPress={() => onKey(key)}
               activeOpacity={0.6}
               accessibilityRole="button"
-              accessibilityLabel={key === '⌫' ? '지우기' : key}
+              accessibilityLabel={key === 'del' ? '지우기' : key}
               style={{
                 flex: 1,
                 height: 48,
@@ -104,13 +106,17 @@ function NumberPad({ onKey }: { onKey: (k: string) => void }) {
                 borderColor: colors.system.border,
               }}
             >
-              <Text style={{
-                fontFamily: key === '⌫' ? 'Pretendard-Regular' : 'SUIT-Medium',
-                fontSize: key === '⌫' ? 18 : 20,
-                color: key === '⌫' ? colors.text.secondary : colors.text.primary,
-              }}>
-                {key}
-              </Text>
+              {key === 'del' ? (
+                <Delete size={20} color={colors.text.secondary} strokeWidth={2} />
+              ) : (
+                <Text style={{
+                  fontFamily: 'SUIT-Medium',
+                  fontSize: 20,
+                  color: colors.text.primary,
+                }}>
+                  {key}
+                </Text>
+              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -120,9 +126,9 @@ function NumberPad({ onKey }: { onKey: (k: string) => void }) {
 }
 
 function SelectorRow({
-  icon, label, value, onPress, dimmed,
+  icon: Icon, label, value, onPress, dimmed,
 }: {
-  icon: string; label: string; value: string; onPress: () => void; dimmed?: boolean;
+  icon: LucideIcon; label: string; value: string; onPress: () => void; dimmed?: boolean;
 }) {
   const { colors } = useTheme();
   return (
@@ -140,7 +146,9 @@ function SelectorRow({
         borderBottomColor: colors.system.divider,
       }}
     >
-      <Text style={{ fontSize: 17, width: 26 }}>{icon}</Text>
+      <View style={{ width: 26 }}>
+        <Icon size={18} color={colors.text.secondary} strokeWidth={2} />
+      </View>
       <Text style={{
         fontFamily: 'Pretendard-Regular',
         fontSize: 13,
@@ -157,7 +165,7 @@ function SelectorRow({
       }}>
         {value}
       </Text>
-      <Text style={{ fontSize: 18, color: colors.text.tertiary }}>›</Text>
+      <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
     </TouchableOpacity>
   );
 }
@@ -307,7 +315,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
   }
 
   function handleKey(key: string) {
-    if (key === '⌫') {
+    if (key === 'del') {
       setAmountStr(p => (p.length <= 1 ? '0' : p.slice(0, -1)));
       return;
     }
@@ -353,7 +361,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
   function pickAccount(acc: Account) {
     setAccountId(acc.id);
-    setAccountLbl(`${CURRENCY_FLAGS[acc.currency]} ${acc.name}`);
+    setAccountLbl(acc.name);
     if (!currencyTouched) setCurrency(acc.currency);
     setView('main');
   }
@@ -440,9 +448,9 @@ export function TransactionSheet({ visible, onClose }: Props) {
               }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={{ fontSize: 18, color: colors.text.secondary, lineHeight: 22 }}>
-                {view === 'main' ? '×' : '←'}
-              </Text>
+              {view === 'main'
+                ? <X size={18} color={colors.text.secondary} strokeWidth={2} />
+                : <ArrowLeft size={18} color={colors.text.secondary} strokeWidth={2} />}
             </TouchableOpacity>
           </View>
 
@@ -598,13 +606,13 @@ export function TransactionSheet({ visible, onClose }: Props) {
               >
                 <View style={{ paddingHorizontal: spacing.screenPadding }}>
                   <SelectorRow
-                    icon="🏷️" label="카테고리"
+                    icon={Tag} label="카테고리"
                     value={categoryLabel ?? '선택하세요'}
                     dimmed={!categoryId}
                     onPress={() => setView('category')}
                   />
                   <SelectorRow
-                    icon="🏦" label="계좌"
+                    icon={Landmark} label="계좌"
                     value={accountLabel ?? '선택하세요'}
                     dimmed={!accountId}
                     onPress={() => setView('account')}
@@ -623,7 +631,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                     }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 24 }}>
-                      <Text style={{ fontSize: 17, width: 26 }}>📅</Text>
+                      <View style={{ width: 26 }}><Calendar size={18} color={colors.text.secondary} strokeWidth={2} /></View>
                       <Text style={{
                         fontFamily: 'Pretendard-Regular',
                         fontSize: 13, color: colors.text.secondary, width: 52,
@@ -637,7 +645,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                       }}>
                         {dateDisplay}
                       </Text>
-                      <Text style={{ fontSize: 18, color: colors.text.tertiary }}>›</Text>
+                      <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
                     </View>
                     {showDate && (
                       <TextInput
@@ -665,7 +673,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                     flexDirection: 'row', alignItems: 'center',
                     minHeight: 48, paddingVertical: 12,
                   }}>
-                    <Text style={{ fontSize: 17, width: 26 }}>📝</Text>
+                    <View style={{ width: 26 }}><FileText size={18} color={colors.text.secondary} strokeWidth={2} /></View>
                     <Text style={{
                       fontFamily: 'Pretendard-Regular',
                       fontSize: 13, color: colors.text.secondary, width: 52,
@@ -802,7 +810,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                     borderStyle: 'dashed',
                   }}
                 >
-                  <Text style={{ fontSize: 16, color: colors.accent.text }}>+</Text>
+                  <Plus size={16} color={colors.accent.text} strokeWidth={2.4} />
                   <Text style={{
                     fontFamily: 'Pretendard-Medium',
                     fontSize: 14, color: colors.accent.text,
@@ -814,7 +822,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
               {filteredCategories.length === 0 ? (
                 <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
-                  <Text style={{ fontSize: 36 }}>💸</Text>
+                  <Receipt size={36} color={colors.text.tertiary} strokeWidth={1.6} />
                   <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
                     아직 카테고리가 없어요.{'\n'}위의 버튼으로 첫 카테고리를 만들어보세요.
                   </Text>
@@ -887,7 +895,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   borderStyle: 'dashed',
                 }}
               >
-                <Text style={{ fontSize: 16, color: colors.accent.text }}>+</Text>
+                <Plus size={16} color={colors.accent.text} strokeWidth={2.4} />
                 <Text style={{
                   fontFamily: 'Pretendard-Medium',
                   fontSize: 14, color: colors.accent.text,
@@ -898,7 +906,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
               {!accounts || accounts.length === 0 ? (
                 <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
-                  <Text style={{ fontSize: 36 }}>🏦</Text>
+                  <Landmark size={36} color={colors.text.tertiary} strokeWidth={1.6} />
                   <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
                     계좌가 없어요.{'\n'}위 버튼으로 먼저 계좌를 만들어보세요.
                   </Text>
@@ -925,7 +933,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                           borderColor: active ? cc.primary : colors.system.border,
                         }}
                       >
-                        <Text style={{ fontSize: 24, marginRight: 12 }}>{CURRENCY_FLAGS[acc.currency]}</Text>
+                        <View style={{ marginRight: 12 }}><Flag code={CURRENCY_FLAGS[acc.currency]} size={28} /></View>
                         <View style={{ flex: 1 }}>
                           <Text style={{
                             fontFamily: 'Pretendard-SemiBold',
@@ -947,13 +955,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                             backgroundColor: cc.primary,
                             alignItems: 'center', justifyContent: 'center',
                           }}>
-                            <Text style={{
-                              fontSize: 13,
-                              fontFamily: 'Pretendard-SemiBold',
-                              color: colors.text.inverse,
-                            }}>
-                              ✓
-                            </Text>
+                            <Check size={14} color={colors.text.inverse} strokeWidth={3} />
                           </View>
                         )}
                       </TouchableOpacity>

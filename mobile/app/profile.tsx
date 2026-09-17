@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/lib/api/client';
 import { colors, spacing, radius, shadow } from '@/theme';
+import { ArrowLeft, AlertTriangle, ChevronRight } from 'lucide-react-native';
 
 interface UserProfile {
   userId: string;
@@ -171,9 +172,9 @@ export default function ProfileScreen() {
         paddingVertical: 16,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12, padding: 4 }}>
-          <Text style={{ fontSize: 20, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={20} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ fontSize: 20, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           프로필 설정
         </Text>
       </View>
@@ -199,7 +200,7 @@ export default function ProfileScreen() {
                   style={{ width: 96, height: 96 }}
                 />
               ) : (
-                <Text style={{ fontSize: 36, fontWeight: '700', color: colors.text.brand }}>
+                <Text style={{ fontSize: 36, fontFamily: 'SUIT-Bold', color: colors.text.brand }}>
                   {effectiveLetter}
                 </Text>
               )}
@@ -207,7 +208,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handlePickImage} style={{ marginTop: 12 }}>
-            <Text style={{ fontSize: 14, color: colors.text.brand, fontWeight: '600' }}>
+            <Text style={{ fontSize: 14, color: colors.text.brand, fontFamily: 'Pretendard-SemiBold' }}>
               사진 변경
             </Text>
           </TouchableOpacity>
@@ -265,7 +266,7 @@ export default function ProfileScreen() {
                     paddingVertical: 8,
                   }}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>
+                  <Text style={{ color: '#fff', fontFamily: 'Pretendard-SemiBold', fontSize: 14 }}>
                     {savingName ? '...' : '저장'}
                   </Text>
                 </TouchableOpacity>
@@ -278,10 +279,10 @@ export default function ProfileScreen() {
                 onPress={startEditName}
                 style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
               >
-                <Text style={{ fontSize: 16, color: colors.text.primary, fontWeight: '500' }}>
+                <Text style={{ fontSize: 16, color: colors.text.primary, fontFamily: 'Pretendard-Medium' }}>
                   {effectiveName}
                 </Text>
-                <Text style={{ color: colors.text.brand, fontSize: 13, fontWeight: '500' }}>수정</Text>
+                <Text style={{ color: colors.text.brand, fontSize: 13, fontFamily: 'Pretendard-Medium' }}>수정</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -310,9 +311,9 @@ export default function ProfileScreen() {
               padding: spacing.cardPadding,
             }}
           >
-            <Text style={{ fontSize: 20, marginRight: 12 }}>⚠️</Text>
+            <View style={{ marginRight: 12 }}><AlertTriangle size={20} color={colors.status.warning} strokeWidth={2} /></View>
             <Text style={{ flex: 1, fontSize: 15, color: colors.loss.text }}>계정 탈퇴</Text>
-            <Text style={{ color: colors.text.tertiary }}>›</Text>
+            <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
           </TouchableOpacity>
         </View>
 

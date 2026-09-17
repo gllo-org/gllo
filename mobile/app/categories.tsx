@@ -5,11 +5,11 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
-import { colors, spacing, radius, shadow } from '@/theme';
+import { useTheme, spacing, radius, shadow } from '@/theme';
+import { ArrowLeft, Plus } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.55;
@@ -35,6 +35,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
   editTarget: Category | null;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
   const isEdit = editTarget !== null;
@@ -114,11 +115,11 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
+            <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary, marginBottom: 20 }}>
               {isEdit ? '카테고리 수정' : '새 카테고리'}
             </Text>
 
-            <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>이름</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>이름</Text>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -134,7 +135,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
 
             {!isEdit && (
               <>
-                <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>유형</Text>
+                <Text style={{ fontSize: 13, fontFamily: 'Pretendard-Medium', color: colors.text.secondary, marginBottom: 8 }}>유형</Text>
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 28 }}>
                   {(Object.keys(TYPE_LABELS) as CategoryType[]).map((t) => {
                     const active = type === t;
@@ -150,7 +151,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
                           borderColor: active ? colors.text.brand : colors.system.border,
                         }}
                       >
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: active ? colors.text.brand : colors.text.tertiary }}>
+                        <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: active ? colors.text.brand : colors.text.tertiary }}>
                           {TYPE_LABELS[t]}
                         </Text>
                       </TouchableOpacity>
@@ -160,17 +161,20 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
               </>
             )}
 
-            <TouchableOpacity onPress={handleSave} disabled={isPending} activeOpacity={0.85}>
-              <LinearGradient
-                colors={isPending ? ['#E5E7EB', '#E5E7EB', '#E5E7EB'] : colors.gradient.primary}
-                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-              >
-                {isPending
-                  ? <ActivityIndicator color={colors.text.inverse} />
-                  : <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>저장하기</Text>
-                }
-              </LinearGradient>
+            <TouchableOpacity
+              onPress={handleSave}
+              disabled={isPending}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              style={{
+                backgroundColor: isPending ? colors.bg.input : colors.accent.primary,
+                borderRadius: radius.button, paddingVertical: 15, alignItems: 'center',
+              }}
+            >
+              {isPending
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : <Text style={{ fontSize: 16, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>저장하기</Text>
+              }
             </TouchableOpacity>
           </ScrollView>
         </Animated.View>
@@ -180,6 +184,7 @@ function CategoryFormSheet({ visible, editTarget, onClose }: {
 }
 
 export default function CategoriesScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [formVisible, setFormVisible] = useState(false);
@@ -219,7 +224,7 @@ export default function CategoriesScreen() {
     if (cats.length === 0) return null;
     return (
       <>
-        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.tertiary, marginBottom: 8 }}>
+        <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.tertiary, marginBottom: 8 }}>
           {label}
         </Text>
         <View style={{ backgroundColor: colors.bg.surface, borderRadius: radius.card, overflow: 'hidden', marginBottom: 20, ...shadow.card }}>
@@ -265,9 +270,9 @@ export default function CategoriesScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           카테고리 관리
         </Text>
         <View style={{ width: 38 }} />
@@ -293,15 +298,11 @@ export default function CategoriesScreen() {
           <TouchableOpacity
             onPress={() => { setEditTarget(null); setFormVisible(true); }}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            style={{ backgroundColor: colors.accent.primary, borderRadius: radius.button, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6 }}
           >
-            <LinearGradient
-              colors={colors.gradient.primary}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={{ borderRadius: radius.button, paddingVertical: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6 }}
-            >
-              <Text style={{ fontSize: 18, color: colors.text.inverse }}>+</Text>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.inverse }}>카테고리 추가</Text>
-            </LinearGradient>
+            <Plus size={18} color={colors.text.inverse} strokeWidth={2.4} />
+            <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.inverse }}>카테고리 추가</Text>
           </TouchableOpacity>
         </ScrollView>
       )}

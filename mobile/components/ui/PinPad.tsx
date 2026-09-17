@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
+import { Delete, Check } from 'lucide-react-native';
 import { useTheme, radius, spacing } from '@/theme';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'done'] as const;
@@ -95,14 +96,13 @@ export function PinPad({ value, length = 4, onChange, onSubmit, error }: Props) 
               })}
             >
               {isDel ? (
-                <Text style={{ fontSize: 20, color: colors.text.secondary }}>⌫</Text>
+                <Delete size={22} color={colors.text.secondary} strokeWidth={2} />
               ) : isDone ? (
-                <Text style={{
-                  fontSize: 20,
-                  color: canSubmit ? colors.text.inverse : colors.text.tertiary,
-                }}>
-                  ✓
-                </Text>
+                <Check
+                  size={22}
+                  color={canSubmit ? colors.text.inverse : colors.text.tertiary}
+                  strokeWidth={2.4}
+                />
               ) : (
                 <Text style={{
                   fontFamily: 'SUIT-SemiBold',

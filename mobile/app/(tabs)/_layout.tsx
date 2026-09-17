@@ -1,20 +1,25 @@
 import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
+import { Home, CreditCard, BarChart3, Menu, type LucideIcon } from 'lucide-react-native';
 import { useTheme } from '@/theme';
 
 interface TabIconProps {
-  emoji: string;
+  icon: LucideIcon;
   label: string;
   focused: boolean;
 }
 
-function TabIcon({ emoji, label, focused }: TabIconProps) {
+function TabIcon({ icon: Icon, label, focused }: TabIconProps) {
   const { colors } = useTheme();
   return (
     <View style={{ alignItems: 'center', gap: 2 }}>
-      <Text style={{ fontSize: 22 }}>{emoji}</Text>
+      <Icon
+        size={22}
+        color={focused ? colors.accent.primary : colors.text.tertiary}
+        strokeWidth={2}
+      />
       {focused && (
-        <Text style={{ fontSize: 10, fontWeight: '600', color: colors.accent.primary }}>
+        <Text style={{ fontSize: 10, fontFamily: 'Pretendard-SemiBold', color: colors.accent.primary }}>
           {label}
         </Text>
       )}
@@ -43,7 +48,7 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="🏠" label="홈" focused={focused} />
+            <TabIcon icon={Home} label="홈" focused={focused} />
           ),
         }}
       />
@@ -51,7 +56,7 @@ export default function TabLayout() {
         name="transactions"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="💳" label="거래" focused={focused} />
+            <TabIcon icon={CreditCard} label="거래" focused={focused} />
           ),
         }}
       />
@@ -59,7 +64,7 @@ export default function TabLayout() {
         name="analytics"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="📊" label="분석" focused={focused} />
+            <TabIcon icon={BarChart3} label="분석" focused={focused} />
           ),
         }}
       />
@@ -67,7 +72,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon emoji="☰" label="더보기" focused={focused} />
+            <TabIcon icon={Menu} label="더보기" focused={focused} />
           ),
         }}
       />

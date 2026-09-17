@@ -2,16 +2,20 @@ import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import {
+  User, Globe, Wallet, Tag, Repeat, Plane, FileText, TrendingUp,
+  LogOut, AlertTriangle, ChevronRight, type LucideIcon,
+} from 'lucide-react-native';
 import { colors, spacing, radius } from '@/theme';
 
 interface SettingsRowProps {
   label: string;
-  emoji: string;
+  icon: LucideIcon;
   onPress?: () => void;
   isDanger?: boolean;
 }
 
-function SettingsRow({ label, emoji, onPress, isDanger = false }: SettingsRowProps) {
+function SettingsRow({ label, icon: Icon, onPress, isDanger = false }: SettingsRowProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -24,7 +28,13 @@ function SettingsRow({ label, emoji, onPress, isDanger = false }: SettingsRowPro
         borderBottomColor: colors.system.divider,
       }}
     >
-      <Text style={{ fontSize: 20, marginRight: 12 }}>{emoji}</Text>
+      <View style={{ width: 22, marginRight: 12 }}>
+        <Icon
+          size={19}
+          color={isDanger ? colors.loss.text : colors.text.secondary}
+          strokeWidth={2}
+        />
+      </View>
       <Text style={{
         flex: 1,
         fontSize: 15,
@@ -32,7 +42,7 @@ function SettingsRow({ label, emoji, onPress, isDanger = false }: SettingsRowPro
       }}>
         {label}
       </Text>
-      <Text style={{ color: colors.text.tertiary }}>›</Text>
+      <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
     </TouchableOpacity>
   );
 }
@@ -60,7 +70,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
       <View style={{ paddingHorizontal: spacing.screenPadding, paddingVertical: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ fontSize: 20, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           더보기
         </Text>
       </View>
@@ -73,12 +83,12 @@ export default function SettingsScreen() {
           marginBottom: 16,
           overflow: 'hidden',
         }}>
-          <SettingsRow emoji="👤" label="프로필 설정" onPress={() => router.push('/profile')} />
-          <SettingsRow emoji="🌍" label="기본 정보 수정" onPress={() => router.push('/onboarding')} />
-          <SettingsRow emoji="💰" label="계좌 관리" onPress={() => router.push('/accounts')} />
-          <SettingsRow emoji="🏷️" label="카테고리 관리" onPress={() => router.push('/categories')} />
-          <SettingsRow emoji="🔁" label="고정 지출 관리" onPress={() => router.push('/recurring')} />
-          <SettingsRow emoji="✈️" label="여행 기록" onPress={() => router.push('/trips')} />
+          <SettingsRow icon={User} label="프로필 설정" onPress={() => router.push('/profile')} />
+          <SettingsRow icon={Globe} label="기본 정보 수정" onPress={() => router.push('/onboarding')} />
+          <SettingsRow icon={Wallet} label="계좌 관리" onPress={() => router.push('/accounts')} />
+          <SettingsRow icon={Tag} label="카테고리 관리" onPress={() => router.push('/categories')} />
+          <SettingsRow icon={Repeat} label="고정 지출 관리" onPress={() => router.push('/recurring')} />
+          <SettingsRow icon={Plane} label="여행 기록" onPress={() => router.push('/trips')} />
         </View>
 
         <View style={{
@@ -88,8 +98,8 @@ export default function SettingsScreen() {
           marginBottom: 16,
           overflow: 'hidden',
         }}>
-          <SettingsRow emoji="📄" label="월간 리포트" onPress={() => router.push('/report')} />
-          <SettingsRow emoji="📈" label="미실현 손익" onPress={() => router.push('/unrealized-pnl')} />
+          <SettingsRow icon={FileText} label="월간 리포트" onPress={() => router.push('/report')} />
+          <SettingsRow icon={TrendingUp} label="미실현 손익" onPress={() => router.push('/unrealized-pnl')} />
         </View>
 
         <View style={{
@@ -99,8 +109,8 @@ export default function SettingsScreen() {
           marginBottom: 16,
           overflow: 'hidden',
         }}>
-          <SettingsRow emoji="🚪" label="로그아웃" onPress={handleSignOut} />
-          <SettingsRow emoji="⚠️" label="계정 탈퇴" isDanger onPress={() => router.push('/delete-account')} />
+          <SettingsRow icon={LogOut} label="로그아웃" onPress={handleSignOut} />
+          <SettingsRow icon={AlertTriangle} label="계정 탈퇴" isDanger onPress={() => router.push('/delete-account')} />
         </View>
 
         <Text style={{

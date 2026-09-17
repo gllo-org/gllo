@@ -8,8 +8,10 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
+import { Flag } from '@/components/ui/Flag';
 import { colors, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode } from '@/theme';
+import { ArrowLeft, BarChart3, TrendingUp, TrendingDown } from 'lucide-react-native';
 
 interface UnrealizedPnlItem {
   accountId: number;
@@ -32,7 +34,7 @@ function PnlBadge({ pnl, percentage }: { pnl: number; percentage: number }) {
         borderRadius: radius.chip,
         backgroundColor: colors.neutral.bg,
       }}>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: colors.neutral.text }}>± 0%</Text>
+        <Text style={{ fontSize: 12, fontFamily: 'Pretendard-SemiBold', color: colors.neutral.text }}>± 0%</Text>
       </View>
     );
   }
@@ -43,12 +45,16 @@ function PnlBadge({ pnl, percentage }: { pnl: number; percentage: number }) {
       paddingHorizontal: 8, paddingVertical: 4,
       borderRadius: radius.chip,
       backgroundColor: isProfit ? colors.profit.bg : colors.loss.bg,
+      flexDirection: 'row', alignItems: 'center', gap: 3,
     }}>
+      {isProfit
+        ? <TrendingUp size={12} color={colors.profit.text} strokeWidth={2.4} />
+        : <TrendingDown size={12} color={colors.loss.text} strokeWidth={2.4} />}
       <Text style={{
-        fontSize: 12, fontWeight: '600',
+        fontSize: 12, fontFamily: 'Pretendard-SemiBold',
         color: isProfit ? colors.profit.text : colors.loss.text,
       }}>
-        {isProfit ? '▲' : '▼'} {Math.abs(percentage).toFixed(2)}%
+        {Math.abs(percentage).toFixed(2)}%
       </Text>
     </View>
   );
@@ -58,7 +64,7 @@ function RateRow({ label, value, baseCurrency }: { label: string; value: number;
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <Text style={{ fontSize: 12, color: colors.text.tertiary }}>{label}</Text>
-      <Text style={{ fontSize: 12, fontWeight: '500', color: colors.text.secondary }}>
+      <Text style={{ fontSize: 12, fontFamily: 'Pretendard-Medium', color: colors.text.secondary }}>
         {baseCurrency === 'KRW'
           ? `${value.toLocaleString('ko-KR', { maximumFractionDigits: 0 })} KRW`
           : `${value.toFixed(4)} ${baseCurrency}`}
@@ -86,10 +92,10 @@ function AccountPnlCard({ item, baseCurrency }: { item: UnrealizedPnlItem; baseC
           backgroundColor: cc.bg, alignItems: 'center', justifyContent: 'center',
           marginRight: 12,
         }}>
-          <Text style={{ fontSize: 20 }}>{CURRENCY_FLAGS[item.currency]}</Text>
+          <Flag code={CURRENCY_FLAGS[item.currency]} size={24} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text.primary }}>
+          <Text style={{ fontSize: 15, fontFamily: 'Pretendard-Bold', color: colors.text.primary }}>
             {item.accountName}
           </Text>
           <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 1 }}>
@@ -117,7 +123,7 @@ function AccountPnlCard({ item, baseCurrency }: { item: UnrealizedPnlItem; baseC
       }}>
         <Text style={{ fontSize: 13, color: colors.text.secondary }}>평가손익</Text>
         <Text style={{
-          fontSize: 15, fontWeight: '700',
+          fontSize: 15, fontFamily: 'Pretendard-Bold',
           color: isNeutral ? colors.neutral.text : isProfit ? colors.profit.text : colors.loss.text,
         }}>
           {isProfit ? '+' : ''}{formatCurrency(item.unrealizedPnl, baseCurrency)}
@@ -148,9 +154,9 @@ export default function UnrealizedPnlScreen() {
         paddingHorizontal: spacing.screenPadding, paddingTop: 16, paddingBottom: 12,
       }}>
         <TouchableOpacity onPress={() => router.back()} style={{ padding: 8, marginLeft: -8 }}>
-          <Text style={{ fontSize: 22, color: colors.text.primary }}>←</Text>
+          <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           미실현 손익
         </Text>
         <View style={{ width: 38 }} />
@@ -172,7 +178,7 @@ export default function UnrealizedPnlScreen() {
                 }}
               >
                 <Text style={{
-                  fontSize: 12, fontWeight: '700',
+                  fontSize: 12, fontFamily: 'Pretendard-Bold',
                   color: active ? colors.currency[c].text : colors.text.tertiary,
                 }}>
                   {c}
@@ -188,8 +194,8 @@ export default function UnrealizedPnlScreen() {
           </View>
         ) : error instanceof ApiError && error.code === 404 ? (
           <View style={{ alignItems: 'center', paddingVertical: 60, gap: 12 }}>
-            <Text style={{ fontSize: 40 }}>📊</Text>
-            <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.secondary }}>
+            <BarChart3 size={40} color={colors.text.tertiary} strokeWidth={1.6} />
+            <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary }}>
               외화 계좌가 없어요
             </Text>
             <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
@@ -198,8 +204,8 @@ export default function UnrealizedPnlScreen() {
           </View>
         ) : foreignItems.length === 0 ? (
           <View style={{ alignItems: 'center', paddingVertical: 60, gap: 12 }}>
-            <Text style={{ fontSize: 40 }}>📊</Text>
-            <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.secondary }}>
+            <BarChart3 size={40} color={colors.text.tertiary} strokeWidth={1.6} />
+            <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary }}>
               외화 계좌가 없어요
             </Text>
             <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
@@ -226,14 +232,14 @@ export default function UnrealizedPnlScreen() {
                 전체 평가손익 ({baseCurrency} 기준)
               </Text>
               <Text style={{
-                fontSize: 28, fontWeight: '700',
+                fontSize: 28, fontFamily: 'SUIT-Bold',
                 color: isTotalNeutral ? colors.neutral.text : isTotalProfit ? colors.profit.text : colors.loss.text,
               }}>
                 {isTotalProfit ? '+' : ''}{formatCurrency(totalPnl, baseCurrency)}
               </Text>
             </LinearGradient>
 
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.secondary, marginBottom: 12 }}>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: colors.text.secondary, marginBottom: 12 }}>
               계좌별 상세
             </Text>
 

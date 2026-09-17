@@ -5,13 +5,13 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
-import type { CurrencyCode } from '@/theme';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
+import type { CurrencyCode, ThemeColors } from '@/theme';
+import { X, Pin, Tag, Landmark, Calendar, FileText, Wallet, Receipt, AlertTriangle, ArrowLeft, type LucideIcon, ChevronRight } from 'lucide-react-native';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.7;
@@ -47,12 +47,14 @@ interface ExchangeRateEntry {
   rate: number;
 }
 
-const TYPE_CONFIG: Record<TxType, { label: string; color: string; bg: string; prefix: string }> = {
-  EXPENSE:  { label: '지출', color: colors.loss.text,   bg: colors.loss.light,   prefix: '-' },
-  INCOME:   { label: '수입', color: colors.profit.text, bg: colors.profit.light, prefix: '+' },
-  TRANSFER: { label: '이체', color: colors.text.brand,  bg: colors.bg.surface,   prefix: '' },
-  EXCHANGE: { label: '환전', color: colors.text.brand,  bg: colors.bg.surface,   prefix: '↕' },
-};
+function getTypeConfig(colors: ThemeColors): Record<TxType, { label: string; color: string; bg: string; prefix: string }> {
+  return {
+    EXPENSE:  { label: '지출', color: colors.loss.text,   bg: colors.loss.light,   prefix: '-' },
+    INCOME:   { label: '수입', color: colors.profit.text, bg: colors.profit.light, prefix: '+' },
+    TRANSFER: { label: '이체', color: colors.text.brand,  bg: colors.bg.surface,   prefix: '' },
+    EXCHANGE: { label: '환전', color: colors.text.brand,  bg: colors.bg.surface,   prefix: '↕' },
+  };
+}
 
 const CATEGORY_EMOJI: Record<string, string> = {
   '식비': '🍜', '교통': '🚇', '주거비': '🏠', '의류': '👕',
@@ -69,9 +71,22 @@ function categoryEmoji(name: string): string {
   return '💸';
 }
 
+function RowIcon({ icon, color }: { icon: LucideIcon | string; color: string }) {
+  if (typeof icon === 'string') {
+    return <Text style={{ fontSize: 18, width: 32 }}>{icon}</Text>;
+  }
+  const Icon = icon;
+  return (
+    <View style={{ width: 32 }}>
+      <Icon size={18} color={color} strokeWidth={2} />
+    </View>
+  );
+}
+
 function DetailRow({ icon, label, value, isLast }: {
-  icon: string; label: string; value: string; isLast?: boolean;
+  icon: LucideIcon | string; label: string; value: string; isLast?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={{
       flexDirection: 'row', alignItems: 'flex-start',
@@ -79,7 +94,7 @@ function DetailRow({ icon, label, value, isLast }: {
       borderBottomWidth: isLast ? 0 : 1,
       borderBottomColor: colors.system.divider,
     }}>
-      <Text style={{ fontSize: 18, width: 32 }}>{icon}</Text>
+      <RowIcon icon={icon} color={colors.text.secondary} />
       <Text style={{ fontSize: 13, color: colors.text.secondary, width: 56, lineHeight: 22 }}>{label}</Text>
       <Text style={{ flex: 1, fontSize: 15, color: colors.text.primary, lineHeight: 22 }}>{value}</Text>
     </View>
@@ -87,7 +102,7 @@ function DetailRow({ icon, label, value, isLast }: {
 }
 
 function EditRow({ icon, label, value, onChangeText, placeholder, keyboardType, maxLength, isLast }: {
-  icon: string;
+  icon: LucideIcon | string;
   label: string;
   value: string;
   onChangeText: (t: string) => void;
@@ -96,6 +111,7 @@ function EditRow({ icon, label, value, onChangeText, placeholder, keyboardType, 
   maxLength?: number;
   isLast?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={{
       flexDirection: 'row', alignItems: 'center',
@@ -103,7 +119,7 @@ function EditRow({ icon, label, value, onChangeText, placeholder, keyboardType, 
       borderBottomWidth: isLast ? 0 : 1,
       borderBottomColor: colors.system.divider,
     }}>
-      <Text style={{ fontSize: 18, width: 32 }}>{icon}</Text>
+      <RowIcon icon={icon} color={colors.text.secondary} />
       <Text style={{ fontSize: 13, color: colors.text.secondary, width: 56 }}>{label}</Text>
       <TextInput
         value={value}
@@ -127,6 +143,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
   onSelect: (cat: Category) => void;
   onClose: () => void;
 }) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
 
   useEffect(() => {
@@ -173,11 +190,11 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{ flex: 1, fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               카테고리 선택
             </Text>
             <TouchableOpacity onPress={closeSheet} style={{ padding: 6 }} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Text style={{ fontSize: 22, color: colors.text.tertiary, lineHeight: 26 }}>×</Text>
+              <X size={22} color={colors.text.tertiary} strokeWidth={2} />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -191,7 +208,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
               </View>
             ) : categories.length === 0 ? (
               <View style={{ alignItems: 'center', paddingTop: 40, gap: 12 }}>
-                <Text style={{ fontSize: 36 }}>💸</Text>
+                <Receipt size={36} color={colors.text.tertiary} strokeWidth={1.6} />
                 <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center' }}>
                   카테고리가 없어요.
                 </Text>
@@ -210,7 +227,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
                         width: '30%',
                         aspectRatio: 1,
                         borderRadius: radius.card,
-                        backgroundColor: active ? colors.gradient.primary[0] + '20' : colors.bg.surface,
+                        backgroundColor: active ? colors.accent.light : colors.bg.surface,
                         borderWidth: active ? 2 : 1,
                         borderColor: active ? colors.text.brand : colors.system.border,
                         alignItems: 'center',
@@ -221,7 +238,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
                     >
                       <Text style={{ fontSize: 26 }}>{emoji}</Text>
                       <Text style={{
-                        fontSize: 12, fontWeight: '500', textAlign: 'center',
+                        fontSize: 12, fontFamily: 'Pretendard-Medium', textAlign: 'center',
                         color: active ? colors.text.brand : colors.text.primary,
                       }}>
                         {cat.name}
@@ -239,6 +256,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
 }
 
 export default function TransactionDetailScreen() {
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -364,17 +382,17 @@ export default function TransactionDetailScreen() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 36 }}>⚠️</Text>
+          <AlertTriangle size={36} color={colors.status.warning} strokeWidth={1.8} />
           <Text style={{ fontSize: 15, color: colors.text.secondary }}>거래를 찾을 수 없어요.</Text>
           <TouchableOpacity onPress={() => router.back()}>
-            <Text style={{ fontSize: 14, color: colors.text.brand, fontWeight: '600' }}>돌아가기</Text>
+            <Text style={{ fontSize: 14, color: colors.text.brand, fontFamily: 'Pretendard-SemiBold' }}>돌아가기</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  const cfg = TYPE_CONFIG[tx.type];
+  const cfg = getTypeConfig(colors)[tx.type];
   const isEditable = tx.type !== 'EXCHANGE';
 
   return (
@@ -387,11 +405,15 @@ export default function TransactionDetailScreen() {
           onPress={isEditing ? () => setIsEditing(false) : () => router.back()}
           style={{ padding: 8, marginLeft: -8 }}
         >
-          <Text style={{ fontSize: isEditing ? 15 : 22, color: colors.text.primary, fontWeight: isEditing ? '500' : '400' }}>
-            {isEditing ? '취소' : '←'}
-          </Text>
+          {isEditing ? (
+            <Text style={{ fontSize: 15, color: colors.text.primary, fontFamily: 'Pretendard-Medium' }}>
+              취소
+            </Text>
+          ) : (
+            <ArrowLeft size={22} color={colors.text.primary} strokeWidth={2} />
+          )}
         </TouchableOpacity>
-        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+        <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
           {isEditing ? '거래 수정' : '거래 상세'}
         </Text>
         {isEditable ? (
@@ -403,12 +425,12 @@ export default function TransactionDetailScreen() {
             >
               {isUpdating
                 ? <ActivityIndicator size="small" color={colors.text.brand} />
-                : <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.brand }}>저장</Text>
+                : <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>저장</Text>
               }
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={startEdit} style={{ padding: 8, marginRight: -8 }}>
-              <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text.brand }}>편집</Text>
+              <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.text.brand }}>편집</Text>
             </TouchableOpacity>
           )
         ) : (
@@ -436,10 +458,10 @@ export default function TransactionDetailScreen() {
             backgroundColor: cfg.color + '18',
             marginBottom: 12,
           }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: cfg.color }}>{cfg.label}</Text>
+            <Text style={{ fontSize: 13, fontFamily: 'Pretendard-SemiBold', color: cfg.color }}>{cfg.label}</Text>
           </View>
           <Text style={{
-            fontSize: 36, fontWeight: '700', letterSpacing: -1, color: cfg.color,
+            fontSize: 36, fontFamily: 'SUIT-Bold', letterSpacing: -1, color: cfg.color,
           }}>
             {cfg.prefix}{formatCurrency(tx.amount, tx.currency)}
           </Text>
@@ -462,28 +484,28 @@ export default function TransactionDetailScreen() {
         }}>
           {!isEditing ? (
             <>
-              <DetailRow icon="📌" label="항목명" value={tx.title} />
+              <DetailRow icon={Pin} label="항목명" value={tx.title} />
               {tx.categoryName && (
                 <DetailRow
-                  icon={tx.categoryEmoji ?? '🏷️'}
+                  icon={tx.categoryEmoji ?? Tag}
                   label="카테고리"
                   value={tx.categoryName}
                 />
               )}
-              <DetailRow icon="🏦" label="계좌" value={tx.accountName} />
-              <DetailRow icon="📅" label="날짜" value={tx.transactionDate} isLast={!tx.note} />
-              {tx.note && <DetailRow icon="📝" label="메모" value={tx.note} isLast />}
+              <DetailRow icon={Landmark} label="계좌" value={tx.accountName} />
+              <DetailRow icon={Calendar} label="날짜" value={tx.transactionDate} isLast={!tx.note} />
+              {tx.note && <DetailRow icon={FileText} label="메모" value={tx.note} isLast />}
             </>
           ) : (
             <>
               <EditRow
-                icon="📌" label="항목명"
+                icon={Pin} label="항목명"
                 value={editTitle}
                 onChangeText={setEditTitle}
                 placeholder="항목명을 입력하세요"
               />
               <EditRow
-                icon="💰" label="금액"
+                icon={Wallet} label="금액"
                 value={editAmount}
                 onChangeText={setEditAmount}
                 keyboardType="decimal-pad"
@@ -499,18 +521,18 @@ export default function TransactionDetailScreen() {
                   borderBottomColor: colors.system.divider,
                 }}
               >
-                <Text style={{ fontSize: 18, width: 32 }}>🏷️</Text>
+                <View style={{ width: 32 }}><Tag size={18} color={colors.text.secondary} strokeWidth={2} /></View>
                 <Text style={{ fontSize: 13, color: colors.text.secondary, width: 56 }}>카테고리</Text>
                 <Text style={{
-                  flex: 1, fontSize: 15, fontWeight: '500',
+                  flex: 1, fontSize: 15, fontFamily: 'Pretendard-Medium',
                   color: editCategoryId ? colors.text.primary : colors.text.tertiary,
                 }}>
                   {editCategoryLabel ?? '선택하세요'}
                 </Text>
-                <Text style={{ fontSize: 18, color: colors.text.tertiary }}>›</Text>
+                <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={2} />
               </TouchableOpacity>
               <EditRow
-                icon="📅" label="날짜"
+                icon={Calendar} label="날짜"
                 value={editDate}
                 onChangeText={setEditDate}
                 placeholder="YYYY-MM-DD"
@@ -518,7 +540,7 @@ export default function TransactionDetailScreen() {
                 maxLength={10}
               />
               <EditRow
-                icon="📝" label="메모"
+                icon={FileText} label="메모"
                 value={editNote}
                 onChangeText={setEditNote}
                 placeholder="메모 (선택)"
@@ -543,7 +565,7 @@ export default function TransactionDetailScreen() {
           >
             {isDeleting
               ? <ActivityIndicator color={colors.loss.text} />
-              : <Text style={{ fontSize: 15, fontWeight: '600', color: colors.loss.text }}>
+              : <Text style={{ fontSize: 15, fontFamily: 'Pretendard-SemiBold', color: colors.loss.text }}>
                   거래 삭제
                 </Text>
             }
