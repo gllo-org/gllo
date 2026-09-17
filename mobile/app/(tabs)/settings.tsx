@@ -3,7 +3,7 @@ import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
-  User, Globe, Wallet, Tag, Repeat, Plane, FileText, TrendingUp,
+  User, Globe, Wallet, Tag, Repeat, PiggyBank, Plane, FileText, TrendingUp,
   LogOut, AlertTriangle, ChevronRight, type LucideIcon,
 } from 'lucide-react-native';
 import { colors, spacing, radius } from '@/theme';
@@ -88,6 +88,7 @@ export default function SettingsScreen() {
           <SettingsRow icon={Wallet} label="계좌 관리" onPress={() => router.push('/accounts')} />
           <SettingsRow icon={Tag} label="카테고리 관리" onPress={() => router.push('/categories')} />
           <SettingsRow icon={Repeat} label="고정 지출 관리" onPress={() => router.push('/recurring')} />
+          <SettingsRow icon={PiggyBank} label="예산 관리" onPress={() => router.push('/budget')} />
           <SettingsRow icon={Plane} label="여행 기록" onPress={() => router.push('/trips')} />
         </View>
 

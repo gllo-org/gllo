@@ -478,7 +478,7 @@ function TripFormSheet({
   );
 }
 
-const TRIPS_ENABLED = false;
+const TRIPS_ENABLED = true;
 
 export default function TripsScreen() {
   const { colors } = useTheme();
