@@ -5,37 +5,45 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { useTheme, spacing, radius, typography } from '@/theme';
+import { Globe, Wallet, Plane, BarChart3, Rocket, type LucideIcon } from 'lucide-react-native';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
 const TUTORIAL_SEEN_KEY = 'gllo_tutorial_seen';
 
-const SLIDES = [
+interface TutorialSlide {
+  icon: LucideIcon;
+  gradient: readonly [string, string, string];
+  title: string;
+  description: string;
+}
+
+const SLIDES: readonly TutorialSlide[] = [
   {
-    emoji: '🌍',
-    gradient: ['#EDE8FF', '#FDE8F2', '#FFF0E8'] as const,
+    icon: Globe,
+    gradient: ['#EDE8FF', '#FDE8F2', '#FFF0E8'],
     title: 'GLLO에 오신 걸\n환영해요!',
     description: '해외 생활의 복잡한 자산 관리를\n한 앱에서 해결해요.',
   },
   {
-    emoji: '💰',
-    gradient: ['#DCFCE7', '#D1FAE5', '#FFF0E8'] as const,
+    icon: Wallet,
+    gradient: ['#DCFCE7', '#D1FAE5', '#FFF0E8'],
     title: '다중 통화 계좌',
     description: 'EUR, USD, GBP 계좌를 한눈에 관리하고\n환율 평단가를 자동으로 계산해요.',
   },
   {
-    emoji: '✈️',
-    gradient: ['#E4FDE9', '#FFF5EC', '#DCF4FF'] as const,
+    icon: Plane,
+    gradient: ['#E4FDE9', '#FFF5EC', '#DCF4FF'],
     title: '여행 모드',
     description: '여행 경비를 일상 지출과 분리해서\n깔끔하게 관리해요.',
   },
   {
-    emoji: '📊',
-    gradient: ['#EDE8FF', '#FDE8F2', '#EDE8FF'] as const,
+    icon: BarChart3,
+    gradient: ['#EDE8FF', '#FDE8F2', '#EDE8FF'],
     title: '지출 분석',
     description: '카테고리별 지출 패턴을 시각화해서\n소비 습관을 한눈에 파악해요.',
   },
-] as const;
+];
 
 export async function markTutorialSeen() {
   if (Platform.OS === 'web') {
@@ -119,7 +127,7 @@ export default function TutorialScreen() {
                   marginBottom: 40,
                 }}
               >
-                <Text style={{ fontSize: 72 }}>{s.emoji}</Text>
+                <s.icon size={64} color={colors.text.primary} strokeWidth={1.5} />
               </LinearGradient>
 
               <Text style={{
@@ -163,8 +171,10 @@ export default function TutorialScreen() {
               width: '100%',
               height: 52,
               borderRadius: radius.button,
+              flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 6,
               backgroundColor: colors.accent.primary,
             }}
           >
@@ -173,8 +183,11 @@ export default function TutorialScreen() {
               fontFamily: 'Pretendard-SemiBold',
               color: colors.text.inverse,
             }}>
-              {currentIndex === SLIDES.length - 1 ? 'GLLO 시작하기 🚀' : '다음'}
+              {currentIndex === SLIDES.length - 1 ? 'GLLO 시작하기' : '다음'}
             </Text>
+            {currentIndex === SLIDES.length - 1 && (
+              <Rocket size={18} color={colors.text.inverse} strokeWidth={2} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
