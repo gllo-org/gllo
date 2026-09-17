@@ -402,7 +402,6 @@ export default function BudgetScreen() {
           </>
         ) : (
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 16 }}>
-            <Text style={{ fontSize: 48 }}>💜</Text>
             <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
               예산이 없어요
             </Text>

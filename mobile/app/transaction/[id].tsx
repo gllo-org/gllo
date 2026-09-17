@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency } from '@/lib/utils/currency';
+import { categoryIcon } from '@/lib/utils/categoryIcon';
 import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode, ThemeColors } from '@/theme';
 import { X, Pin, Tag, Landmark, Calendar, FileText, Wallet, Receipt, AlertTriangle, ArrowLeft, type LucideIcon, ChevronRight } from 'lucide-react-native';
@@ -32,7 +33,6 @@ interface TransactionDetail {
   currency: CurrencyCode;
   categoryId: string | null;
   categoryName: string | null;
-  categoryEmoji: string | null;
   accountId: string;
   accountName: string;
   transactionDate: string;
@@ -56,25 +56,7 @@ function getTypeConfig(colors: ThemeColors): Record<TxType, { label: string; col
   };
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  '식비': '🍜', '교통': '🚇', '주거비': '🏠', '의류': '👕',
-  '의료': '🏥', '건강': '🏥', '교육': '📚', '문화': '🎭',
-  '통신': '📱', '보험': '🛡️', '용돈': '💰', '여행': '✈️',
-  '비자': '📋', '보증금': '🏦', '항공권': '✈️', '기숙사': '🏫',
-  '장학금': '🎓', '월세': '🏠', '구독': '📺', '기타': '💸',
-};
-
-function categoryEmoji(name: string): string {
-  for (const [k, v] of Object.entries(CATEGORY_EMOJI)) {
-    if (name.includes(k)) return v;
-  }
-  return '💸';
-}
-
-function RowIcon({ icon, color }: { icon: LucideIcon | string; color: string }) {
-  if (typeof icon === 'string') {
-    return <Text style={{ fontSize: 18, width: 32 }}>{icon}</Text>;
-  }
+function RowIcon({ icon, color }: { icon: LucideIcon; color: string }) {
   const Icon = icon;
   return (
     <View style={{ width: 32 }}>
@@ -84,7 +66,7 @@ function RowIcon({ icon, color }: { icon: LucideIcon | string; color: string }) 
 }
 
 function DetailRow({ icon, label, value, isLast }: {
-  icon: LucideIcon | string; label: string; value: string; isLast?: boolean;
+  icon: LucideIcon; label: string; value: string; isLast?: boolean;
 }) {
   const { colors } = useTheme();
   return (
@@ -102,7 +84,7 @@ function DetailRow({ icon, label, value, isLast }: {
 }
 
 function EditRow({ icon, label, value, onChangeText, placeholder, keyboardType, maxLength, isLast }: {
-  icon: LucideIcon | string;
+  icon: LucideIcon;
   label: string;
   value: string;
   onChangeText: (t: string) => void;
@@ -216,7 +198,7 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
             ) : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                 {categories.map((cat) => {
-                  const emoji = categoryEmoji(cat.name);
+                  const Icon = categoryIcon(cat.name);
                   const active = selectedId === cat.id;
                   return (
                     <TouchableOpacity
@@ -236,7 +218,11 @@ function CategoryPickerSheet({ visible, categories, isLoadingCats, selectedId, o
                         ...(active ? shadow.card : {}),
                       }}
                     >
-                      <Text style={{ fontSize: 26 }}>{emoji}</Text>
+                      <Icon
+                        size={24}
+                        color={active ? colors.text.brand : colors.text.secondary}
+                        strokeWidth={1.8}
+                      />
                       <Text style={{
                         fontSize: 12, fontFamily: 'Pretendard-Medium', textAlign: 'center',
                         color: active ? colors.text.brand : colors.text.primary,
@@ -312,11 +298,7 @@ export default function TransactionDetailScreen() {
     setEditTitle(tx.title);
     setEditAmount(String(tx.amount));
     setEditCategoryId(tx.categoryId);
-    setEditCategoryLabel(
-      tx.categoryName
-        ? `${tx.categoryEmoji ?? categoryEmoji(tx.categoryName)} ${tx.categoryName}`
-        : null
-    );
+    setEditCategoryLabel(tx.categoryName);
     setEditDate(tx.transactionDate);
     setEditNote(tx.note ?? '');
     setIsEditing(true);
@@ -470,8 +452,13 @@ export default function TransactionDetailScreen() {
               ≈ {formatCurrency(tx.amount * krwRate, 'KRW')}
             </Text>
           )}
-          {tx.categoryEmoji && (
-            <Text style={{ fontSize: 32, marginTop: 12 }}>{tx.categoryEmoji}</Text>
+          {tx.categoryName && (
+            <View style={{ marginTop: 12 }}>
+              {(() => {
+                const CategoryIcon = categoryIcon(tx.categoryName);
+                return <CategoryIcon size={30} color={cfg.color} strokeWidth={1.6} />;
+              })()}
+            </View>
           )}
         </View>
 
@@ -487,7 +474,7 @@ export default function TransactionDetailScreen() {
               <DetailRow icon={Pin} label="항목명" value={tx.title} />
               {tx.categoryName && (
                 <DetailRow
-                  icon={tx.categoryEmoji ?? Tag}
+                  icon={categoryIcon(tx.categoryName)}
                   label="카테고리"
                   value={tx.categoryName}
                 />
@@ -580,7 +567,7 @@ export default function TransactionDetailScreen() {
         selectedId={editCategoryId}
         onSelect={(cat) => {
           setEditCategoryId(cat.id);
-          setEditCategoryLabel(`${categoryEmoji(cat.name)} ${cat.name}`);
+          setEditCategoryLabel(cat.name);
         }}
         onClose={() => setShowCategoryPicker(false)}
       />

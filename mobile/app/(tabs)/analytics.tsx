@@ -13,6 +13,7 @@ import { getYearMonth } from '@/lib/utils/date';
 import { colors, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 import { X, Inbox, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { categoryIcon } from '@/lib/utils/categoryIcon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SHEET_H = Dimensions.get('window').height * 0.65;
@@ -34,7 +35,6 @@ interface MonthlyReport {
 
 interface CategoryExpense {
   categoryName: string;
-  categoryEmoji: string;
   amount: number;
   percentage: number;
 }
@@ -51,7 +51,6 @@ interface Transaction {
   amount: number;
   currency: CurrencyCode;
   categoryName: string;
-  categoryEmoji: string;
   transactionDate: string;
 }
 
@@ -166,9 +165,17 @@ function CategoryDrilldownSheet({
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 12,
           }}>
+            {(() => {
+              const HeaderIcon = categoryIcon(category?.categoryName);
+              return (
+                <View style={{ marginRight: 10 }}>
+                  <HeaderIcon size={22} color={colors.text.primary} strokeWidth={1.8} />
+                </View>
+              );
+            })()}
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 17, fontFamily: 'SUIT-Bold', color: colors.text.primary }}>
-                {category?.categoryEmoji} {category?.categoryName}
+                {category?.categoryName}
               </Text>
               <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
                 {year}년 {month}월 · {formatCurrency(category?.amount ?? 0, currency)}
@@ -193,14 +200,18 @@ function CategoryDrilldownSheet({
               data={filtered}
               keyExtractor={(item) => item.id}
               contentContainerStyle={{ paddingHorizontal: spacing.screenPadding, paddingBottom: 32 }}
-              renderItem={({ item }) => (
+              renderItem={({ item }) => {
+                const ItemIcon = categoryIcon(item.categoryName);
+                return (
                 <View style={{
                   flexDirection: 'row', alignItems: 'center',
                   paddingVertical: 12,
                   borderBottomWidth: 1,
                   borderBottomColor: colors.system.divider,
                 }}>
-                  <Text style={{ fontSize: 20, marginRight: 12 }}>{item.categoryEmoji || '💸'}</Text>
+                  <View style={{ marginRight: 12 }}>
+                    <ItemIcon size={20} color={colors.text.secondary} strokeWidth={1.8} />
+                  </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 14, fontFamily: 'Pretendard-Medium', color: colors.text.primary }}>
                       {item.title}
@@ -213,7 +224,8 @@ function CategoryDrilldownSheet({
                     -{formatCurrency(item.amount, item.currency)}
                   </Text>
                 </View>
-              )}
+                );
+              }}
             />
           )}
         </Animated.View>
@@ -589,7 +601,9 @@ function CategoryTab({
                 카테고리 상세 (탭하면 거래 목록)
               </Text>
               <View style={{ gap: 0 }}>
-                {categories.map((cat, i) => (
+                {categories.map((cat, i) => {
+                  const CatIcon = categoryIcon(cat.categoryName);
+                  return (
                   <TouchableOpacity
                     key={cat.categoryName}
                     onPress={() => openDrilldown(cat)}
@@ -605,8 +619,9 @@ function CategoryTab({
                       width: 12, height: 12, borderRadius: 6,
                       backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
                     }} />
+                    <CatIcon size={16} color={colors.text.secondary} strokeWidth={1.8} />
                     <Text style={{ fontSize: 14, color: colors.text.primary, flex: 1 }}>
-                      {cat.categoryEmoji} {cat.categoryName}
+                      {cat.categoryName}
                     </Text>
                     <Text style={{ fontSize: 13, color: colors.text.secondary }}>
                       {cat.percentage.toFixed(1)}%
@@ -616,7 +631,8 @@ function CategoryTab({
                     </Text>
                     <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={2} />
                   </TouchableOpacity>
-                ))}
+                  );
+                })}
               </View>
             </View>
           </>

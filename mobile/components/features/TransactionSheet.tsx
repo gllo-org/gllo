@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { Delete, Check, X, ArrowLeft, Tag, Landmark, Calendar, FileText, Receipt, type LucideIcon, Plus, ChevronRight } from 'lucide-react-native';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
+import { categoryIcon } from '@/lib/utils/categoryIcon';
 import { Flag } from '@/components/ui/Flag';
 import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode, ThemeColors } from '@/theme';
@@ -58,21 +59,6 @@ function typeColor(type: TxType, colors: ThemeColors): string {
 }
 
 const CURRENCIES: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'KRW'];
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  '식비': '🍜', '교통': '🚇', '주거비': '🏠', '의류': '👕',
-  '의료': '🏥', '건강': '🏥', '교육': '📚', '문화': '🎭',
-  '통신': '📱', '보험': '🛡️', '용돈': '💰', '여행': '✈️',
-  '비자': '📋', '보증금': '🏦', '항공권': '✈️', '기숙사': '🏫',
-  '장학금': '🎓', '월세': '🏠', '구독': '📺', '기타': '💸',
-};
-
-function categoryEmoji(name: string): string {
-  for (const [k, v] of Object.entries(CATEGORY_EMOJI)) {
-    if (name.includes(k)) return v;
-  }
-  return '💸';
-}
 
 function todayStr(): string {
   const d = new Date();
@@ -339,7 +325,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
         type: txType,
         amount: numAmount,
         currency,
-        title: categoryLabel?.replace(/^.{1,2}\s/, '') ?? txType,
+        title: categoryLabel ?? txType,
         categoryId,
         accountId,
         transactionDate: txDate,
@@ -355,7 +341,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
   function pickCategory(cat: Category) {
     setCategoryId(cat.id);
-    setCategoryLbl(`${categoryEmoji(cat.name)} ${cat.name}`);
+    setCategoryLbl(cat.name);
     setView('main');
   }
 
@@ -606,7 +592,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
               >
                 <View style={{ paddingHorizontal: spacing.screenPadding }}>
                   <SelectorRow
-                    icon={Tag} label="카테고리"
+                    icon={categoryLabel ? categoryIcon(categoryLabel) : Tag} label="카테고리"
                     value={categoryLabel ?? '선택하세요'}
                     dimmed={!categoryId}
                     onPress={() => setView('category')}
@@ -830,7 +816,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
               ) : (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                   {filteredCategories.map((cat) => {
-                    const emoji = categoryEmoji(cat.name);
+                    const Icon = categoryIcon(cat.name);
                     const active = categoryId === cat.id;
                     return (
                       <TouchableOpacity
@@ -851,7 +837,11 @@ export function TransactionSheet({ visible, onClose }: Props) {
                           gap: 6,
                         }}
                       >
-                        <Text style={{ fontSize: 26 }}>{emoji}</Text>
+                        <Icon
+                          size={24}
+                          color={active ? colors.accent.text : colors.text.secondary}
+                          strokeWidth={1.8}
+                        />
                         <Text style={{
                           fontFamily: 'Pretendard-Medium',
                           fontSize: 12, textAlign: 'center',

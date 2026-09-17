@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/lib/api/client';
 import { colors, spacing, radius } from '@/theme';
+import { LogOut } from 'lucide-react-native';
 
 export default function LogoutCompleteScreen() {
   const { signOut } = useAuthStore();
@@ -23,7 +24,9 @@ export default function LogoutCompleteScreen() {
         alignItems: 'center',
         paddingHorizontal: spacing.screenPadding,
       }}>
-        <Text style={{ fontSize: 64, marginBottom: 28 }}>👋</Text>
+        <View style={{ marginBottom: 28 }}>
+          <LogOut size={64} color={colors.text.brand} strokeWidth={1.4} />
+        </View>
 
         <Text style={{
           fontSize: 24,
@@ -42,7 +45,7 @@ export default function LogoutCompleteScreen() {
           textAlign: 'center',
           lineHeight: 24,
         }}>
-          GLLO는 언제든지{'\n'}돌아올 준비가 되어 있어요 🌍
+          GLLO는 언제든지{'\n'}돌아올 준비가 되어 있어요
         </Text>
 
         <TouchableOpacity

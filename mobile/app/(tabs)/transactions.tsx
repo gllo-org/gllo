@@ -10,6 +10,7 @@ import { useTheme, spacing, radius, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
 import { Plane } from 'lucide-react-native';
+import { categoryIcon } from '@/lib/utils/categoryIcon';
 
 type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER' | 'EXCHANGE';
 
@@ -20,7 +21,6 @@ interface Transaction {
   amount: number;
   currency: CurrencyCode;
   categoryName: string;
-  categoryEmoji: string;
   transactionDate: string;
   isTrip: boolean;
 }
@@ -64,6 +64,7 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
   const amountColor = isPositive ? colors.profit.text : isExchange ? colors.text.brand : colors.loss.text;
   const prefix = isPositive ? '+' : isExchange ? '↕' : '-';
   const showKrw = krwRate !== null && item.currency !== 'KRW' && item.type !== 'EXCHANGE';
+  const CategoryIcon = categoryIcon(item.categoryName);
 
   return (
     <TouchableOpacity
@@ -86,7 +87,7 @@ function TransactionItem({ item, krwRate }: { item: Transaction; krwRate: number
         justifyContent: 'center',
         marginRight: 12,
       }}>
-        <Text style={{ fontSize: 22 }}>{item.categoryEmoji || '💸'}</Text>
+        <CategoryIcon size={22} color={colors.text.secondary} strokeWidth={1.8} />
       </View>
 
       <View style={{ flex: 1 }}>
@@ -173,7 +174,6 @@ export default function TransactionsScreen() {
         </View>
       ) : allTransactions.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 40 }}>💜</Text>
           <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
             아직 거래 내역이 없어요.{'\n'}+ 버튼으로 첫 거래를 기록해볼까요?
           </Text>

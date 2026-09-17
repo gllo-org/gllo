@@ -15,12 +15,12 @@ import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeft, Inbox, FileText, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { categoryIcon } from '@/lib/utils/categoryIcon';
 
 const API_BASE = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080'}/api/v1`;
 
 interface CategoryExpenseDto {
   categoryName: string;
-  categoryEmoji: string;
   amount: number;
   percentage: number;
 }
@@ -221,9 +221,14 @@ export default function ReportScreen() {
                     }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                      {item.categoryEmoji ? (
-                        <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
-                      ) : null}
+                      {(() => {
+                        const CategoryIcon = categoryIcon(item.categoryName);
+                        return (
+                          <View style={{ marginRight: 8 }}>
+                            <CategoryIcon size={16} color={colors.text.secondary} strokeWidth={1.8} />
+                          </View>
+                        );
+                      })()}
                       <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
                       <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                         {formatCurrency(item.amount, report.currency)}
@@ -260,9 +265,14 @@ export default function ReportScreen() {
                     }}
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-                      {item.categoryEmoji ? (
-                        <Text style={{ fontSize: 16, marginRight: 8 }}>{item.categoryEmoji}</Text>
-                      ) : null}
+                      {(() => {
+                        const CategoryIcon = categoryIcon(item.categoryName);
+                        return (
+                          <View style={{ marginRight: 8 }}>
+                            <CategoryIcon size={16} color={colors.text.secondary} strokeWidth={1.8} />
+                          </View>
+                        );
+                      })()}
                       <Text style={{ flex: 1, fontSize: 14, color: colors.text.primary }}>{item.categoryName}</Text>
                       <Text style={{ fontSize: 14, fontFamily: 'Pretendard-SemiBold', color: colors.text.primary }}>
                         {formatCurrency(item.amount, report.currency)}

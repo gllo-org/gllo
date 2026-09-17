@@ -7,7 +7,7 @@ import { showAlert } from '@/lib/ui/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { GraduationCap, Briefcase, Home, Map, Check, ArrowLeft, type LucideIcon } from 'lucide-react-native';
+import { GraduationCap, Briefcase, Home, Map, Check, ArrowLeft, PartyPopper, type LucideIcon } from 'lucide-react-native';
 import { apiClient } from '@/lib/api/client';
 import { Flag, type FlagCode } from '@/components/ui/Flag';
 import { useTheme, spacing, radius, shadow } from '@/theme';
@@ -535,7 +535,7 @@ export default function OnboardingScreen() {
             backgroundColor: colors.accent.light,
           }}
         >
-          <Text style={{ fontSize: 40 }}>🎉</Text>
+          <PartyPopper size={40} color={colors.accent.text} strokeWidth={1.6} />
         </View>
 
         <Text style={{ fontSize: 24, fontFamily: 'SUIT-Bold', color: colors.text.primary, textAlign: 'center', marginBottom: 10 }}>
