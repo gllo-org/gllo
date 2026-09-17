@@ -353,7 +353,7 @@ export default function TransactionDetailScreen() {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
           <ActivityIndicator color={colors.text.brand} />
           <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
-            글로가 데이터를 불러오고 있어요...
+            GLLO가 데이터를 불러오고 있어요...
           </Text>
         </View>
       </SafeAreaView>

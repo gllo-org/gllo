@@ -4,13 +4,12 @@ import {
   Animated, Easing, Dimensions, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow } from '@/theme';
-import type { CurrencyCode } from '@/theme';
+import { useTheme, spacing, radius, shadow } from '@/theme';
+import type { CurrencyCode, ThemeColors } from '@/theme';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const SHEET_H = SCREEN_H * 0.92;
@@ -44,11 +43,17 @@ interface Props {
   onClose: () => void;
 }
 
-const TYPE_CONFIG: Record<TxType, { label: string; color: string; prefix: string }> = {
-  EXPENSE:  { label: '지출',   color: colors.loss.text,   prefix: '-' },
-  INCOME:   { label: '수입',   color: colors.profit.text, prefix: '+' },
-  EXCHANGE: { label: '환전',   color: colors.currency.EUR.text, prefix: '⇄' },
+const TYPE_META: Record<TxType, { label: string; prefix: string }> = {
+  EXPENSE:  { label: '지출', prefix: '-' },
+  INCOME:   { label: '수입', prefix: '+' },
+  EXCHANGE: { label: '환전', prefix: '⇄' },
 };
+
+function typeColor(type: TxType, colors: ThemeColors): string {
+  if (type === 'EXPENSE') return colors.loss.text;
+  if (type === 'INCOME') return colors.profit.text;
+  return colors.accent.primary;
+}
 
 const CURRENCIES: CurrencyCode[] = ['EUR', 'USD', 'GBP', 'KRW'];
 
@@ -75,21 +80,24 @@ function todayStr(): string {
 const PAD_ROWS = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['.', '0', '⌫']] as const;
 
 function NumberPad({ onKey }: { onKey: (k: string) => void }) {
+  const { colors } = useTheme();
   return (
-    <View style={{ paddingHorizontal: 10, paddingVertical: 4 }}>
+    <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
       {PAD_ROWS.map((row, ri) => (
-        <View key={ri} style={{ flexDirection: 'row', marginBottom: 4 }}>
+        <View key={ri} style={{ flexDirection: 'row', marginBottom: 6 }}>
           {row.map((key) => (
             <TouchableOpacity
               key={key}
               onPress={() => onKey(key)}
-              activeOpacity={0.55}
+              activeOpacity={0.6}
+              accessibilityRole="button"
+              accessibilityLabel={key === '⌫' ? '지우기' : key}
               style={{
                 flex: 1,
-                height: 50,
+                height: 48,
                 marginHorizontal: 3,
                 borderRadius: radius.chip,
-                backgroundColor: key === '⌫' ? colors.bg.surface : colors.bg.screen,
+                backgroundColor: colors.bg.input,
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderWidth: 1,
@@ -97,9 +105,9 @@ function NumberPad({ onKey }: { onKey: (k: string) => void }) {
               }}
             >
               <Text style={{
+                fontFamily: key === '⌫' ? 'Pretendard-Regular' : 'SUIT-Medium',
                 fontSize: key === '⌫' ? 18 : 20,
-                fontWeight: key === '⌫' ? '400' : '500',
-                color: colors.text.primary,
+                color: key === '⌫' ? colors.text.secondary : colors.text.primary,
               }}>
                 {key}
               </Text>
@@ -116,22 +124,35 @@ function SelectorRow({
 }: {
   icon: string; label: string; value: string; onPress: () => void; dimmed?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`${label}: ${value}`}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 15,
+        minHeight: 48,
+        paddingVertical: 14,
         borderBottomWidth: 1,
         borderBottomColor: colors.system.divider,
       }}
     >
-      <Text style={{ fontSize: 18, width: 28 }}>{icon}</Text>
-      <Text style={{ fontSize: 13, color: colors.text.secondary, width: 52 }}>{label}</Text>
+      <Text style={{ fontSize: 17, width: 26 }}>{icon}</Text>
       <Text style={{
-        flex: 1, fontSize: 15, fontWeight: '500',
+        fontFamily: 'Pretendard-Regular',
+        fontSize: 13,
+        color: colors.text.secondary,
+        width: 52,
+      }}>
+        {label}
+      </Text>
+      <Text style={{
+        flex: 1,
+        fontFamily: 'Pretendard-Medium',
+        fontSize: 15,
         color: dimmed ? colors.text.tertiary : colors.text.primary,
       }}>
         {value}
@@ -142,6 +163,7 @@ function SelectorRow({
 }
 
 export function TransactionSheet({ visible, onClose }: Props) {
+  const { colors } = useTheme();
   const translateY = useRef(new Animated.Value(SHEET_H)).current;
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -354,7 +376,8 @@ export function TransactionSheet({ visible, onClose }: Props) {
   })();
 
   const isValid = amount > 0 && !!categoryId && !!accountId;
-  const cfg = TYPE_CONFIG[txType];
+  const activeTypeColor = typeColor(txType, colors);
+  const meta = TYPE_META[txType];
 
   const amountDisplay = (() => {
     const sym = { EUR: '€', USD: '$', GBP: '£', KRW: '₩' }[currency];
@@ -371,16 +394,21 @@ export function TransactionSheet({ visible, onClose }: Props) {
         <TouchableOpacity
           style={{ flex: 1, backgroundColor: colors.bg.overlay }}
           activeOpacity={1}
+          accessibilityRole="button"
+          accessibilityLabel="닫기"
           onPress={closeSheet}
         />
 
         <Animated.View style={{
           position: 'absolute', bottom: 0, left: 0, right: 0,
           height: SHEET_H,
-          backgroundColor: colors.bg.screen,
+          backgroundColor: colors.bg.surface,
           borderTopLeftRadius: radius.bottom,
           borderTopRightRadius: radius.bottom,
+          borderTopWidth: 1,
+          borderTopColor: colors.system.border,
           transform: [{ translateY }],
+          ...shadow.float,
         }}>
           {/* Handle bar */}
           <View style={{ alignItems: 'center', paddingTop: 10, paddingBottom: 2 }}>
@@ -392,15 +420,27 @@ export function TransactionSheet({ visible, onClose }: Props) {
             flexDirection: 'row', alignItems: 'center',
             paddingHorizontal: spacing.screenPadding, paddingVertical: 10,
           }}>
-            <Text style={{ flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary }}>
+            <Text style={{
+              flex: 1,
+              fontFamily: 'SUIT-Bold',
+              fontSize: 18,
+              color: colors.text.primary,
+            }}>
               {view === 'category' ? '카테고리 선택' : view === 'account' ? '계좌 선택' : '새 거래 추가'}
             </Text>
             <TouchableOpacity
               onPress={view === 'main' ? closeSheet : () => { setView('main'); setAddingCat(false); setNewCatName(''); }}
-              style={{ padding: 6 }}
+              accessibilityRole="button"
+              accessibilityLabel={view === 'main' ? '닫기' : '뒤로'}
+              style={{
+                width: 32, height: 32,
+                borderRadius: radius.chip,
+                backgroundColor: colors.bg.input,
+                alignItems: 'center', justifyContent: 'center',
+              }}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={{ fontSize: 22, color: colors.text.tertiary, lineHeight: 26 }}>
+              <Text style={{ fontSize: 18, color: colors.text.secondary, lineHeight: 22 }}>
                 {view === 'main' ? '×' : '←'}
               </Text>
             </TouchableOpacity>
@@ -413,7 +453,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
               <View style={{
                 flexDirection: 'row',
                 marginHorizontal: spacing.screenPadding,
-                backgroundColor: colors.bg.surface,
+                backgroundColor: colors.bg.input,
                 borderRadius: radius.chip,
                 padding: 3,
                 marginBottom: 10,
@@ -433,9 +473,12 @@ export function TransactionSheet({ visible, onClose }: Props) {
                         setCategoryId(null);
                         setCategoryLbl(null);
                       }}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
                       style={{
-                        flex: 1, paddingVertical: 8, borderRadius: 10,
-                        backgroundColor: active ? colors.bg.screen : 'transparent',
+                        flex: 1, paddingVertical: 9,
+                        borderRadius: radius.chip - 3,
+                        backgroundColor: active ? colors.bg.surface : 'transparent',
                         alignItems: 'center',
                         ...(active ? shadow.card : {}),
                       }}
@@ -443,9 +486,9 @@ export function TransactionSheet({ visible, onClose }: Props) {
                       <Text style={{
                         fontSize: 13,
                         fontFamily: active ? 'Pretendard-SemiBold' : 'Pretendard-Regular',
-                        color: active ? TYPE_CONFIG[t].color : colors.text.tertiary,
+                        color: active ? typeColor(t, colors) : colors.text.tertiary,
                       }}>
-                        {TYPE_CONFIG[t].label}
+                        {TYPE_META[t].label}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -455,7 +498,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
               {/* Currency chips */}
               <View style={{
                 flexDirection: 'row', gap: 6,
-                paddingHorizontal: spacing.screenPadding, marginBottom: 8,
+                paddingHorizontal: spacing.screenPadding, marginBottom: 10,
               }}>
                 {CURRENCIES.map((c) => {
                   const cc = colors.currency[c];
@@ -464,17 +507,21 @@ export function TransactionSheet({ visible, onClose }: Props) {
                     <TouchableOpacity
                       key={c}
                       onPress={() => { setCurrency(c); setCurrencyTouched(true); }}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
                       style={{
-                        flex: 1, paddingVertical: 7,
+                        flex: 1, paddingVertical: 8,
                         borderRadius: radius.chip,
-                        backgroundColor: active ? cc.bg : colors.bg.surface,
+                        backgroundColor: active ? cc.bg : colors.bg.input,
                         alignItems: 'center',
-                        borderWidth: active ? 1.5 : 1,
+                        borderWidth: 1,
                         borderColor: active ? cc.primary : colors.system.border,
                       }}
                     >
                       <Text style={{
-                        fontSize: 12, fontWeight: '600',
+                        fontFamily: 'Pretendard-SemiBold',
+                        fontSize: 12,
                         color: active ? cc.text : colors.text.tertiary,
                       }}>
                         {c}
@@ -486,15 +533,17 @@ export function TransactionSheet({ visible, onClose }: Props) {
 
               {/* Amount display */}
               <View style={{
-                alignItems: 'center', paddingTop: 10, paddingBottom: 4,
+                alignItems: 'center', paddingTop: 12, paddingBottom: 8,
                 borderBottomWidth: 1, borderBottomColor: colors.system.divider,
                 marginBottom: 2,
               }}>
                 <Text style={{
-                  fontSize: 40, fontWeight: '700', letterSpacing: -1,
-                  color: amount > 0 ? cfg.color : colors.text.tertiary,
+                  fontFamily: 'SUIT-Bold',
+                  fontSize: 38,
+                  letterSpacing: -0.8,
+                  color: amount > 0 ? activeTypeColor : colors.text.tertiary,
                 }}>
-                  {cfg.prefix}{amountDisplay}
+                  {meta.prefix}{amountDisplay}
                 </Text>
 
                 {currency !== 'KRW' && (
@@ -506,7 +555,9 @@ export function TransactionSheet({ visible, onClose }: Props) {
                       }
                     }}
                     activeOpacity={0.7}
-                    style={{ marginTop: 4, marginBottom: 6 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="원화 환산 금액 수정"
+                    style={{ marginTop: 6, minHeight: 24, justifyContent: 'center' }}
                   >
                     {editingKrw ? (
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -516,23 +567,23 @@ export function TransactionSheet({ visible, onClose }: Props) {
                           onChangeText={setKrwOverride}
                           keyboardType="number-pad"
                           style={{
-                            fontSize: 13, color: colors.text.secondary,
-                            borderBottomWidth: 1, borderBottomColor: colors.text.brand,
+                            fontSize: 13, color: colors.text.primary,
+                            borderBottomWidth: 1, borderBottomColor: colors.accent.primary,
                             minWidth: 80, paddingVertical: 2,
                           }}
                           onBlur={() => setEditingKrw(false)}
                           autoFocus
                         />
-                        <TouchableOpacity onPress={() => setEditingKrw(false)}>
-                          <Text style={{ fontSize: 12, color: colors.text.brand }}>완료</Text>
+                        <TouchableOpacity onPress={() => setEditingKrw(false)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                          <Text style={{ fontSize: 12, color: colors.accent.text }}>완료</Text>
                         </TouchableOpacity>
                       </View>
                     ) : (
-                      <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
+                      <Text style={{ fontSize: 13, color: colors.text.secondary }}>
                         ≈ {krwDisplayStr !== null
                           ? `₩${parseInt(krwDisplayStr).toLocaleString()}`
                           : '환율 로딩 중…'}
-                        {krwOverride !== null && <Text style={{ color: colors.text.brand }}> (수정됨)</Text>}
+                        {krwOverride !== null && <Text style={{ color: colors.accent.text }}> (수정됨)</Text>}
                       </Text>
                     )}
                   </TouchableOpacity>
@@ -563,16 +614,27 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   <TouchableOpacity
                     onPress={() => setShowDate(!showDate)}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel={`날짜: ${dateDisplay}`}
                     style={{
-                      paddingVertical: 15,
+                      paddingVertical: 14,
                       borderBottomWidth: 1,
                       borderBottomColor: colors.system.divider,
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 18, width: 28 }}>📅</Text>
-                      <Text style={{ fontSize: 13, color: colors.text.secondary, width: 52 }}>날짜</Text>
-                      <Text style={{ flex: 1, fontSize: 15, fontWeight: '500', color: colors.text.primary }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 24 }}>
+                      <Text style={{ fontSize: 17, width: 26 }}>📅</Text>
+                      <Text style={{
+                        fontFamily: 'Pretendard-Regular',
+                        fontSize: 13, color: colors.text.secondary, width: 52,
+                      }}>
+                        날짜
+                      </Text>
+                      <Text style={{
+                        flex: 1,
+                        fontFamily: 'Pretendard-Medium',
+                        fontSize: 15, color: colors.text.primary,
+                      }}>
                         {dateDisplay}
                       </Text>
                       <Text style={{ fontSize: 18, color: colors.text.tertiary }}>›</Text>
@@ -586,9 +648,11 @@ export function TransactionSheet({ visible, onClose }: Props) {
                         keyboardType="numbers-and-punctuation"
                         maxLength={10}
                         style={{
-                          marginTop: 10, marginLeft: 80,
+                          marginTop: 10, marginLeft: 78,
                           fontSize: 15, color: colors.text.primary,
                           backgroundColor: colors.bg.input,
+                          borderWidth: 1,
+                          borderColor: colors.system.border,
                           borderRadius: radius.input,
                           paddingHorizontal: 12, paddingVertical: 8,
                         }}
@@ -599,10 +663,15 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   {/* Memo row */}
                   <View style={{
                     flexDirection: 'row', alignItems: 'center',
-                    paddingVertical: 13,
+                    minHeight: 48, paddingVertical: 12,
                   }}>
-                    <Text style={{ fontSize: 18, width: 28 }}>📝</Text>
-                    <Text style={{ fontSize: 13, color: colors.text.secondary, width: 52 }}>메모</Text>
+                    <Text style={{ fontSize: 17, width: 26 }}>📝</Text>
+                    <Text style={{
+                      fontFamily: 'Pretendard-Regular',
+                      fontSize: 13, color: colors.text.secondary, width: 52,
+                    }}>
+                      메모
+                    </Text>
                     <TextInput
                       value={memo}
                       onChangeText={setMemo}
@@ -623,24 +692,35 @@ export function TransactionSheet({ visible, onClose }: Props) {
                 paddingHorizontal: spacing.screenPadding,
                 paddingTop: 6, paddingBottom: 28,
               }}>
-                <TouchableOpacity onPress={handleSave} disabled={!isValid || isPending} activeOpacity={0.85}>
-                  <LinearGradient
-                    colors={isValid && !isPending
-                      ? colors.gradient.primary
-                      : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                    style={{ borderRadius: radius.button, paddingVertical: 15, alignItems: 'center' }}
-                  >
-                    {isPending
-                      ? <ActivityIndicator color={colors.text.inverse} />
-                      : <Text style={{
-                          fontSize: 16, fontWeight: '600',
-                          color: isValid ? colors.text.inverse : colors.text.tertiary,
-                        }}>
-                          저장하기
-                        </Text>
-                    }
-                  </LinearGradient>
+                <TouchableOpacity
+                  onPress={handleSave}
+                  disabled={!isValid || isPending}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel="저장하기"
+                  accessibilityState={{ disabled: !isValid || isPending }}
+                  style={{
+                    borderRadius: radius.button,
+                    paddingVertical: 15,
+                    minHeight: 52,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: isValid && !isPending ? colors.accent.primary : colors.bg.input,
+                    borderWidth: 1,
+                    borderColor: isValid && !isPending ? colors.accent.primary : colors.system.border,
+                    ...(isValid && !isPending ? shadow.card : {}),
+                  }}
+                >
+                  {isPending
+                    ? <ActivityIndicator color={colors.text.inverse} />
+                    : <Text style={{
+                        fontFamily: 'SUIT-SemiBold',
+                        fontSize: 16,
+                        color: isValid ? colors.text.inverse : colors.text.tertiary,
+                      }}>
+                        저장하기
+                      </Text>
+                  }
                 </TouchableOpacity>
               </View>
             </>
@@ -658,12 +738,12 @@ export function TransactionSheet({ visible, onClose }: Props) {
               {addingCat ? (
                 <View style={{
                   flexDirection: 'row', alignItems: 'center', gap: 8,
-                  backgroundColor: colors.bg.surface,
+                  backgroundColor: colors.bg.input,
                   borderRadius: radius.card,
                   padding: 12,
                   marginBottom: 16,
-                  borderWidth: 1.5,
-                  borderColor: colors.text.brand,
+                  borderWidth: 1,
+                  borderColor: colors.accent.primary,
                 }}>
                   <TextInput
                     value={newCatName}
@@ -679,28 +759,41 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   <TouchableOpacity
                     onPress={handleAddCategory}
                     disabled={creatingCat || !newCatName.trim()}
+                    accessibilityRole="button"
+                    accessibilityLabel="카테고리 추가"
                     style={{
-                      backgroundColor: newCatName.trim() ? colors.text.brand : colors.system.border,
+                      backgroundColor: newCatName.trim() ? colors.accent.primary : colors.system.border,
                       borderRadius: radius.chip,
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
+                      paddingHorizontal: 14,
+                      paddingVertical: 8,
                     }}
                   >
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#fff' }}>
+                    <Text style={{
+                      fontFamily: 'Pretendard-SemiBold',
+                      fontSize: 13,
+                      color: newCatName.trim() ? colors.text.inverse : colors.text.tertiary,
+                    }}>
                       {creatingCat ? '...' : '추가'}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => { setAddingCat(false); setNewCatName(''); }}>
+                  <TouchableOpacity
+                    onPress={() => { setAddingCat(false); setNewCatName(''); }}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
                     <Text style={{ fontSize: 13, color: colors.text.tertiary }}>취소</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
                 <TouchableOpacity
                   onPress={() => setAddingCat(true)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="카테고리 추가"
                   style={{
                     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
                     gap: 6,
-                    backgroundColor: colors.bg.surface,
+                    minHeight: 48,
+                    backgroundColor: colors.bg.input,
                     borderRadius: radius.card,
                     padding: 12,
                     marginBottom: 16,
@@ -709,8 +802,11 @@ export function TransactionSheet({ visible, onClose }: Props) {
                     borderStyle: 'dashed',
                   }}
                 >
-                  <Text style={{ fontSize: 16, color: colors.text.brand }}>+</Text>
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: colors.text.brand }}>
+                  <Text style={{ fontSize: 16, color: colors.accent.text }}>+</Text>
+                  <Text style={{
+                    fontFamily: 'Pretendard-Medium',
+                    fontSize: 14, color: colors.accent.text,
+                  }}>
                     카테고리 추가
                   </Text>
                 </TouchableOpacity>
@@ -733,23 +829,25 @@ export function TransactionSheet({ visible, onClose }: Props) {
                         key={cat.id}
                         onPress={() => pickCategory(cat)}
                         activeOpacity={0.75}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: active }}
                         style={{
                           width: '30%',
                           aspectRatio: 1,
-                          borderRadius: radius.card,
-                          backgroundColor: active ? colors.gradient.primary[0] + '20' : colors.bg.surface,
-                          borderWidth: active ? 2 : 1,
-                          borderColor: active ? colors.text.brand : colors.system.border,
+                          borderRadius: radius.chip,
+                          backgroundColor: active ? colors.accent.light : colors.bg.input,
+                          borderWidth: active ? 1.5 : 1,
+                          borderColor: active ? colors.accent.primary : colors.system.border,
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: 6,
-                          ...(active ? shadow.card : {}),
                         }}
                       >
                         <Text style={{ fontSize: 26 }}>{emoji}</Text>
                         <Text style={{
-                          fontSize: 12, fontWeight: '500', textAlign: 'center',
-                          color: active ? colors.text.brand : colors.text.primary,
+                          fontFamily: 'Pretendard-Medium',
+                          fontSize: 12, textAlign: 'center',
+                          color: active ? colors.accent.text : colors.text.primary,
                         }}>
                           {cat.name}
                         </Text>
@@ -773,10 +871,14 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   closeSheet();
                   setTimeout(() => router.push('/accounts'), 260);
                 }}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="새 계좌 만들기"
                 style={{
                   flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
                   gap: 6,
-                  backgroundColor: colors.bg.surface,
+                  minHeight: 48,
+                  backgroundColor: colors.bg.input,
                   borderRadius: radius.card,
                   padding: 12,
                   marginBottom: 16,
@@ -785,8 +887,11 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   borderStyle: 'dashed',
                 }}
               >
-                <Text style={{ fontSize: 16, color: colors.text.brand }}>+</Text>
-                <Text style={{ fontSize: 14, fontWeight: '500', color: colors.text.brand }}>
+                <Text style={{ fontSize: 16, color: colors.accent.text }}>+</Text>
+                <Text style={{
+                  fontFamily: 'Pretendard-Medium',
+                  fontSize: 14, color: colors.accent.text,
+                }}>
                   새 계좌 만들기
                 </Text>
               </TouchableOpacity>
@@ -799,7 +904,7 @@ export function TransactionSheet({ visible, onClose }: Props) {
                   </Text>
                 </View>
               ) : (
-                <View style={{ gap: 10 }}>
+                <View style={{ gap: spacing.itemGap }}>
                   {accounts.map((acc) => {
                     const cc = colors.currency[acc.currency];
                     const active = accountId === acc.id;
@@ -808,25 +913,31 @@ export function TransactionSheet({ visible, onClose }: Props) {
                         key={acc.id}
                         onPress={() => pickAccount(acc)}
                         activeOpacity={0.75}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: active }}
                         style={{
                           flexDirection: 'row', alignItems: 'center',
-                          padding: 16,
+                          padding: 14,
+                          minHeight: 64,
                           borderRadius: radius.card,
-                          backgroundColor: active ? cc.bg : colors.bg.surface,
-                          borderWidth: active ? 2 : 1,
+                          backgroundColor: active ? cc.bg : colors.bg.input,
+                          borderWidth: active ? 1.5 : 1,
                           borderColor: active ? cc.primary : colors.system.border,
-                          ...(active ? shadow.card : {}),
                         }}
                       >
-                        <Text style={{ fontSize: 26, marginRight: 12 }}>{CURRENCY_FLAGS[acc.currency]}</Text>
+                        <Text style={{ fontSize: 24, marginRight: 12 }}>{CURRENCY_FLAGS[acc.currency]}</Text>
                         <View style={{ flex: 1 }}>
                           <Text style={{
-                            fontSize: 15, fontWeight: '600',
+                            fontFamily: 'Pretendard-SemiBold',
+                            fontSize: 15,
                             color: active ? cc.text : colors.text.primary,
                           }}>
                             {acc.name}
                           </Text>
-                          <Text style={{ fontSize: 12, color: colors.text.secondary, marginTop: 2 }}>
+                          <Text style={{
+                            fontFamily: 'SUIT-Medium',
+                            fontSize: 13, color: colors.text.secondary, marginTop: 2,
+                          }}>
                             {formatCurrency(acc.balance, acc.currency)}
                           </Text>
                         </View>
@@ -836,7 +947,13 @@ export function TransactionSheet({ visible, onClose }: Props) {
                             backgroundColor: cc.primary,
                             alignItems: 'center', justifyContent: 'center',
                           }}>
-                            <Text style={{ fontSize: 13, color: '#fff', fontWeight: '700' }}>✓</Text>
+                            <Text style={{
+                              fontSize: 13,
+                              fontFamily: 'Pretendard-SemiBold',
+                              color: colors.text.inverse,
+                            }}>
+                              ✓
+                            </Text>
                           </View>
                         )}
                       </TouchableOpacity>

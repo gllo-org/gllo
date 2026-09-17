@@ -109,7 +109,7 @@ export default function SettingsScreen() {
           color: colors.text.tertiary,
           paddingVertical: 16,
         }}>
-          글로 v1.0.0 · 글로와 함께한 오늘도 수고했어요 💜
+          GLLO v1.0.0 · GLLO와 함께한 오늘도 수고했어요 💜
         </Text>
       </ScrollView>
     </SafeAreaView>

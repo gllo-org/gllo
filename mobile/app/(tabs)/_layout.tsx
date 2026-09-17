@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 
 interface TabIconProps {
   emoji: string;
@@ -10,11 +9,12 @@ interface TabIconProps {
 }
 
 function TabIcon({ emoji, label, focused }: TabIconProps) {
+  const { colors } = useTheme();
   return (
     <View style={{ alignItems: 'center', gap: 2 }}>
       <Text style={{ fontSize: 22 }}>{emoji}</Text>
       {focused && (
-        <Text style={{ fontSize: 10, fontWeight: '600', color: colors.text.brand }}>
+        <Text style={{ fontSize: 10, fontWeight: '600', color: colors.accent.primary }}>
           {label}
         </Text>
       )}
@@ -23,6 +23,7 @@ function TabIcon({ emoji, label, focused }: TabIconProps) {
 }
 
 export default function TabLayout() {
+  const { colors } = useTheme();
   return (
     <Tabs
       screenOptions={{

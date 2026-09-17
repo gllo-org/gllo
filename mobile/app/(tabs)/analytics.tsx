@@ -628,7 +628,7 @@ function CategoryTab({
           }}>
             <Text style={{ fontSize: 36 }}>📊</Text>
             <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-              해당 월 {categoryType} 내역이 없어요.{'\n'}글로와 함께 가계부를 작성해볼까요?
+              해당 월 {categoryType} 내역이 없어요.{'\n'}GLLO와 함께 가계부를 작성해볼까요?
             </Text>
           </View>
         )}
@@ -659,7 +659,7 @@ export default function AnalyticsScreen() {
           수입/지출 분석
         </Text>
         <Text style={{ ...typography.caption, color: colors.text.tertiary }}>
-          글로가 이번 달 수입/지출 흐름을 살펴봤어요.
+          GLLO가 이번 달 수입/지출 흐름을 살펴봤어요.
         </Text>
       </View>
 

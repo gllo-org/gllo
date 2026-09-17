@@ -114,7 +114,7 @@ export default function ReportScreen() {
         if (canShare) {
           await Sharing.shareAsync(downloadResult.uri, {
             mimeType: 'application/pdf',
-            dialogTitle: `글로 ${formatYearMonth(yearMonth)} 리포트`,
+            dialogTitle: `GLLO ${formatYearMonth(yearMonth)} 리포트`,
           });
         } else {
           showAlert('다운로드 완료', `${fileUri}에 저장되었어요.`);

@@ -42,7 +42,7 @@ export default function LogoutCompleteScreen() {
           textAlign: 'center',
           lineHeight: 24,
         }}>
-          글로는 언제든지{'\n'}돌아올 준비가 되어 있어요 🌍
+          GLLO는 언제든지{'\n'}돌아올 준비가 되어 있어요 🌍
         </Text>
 
         <TouchableOpacity

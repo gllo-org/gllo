@@ -108,7 +108,7 @@ export default function ProfileScreen() {
       await updateImage(publicUrl);
       showAlert('완료', '프로필 사진이 업데이트됐어요 ✓');
     } catch {
-      showAlert('오류', '글로가 사진을 업로드하지 못했어요. 다시 시도해볼까요?');
+      showAlert('오류', 'GLLO가 사진을 업로드하지 못했어요. 다시 시도해볼까요?');
     } finally {
       setUploadingImage(false);
     }
@@ -323,7 +323,7 @@ export default function ProfileScreen() {
           paddingTop: 24,
           paddingHorizontal: spacing.screenPadding,
         }}>
-          글로가 소중한 정보를 안전하게 보관하고 있어요 💜
+          GLLO가 소중한 정보를 안전하게 보관하고 있어요 💜
         </Text>
       </ScrollView>
     </SafeAreaView>

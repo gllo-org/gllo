@@ -9,7 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuthStore } from '@/stores/authStore';
-import { colors, radius, spacing } from '@/theme';
+import { useTheme, radius, spacing } from '@/theme';
 import {
   getLastEmail, saveLastEmail,
   incrementPinFailures, resetPinFailures,
@@ -21,6 +21,7 @@ import { PinPad } from '@/components/ui/PinPad';
 type Mode = 'pin' | 'email';
 
 export default function LoginScreen() {
+  const { colors } = useTheme();
   const [mode, setMode] = useState<Mode>('email');
   const [lastEmail, setLastEmail] = useState<string | null>(null);
   const [pin, setPin] = useState('');
@@ -119,7 +120,7 @@ export default function LoginScreen() {
         '전송 실패',
         isRateLimit
           ? '이메일 전송 한도를 초과했어요.\n잠시 후 다시 시도해주세요.'
-          : '글로가 이메일을 전송하지 못했어요. 잠시 후 다시 시도해주세요.',
+          : 'GLLO가 이메일을 전송하지 못했어요. 잠시 후 다시 시도해주세요.',
       );
     } finally {
       setIsLoading(false);
@@ -130,7 +131,7 @@ export default function LoginScreen() {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
         <LinearGradient
-          colors={colors.gradient.light}
+          colors={colors.gradient.hero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 220 }}
@@ -139,7 +140,7 @@ export default function LoginScreen() {
         <View style={{ flex: 1, paddingHorizontal: spacing.screenPadding, alignItems: 'center' }}>
           <View style={{ paddingTop: 64, paddingBottom: 40, alignItems: 'center' }}>
             <Text style={{ fontSize: 28, fontWeight: '700', color: colors.text.primary, marginBottom: 20 }}>
-              글로
+              GLLO
             </Text>
             <View style={{
               paddingHorizontal: 16, paddingVertical: 8,
@@ -206,7 +207,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <LinearGradient
-          colors={colors.gradient.light}
+          colors={colors.gradient.hero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
@@ -218,10 +219,10 @@ export default function LoginScreen() {
         <View style={{ flex: 1, paddingHorizontal: spacing.screenPadding }}>
           <View style={{ paddingTop: 64, paddingBottom: 48 }}>
             <Text style={{ fontSize: 32, fontWeight: '700', color: colors.text.primary, marginBottom: 8 }}>
-              글로
+              GLLO
             </Text>
             <Text style={{ fontSize: 16, color: colors.text.secondary, lineHeight: 24 }}>
-              글로와 함께 해외 생활{'\n'}첫 가계부를 시작해볼까요?
+              GLLO와 함께 해외 생활{'\n'}첫 가계부를 시작해볼까요?
             </Text>
           </View>
 
@@ -230,7 +231,7 @@ export default function LoginScreen() {
               이메일로 시작하기
             </Text>
             <Text style={{ fontSize: 14, color: colors.text.secondary, marginBottom: 24 }}>
-              글로가 인증번호를 이메일로 보내드려요.
+              GLLO가 인증번호를 이메일로 보내드려요.
             </Text>
 
             <TextInput
@@ -253,7 +254,7 @@ export default function LoginScreen() {
                 borderWidth: 1.5,
                 borderColor: email.length > 0 && !isValidEmail
                   ? colors.loss.text
-                  : isValidEmail ? colors.gradient.primary[0] : colors.system.border,
+                  : isValidEmail ? colors.accent.primary : colors.system.border,
                 marginBottom: 8,
               }}
             />
@@ -267,34 +268,27 @@ export default function LoginScreen() {
             <TouchableOpacity
               onPress={handleSendOtp}
               disabled={!isValidEmail || isLoading}
-              style={{ marginTop: 8 }}
+              accessibilityRole="button"
+              style={{
+                marginTop: 8,
+                borderRadius: radius.button,
+                paddingVertical: 16,
+                alignItems: 'center',
+                backgroundColor: isValidEmail && !isLoading ? colors.accent.primary : colors.bg.input,
+              }}
             >
-              <LinearGradient
-                colors={isValidEmail && !isLoading
-                  ? colors.gradient.primary
-                  : ['#E5E7EB', '#E5E7EB', '#E5E7EB']
-                }
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  borderRadius: radius.button,
-                  paddingVertical: 16,
-                  alignItems: 'center',
-                }}
-              >
-                {isLoading
-                  ? <ActivityIndicator color={colors.text.inverse} />
-                  : (
-                    <Text style={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      color: isValidEmail ? colors.text.inverse : colors.text.tertiary,
-                    }}>
-                      인증번호 받기
-                    </Text>
-                  )
-                }
-              </LinearGradient>
+              {isLoading
+                ? <ActivityIndicator color={colors.text.inverse} />
+                : (
+                  <Text style={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    color: isValidEmail ? colors.text.inverse : colors.text.tertiary,
+                  }}>
+                    인증번호 받기
+                  </Text>
+                )
+              }
             </TouchableOpacity>
           </View>
 

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { colors, spacing, radius, typography } from '@/theme';
+import { useTheme, spacing, radius, typography } from '@/theme';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 
@@ -14,7 +14,7 @@ const SLIDES = [
   {
     emoji: '🌍',
     gradient: ['#EDE8FF', '#FDE8F2', '#FFF0E8'] as const,
-    title: '글로에 오신 걸\n환영해요!',
+    title: 'GLLO에 오신 걸\n환영해요!',
     description: '해외 생활의 복잡한 자산 관리를\n한 앱에서 해결해요.',
   },
   {
@@ -54,6 +54,7 @@ export async function hasTutorialBeenSeen(): Promise<boolean> {
 }
 
 export default function TutorialScreen() {
+  const { colors } = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
   const router = useRouter();
@@ -77,8 +78,6 @@ export default function TutorialScreen() {
     const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
     setCurrentIndex(index);
   };
-
-  const slide = SLIDES[currentIndex];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.screen }}>
@@ -151,7 +150,7 @@ export default function TutorialScreen() {
                 width: i === currentIndex ? 20 : 8,
                 height: 8,
                 borderRadius: 4,
-                backgroundColor: i === currentIndex ? colors.text.brand : colors.system.skeleton,
+                backgroundColor: i === currentIndex ? colors.accent.primary : colors.system.skeleton,
               }} />
             ))}
           </View>
@@ -159,27 +158,23 @@ export default function TutorialScreen() {
           <TouchableOpacity
             onPress={handleNext}
             activeOpacity={0.85}
-            style={{ width: '100%' }}
+            accessibilityRole="button"
+            style={{
+              width: '100%',
+              height: 52,
+              borderRadius: radius.button,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colors.accent.primary,
+            }}
           >
-            <LinearGradient
-              colors={currentIndex === SLIDES.length - 1 ? slide.gradient : colors.gradient.primary}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                height: 52,
-                borderRadius: radius.button,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={{
-                ...typography.body.medium,
-                fontFamily: 'Pretendard-SemiBold',
-                color: colors.text.inverse,
-              }}>
-                {currentIndex === SLIDES.length - 1 ? '글로 시작하기 🚀' : '다음'}
-              </Text>
-            </LinearGradient>
+            <Text style={{
+              ...typography.body.medium,
+              fontFamily: 'Pretendard-SemiBold',
+              color: colors.text.inverse,
+            }}>
+              {currentIndex === SLIDES.length - 1 ? 'GLLO 시작하기 🚀' : '다음'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

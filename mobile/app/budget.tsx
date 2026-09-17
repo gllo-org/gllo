@@ -47,7 +47,7 @@ function getBudgetStatusColor(spentRate: number, timeProgressRate: number): stri
 function getBudgetStatusText(spentRate: number, timeProgressRate: number): string {
   if (spentRate > timeProgressRate + 5) return '이번 달 예산 소진율이 시간 진행율보다 높아요.';
   if (spentRate > timeProgressRate) return '이번 달 예산 소진이 조금 빠른 편이에요.';
-  return '글로가 보기엔 이번 달 지출 페이스가 좋아요.';
+  return 'GLLO가 보기엔 이번 달 지출 페이스가 좋아요.';
 }
 
 function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgressRate: spentRate, timeProgressRate, recommendedDailyAmount: dailyRecommendedAmount, currency }: BudgetStatus) {
@@ -144,7 +144,7 @@ function BudgetGauge({ budgetAmount, spentAmount, remainingAmount, budgetProgres
       </View>
 
       <Text style={{ fontSize: 11, color: colors.text.tertiary, marginTop: 12, textAlign: 'center' }}>
-        글로가 계산한 오늘의 적정 지출이에요.
+        GLLO가 계산한 오늘의 적정 지출이에요.
       </Text>
     </View>
   );
@@ -239,7 +239,7 @@ function BudgetFormSheet({ visible, onClose, yearMonth, initialCurrency }: {
               {monthLabel(yearMonth)} 예산 설정
             </Text>
             <Text style={{ fontSize: 13, color: colors.text.secondary, marginBottom: 24 }}>
-              예산을 설정하면 글로가 매일 적정 지출을 계산해드려요.
+              예산을 설정하면 GLLO가 매일 적정 지출을 계산해드려요.
             </Text>
 
             <Text style={{ fontSize: 13, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>
@@ -356,7 +356,7 @@ export default function BudgetScreen() {
             {monthLabel(yearMonth)}
           </Text>
           <Text style={{ fontSize: 13, color: colors.text.secondary, marginTop: 4 }}>
-            글로가 이번 달 예산을 계산해봤어요.
+            GLLO가 이번 달 예산을 계산해봤어요.
           </Text>
         </View>
 
@@ -364,14 +364,14 @@ export default function BudgetScreen() {
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
             <ActivityIndicator color={colors.text.brand} />
             <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
-              글로가 데이터를 불러오고 있어요...
+              GLLO가 데이터를 불러오고 있어요...
             </Text>
           </View>
         ) : isError ? (
           <View style={{ alignItems: 'center', paddingTop: 60, gap: 12 }}>
             <Text style={{ fontSize: 36 }}>⚠️</Text>
             <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center' }}>
-              글로가 데이터를 불러오지 못했어요.{'\n'}다시 시도해볼까요?
+              GLLO가 데이터를 불러오지 못했어요.{'\n'}다시 시도해볼까요?
             </Text>
           </View>
         ) : status ? (
@@ -405,7 +405,7 @@ export default function BudgetScreen() {
               fontSize: 14, color: colors.text.secondary,
               textAlign: 'center', lineHeight: 22,
             }}>
-              이번 달 예산을 아직 설정하지 않았어요.{'\n'}글로와 함께 예산을 정해볼까요?
+              이번 달 예산을 아직 설정하지 않았어요.{'\n'}GLLO와 함께 예산을 정해볼까요?
             </Text>
             <TouchableOpacity onPress={() => setShowForm(true)} activeOpacity={0.85}>
               <LinearGradient

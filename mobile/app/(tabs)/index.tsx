@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
 import { formatCurrency, CURRENCY_FLAGS } from '@/lib/utils/currency';
-import { colors, spacing, radius, shadow, typography } from '@/theme';
+import { useTheme, spacing, radius, shadow, typography } from '@/theme';
 import { TransactionSheet } from '@/components/features/TransactionSheet';
 import type { CurrencyCode } from '@/theme';
 
@@ -34,6 +34,7 @@ interface Account {
 }
 
 function SkeletonBox({ width, height }: { width: DimensionValue; height: number }) {
+  const { colors } = useTheme();
   return (
     <View style={{
       width, height,
@@ -44,12 +45,13 @@ function SkeletonBox({ width, height }: { width: DimensionValue; height: number 
 }
 
 function BudgetStatusText(spentRate: number, timeRate: number): string {
-  if (spentRate > timeRate + 5) return '글로가 보기엔 이번 달 지출 페이스가 조금 빠른 편이에요.';
-  if (spentRate < timeRate - 5) return '글로가 보기엔 이번 달 지출 페이스가 좋아요.';
-  return '글로가 이번 달 지출 흐름을 살펴봤어요.';
+  if (spentRate > timeRate + 5) return 'GLLO가 보기엔 이번 달 지출 페이스가 조금 빠른 편이에요.';
+  if (spentRate < timeRate - 5) return 'GLLO가 보기엔 이번 달 지출 페이스가 좋아요.';
+  return 'GLLO가 이번 달 지출 흐름을 살펴봤어요.';
 }
 
 export default function DashboardScreen() {
+  const { colors } = useTheme();
   const [sheetVisible, setSheetVisible] = useState(false);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -100,13 +102,13 @@ export default function DashboardScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <LinearGradient
-          colors={colors.gradient.light}
+          colors={colors.gradient.hero}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{ paddingHorizontal: spacing.screenPadding, paddingTop: 20, paddingBottom: 28 }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ ...typography.heading.h2, color: colors.text.primary }}>글로</Text>
+            <Text style={{ ...typography.heading.h2, color: colors.text.primary }}>GLLO</Text>
           </View>
 
           <Text style={{ ...typography.body.small, color: colors.text.secondary, marginBottom: 4 }}>
@@ -228,7 +230,7 @@ export default function DashboardScreen() {
                   + 계좌 추가하기
                 </Text>
                 <Text style={{ ...typography.caption, color: colors.text.tertiary, marginTop: 4 }}>
-                  글로와 함께 첫 계좌를 만들어볼까요?
+                  GLLO와 함께 첫 계좌를 만들어볼까요?
                 </Text>
               </View>
             </TouchableOpacity>
@@ -273,14 +275,12 @@ export default function DashboardScreen() {
               overflow: 'hidden',
               marginBottom: 8,
             }}>
-              <LinearGradient
-                colors={colors.gradient.primary}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              <View
                 style={{
                   height: '100%',
                   width: `${Math.min(stats.budgetSpentRate, 100)}%`,
                   borderRadius: 5,
+                  backgroundColor: colors.accent.primary,
                 }}
               />
             </View>
@@ -354,6 +354,8 @@ export default function DashboardScreen() {
 
       <TouchableOpacity
         onPress={() => setSheetVisible(true)}
+        accessibilityRole="button"
+        accessibilityLabel="거래 추가"
         style={{
           position: 'absolute',
           bottom: 88,
@@ -361,30 +363,20 @@ export default function DashboardScreen() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          overflow: 'hidden',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.accent.primary,
           ...shadow.float,
         }}
         activeOpacity={0.85}
       >
-        <LinearGradient
-          colors={colors.gradient.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: 56,
-            height: 56,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{
-            fontSize: 28,
-            color: colors.text.inverse,
-            lineHeight: 32,
-            textAlign: 'center',
-            includeFontPadding: false,
-          }}>+</Text>
-        </LinearGradient>
+        <Text style={{
+          fontSize: 28,
+          color: colors.text.inverse,
+          lineHeight: 32,
+          textAlign: 'center',
+          includeFontPadding: false,
+        }}>+</Text>
       </TouchableOpacity>
 
       <TransactionSheet

@@ -5,16 +5,16 @@ export const typography = {
   },
 
   amount: {
-    hero:   { fontFamily: 'Pretendard-Bold',     fontSize: 36, letterSpacing: -1 },
-    large:  { fontFamily: 'Pretendard-Bold',     fontSize: 28, letterSpacing: -0.5 },
-    medium: { fontFamily: 'Pretendard-SemiBold', fontSize: 20, letterSpacing: 0 },
-    small:  { fontFamily: 'Pretendard-Medium',   fontSize: 15, letterSpacing: 0 },
+    hero:   { fontFamily: 'SUIT-Bold',     fontSize: 34, letterSpacing: -0.5 },
+    large:  { fontFamily: 'SUIT-Bold',     fontSize: 26, letterSpacing: -0.3 },
+    medium: { fontFamily: 'SUIT-SemiBold', fontSize: 18, letterSpacing: 0 },
+    small:  { fontFamily: 'SUIT-Medium',   fontSize: 14, letterSpacing: 0 },
   },
 
   heading: {
-    h1: { fontFamily: 'SUIT-Bold',     fontSize: 24 },
-    h2: { fontFamily: 'SUIT-Bold',     fontSize: 20 },
-    h3: { fontFamily: 'SUIT-SemiBold', fontSize: 17 },
+    h1: { fontFamily: 'SUIT-Bold',     fontSize: 22 },
+    h2: { fontFamily: 'SUIT-Bold',     fontSize: 18 },
+    h3: { fontFamily: 'SUIT-SemiBold', fontSize: 16 },
   },
 
   body: {

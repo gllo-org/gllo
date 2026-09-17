@@ -488,7 +488,7 @@ export default function AccountsScreen() {
               아직 계좌가 없어요
             </Text>
             <Text style={{ fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 }}>
-              글로와 함께 첫 계좌를 만들어볼까요?{'\n'}통화별로 자산을 관리할 수 있어요.
+              GLLO와 함께 첫 계좌를 만들어볼까요?{'\n'}통화별로 자산을 관리할 수 있어요.
             </Text>
             <TouchableOpacity onPress={() => setCreateVisible(true)} style={{ marginTop: 8 }}>
               <LinearGradient

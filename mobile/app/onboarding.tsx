@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { apiClient } from '@/lib/api/client';
-import { colors, spacing, radius, shadow } from '@/theme';
+import { useTheme, spacing, radius, shadow } from '@/theme';
 import type { CurrencyCode } from '@/theme';
 
 type Purpose = 'EXCHANGE_STUDENT' | 'WORKING_HOLIDAY' | 'IMMIGRATION' | 'LONG_TERM_TRAVEL';
@@ -40,6 +40,7 @@ function getTemplates(): string[] {
 }
 
 function ProgressDots({ current, total }: { current: number; total: number }) {
+  const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: 6, justifyContent: 'center', marginBottom: 32 }}>
       {Array.from({ length: total }).map((_, i) => (
@@ -50,8 +51,8 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
             height: 6,
             borderRadius: 3,
             backgroundColor: i + 1 === current
-              ? colors.text.brand
-              : i + 1 < current ? colors.gradient.primary[0] : colors.system.border,
+              ? colors.accent.primary
+              : i + 1 < current ? colors.accent.primary : colors.system.border,
           }}
         />
       ))}
@@ -60,6 +61,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingScreen() {
+  const { colors } = useTheme();
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
 
@@ -123,7 +125,7 @@ export default function OnboardingScreen() {
       await createDefaultAccounts(selectedCountry);
       setStep(4);
     } catch {
-      showAlert('오류', '글로가 정보를 저장하지 못했어요. 잠시 후 다시 시도해주세요.');
+      showAlert('오류', 'GLLO가 정보를 저장하지 못했어요. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +156,7 @@ export default function OnboardingScreen() {
           해외 생활 목적이 무엇인가요?
         </Text>
         <Text style={{ fontSize: 15, color: colors.text.secondary, marginBottom: 28, lineHeight: 22 }}>
-          글로가 체류 목적에 맞게 예산 카테고리를 준비해드려요.
+          GLLO가 체류 목적에 맞게 예산 카테고리를 준비해드려요.
         </Text>
 
         <View style={{ gap: 12 }}>
@@ -210,21 +212,21 @@ export default function OnboardingScreen() {
         <TouchableOpacity
           onPress={() => setStep(2)}
           disabled={!selectedPurpose}
-          style={{ marginTop: 24 }}
+          accessibilityRole="button"
+          style={{
+            marginTop: 24,
+            borderRadius: radius.button,
+            paddingVertical: 16,
+            alignItems: 'center',
+            backgroundColor: selectedPurpose ? colors.accent.primary : colors.bg.input,
+          }}
         >
-          <LinearGradient
-            colors={selectedPurpose ? colors.gradient.primary : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ borderRadius: radius.button, paddingVertical: 16, alignItems: 'center' }}
-          >
-            <Text style={{
-              fontSize: 16, fontWeight: '600',
-              color: selectedPurpose ? colors.text.inverse : colors.text.tertiary,
-            }}>
-              다음
-            </Text>
-          </LinearGradient>
+          <Text style={{
+            fontSize: 16, fontWeight: '600',
+            color: selectedPurpose ? colors.text.inverse : colors.text.tertiary,
+          }}>
+            다음
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -299,21 +301,21 @@ export default function OnboardingScreen() {
         <TouchableOpacity
           onPress={() => setStep(3)}
           disabled={!selectedCountry}
-          style={{ marginTop: 12 }}
+          accessibilityRole="button"
+          style={{
+            marginTop: 12,
+            borderRadius: radius.button,
+            paddingVertical: 16,
+            alignItems: 'center',
+            backgroundColor: selectedCountry ? colors.accent.primary : colors.bg.input,
+          }}
         >
-          <LinearGradient
-            colors={selectedCountry ? colors.gradient.primary : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ borderRadius: radius.button, paddingVertical: 16, alignItems: 'center' }}
-          >
-            <Text style={{
-              fontSize: 16, fontWeight: '600',
-              color: selectedCountry ? colors.text.inverse : colors.text.tertiary,
-            }}>
-              다음
-            </Text>
-          </LinearGradient>
+          <Text style={{
+            fontSize: 16, fontWeight: '600',
+            color: selectedCountry ? colors.text.inverse : colors.text.tertiary,
+          }}>
+            다음
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -417,7 +419,7 @@ export default function OnboardingScreen() {
             체류 기간을 알려주세요
           </Text>
           <Text style={{ fontSize: 15, color: colors.text.secondary, marginBottom: 28, lineHeight: 22 }}>
-            글로가 체류 기간에 맞게 예산 계획을 도와드려요.
+            GLLO가 체류 기간에 맞게 예산 계획을 도와드려요.
           </Text>
 
           <DateInputRow
@@ -475,26 +477,26 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             onPress={handleSubmitOnboarding}
             disabled={!valid || isSubmitting}
-            style={{ marginTop: 24 }}
+            accessibilityRole="button"
+            style={{
+              marginTop: 24,
+              borderRadius: radius.button,
+              paddingVertical: 16,
+              alignItems: 'center',
+              backgroundColor: valid && !isSubmitting ? colors.accent.primary : colors.bg.input,
+            }}
           >
-            <LinearGradient
-              colors={valid && !isSubmitting ? colors.gradient.primary : ['#E5E7EB', '#E5E7EB', '#E5E7EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ borderRadius: radius.button, paddingVertical: 16, alignItems: 'center' }}
-            >
-              {isSubmitting
-                ? <ActivityIndicator color={colors.text.inverse} />
-                : (
-                  <Text style={{
-                    fontSize: 16, fontWeight: '600',
-                    color: valid ? colors.text.inverse : colors.text.tertiary,
-                  }}>
-                    글로 시작하기
-                  </Text>
-                )
-              }
-            </LinearGradient>
+            {isSubmitting
+              ? <ActivityIndicator color={colors.text.inverse} />
+              : (
+                <Text style={{
+                  fontSize: 16, fontWeight: '600',
+                  color: valid ? colors.text.inverse : colors.text.tertiary,
+                }}>
+                  GLLO 시작하기
+                </Text>
+              )
+            }
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -512,26 +514,24 @@ export default function OnboardingScreen() {
           style={{ flex: 1, width: '100%' }}
           contentContainerStyle={{ alignItems: 'center' }}
         >
-        <LinearGradient
-          colors={colors.gradient.light}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+        <View
           style={{
             width: 88, height: 88,
             borderRadius: 44,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 24,
+            backgroundColor: colors.accent.light,
           }}
         >
-          <Text style={{ fontSize: 40 }}>💜</Text>
-        </LinearGradient>
+          <Text style={{ fontSize: 40 }}>🎉</Text>
+        </View>
 
         <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text.primary, textAlign: 'center', marginBottom: 10 }}>
-          글로에 오신 걸 환영해요!
+          GLLO에 오신 걸 환영해요!
         </Text>
         <Text style={{ fontSize: 15, color: colors.text.secondary, textAlign: 'center', lineHeight: 22, marginBottom: 32 }}>
-          글로가 {selectedCountry?.flag} {selectedCountry?.label} {purposeLabel}에게{'\n'}꼭 필요한 카테고리를 준비해뒀어요.
+          GLLO가 {selectedCountry?.flag} {selectedCountry?.label} {purposeLabel}에게{'\n'}꼭 필요한 카테고리를 준비해뒀어요.
         </Text>
 
         <View style={{
@@ -554,11 +554,11 @@ export default function OnboardingScreen() {
             }}>
               <View style={{
                 width: 22, height: 22, borderRadius: 11,
-                backgroundColor: colors.gradient.primary[0] + '40',
+                backgroundColor: colors.accent.light,
                 alignItems: 'center', justifyContent: 'center',
                 marginRight: 12,
               }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text.brand }}>✓</Text>
+                <Text style={{ fontSize: 11, fontWeight: '700', color: colors.accent.primary }}>✓</Text>
               </View>
               <Text style={{ fontSize: 15, color: colors.text.primary }}>{t}</Text>
             </View>
@@ -590,18 +590,16 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           onPress={() => router.replace('/(tabs)')}
-          style={{ width: '100%', marginTop: 16 }}
+          accessibilityRole="button"
+          style={{
+            width: '100%', marginTop: 16,
+            borderRadius: radius.button, paddingVertical: 16, alignItems: 'center',
+            backgroundColor: colors.accent.primary,
+          }}
         >
-          <LinearGradient
-            colors={colors.gradient.primary}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={{ borderRadius: radius.button, paddingVertical: 16, alignItems: 'center' }}
-          >
-            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>
-              대시보드로 이동
-            </Text>
-          </LinearGradient>
+          <Text style={{ fontSize: 16, fontWeight: '600', color: colors.text.inverse }}>
+            대시보드로 이동
+          </Text>
         </TouchableOpacity>
       </View>
     );

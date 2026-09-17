@@ -592,7 +592,7 @@ function TripsScreenImpl() {
                 여행이 없어요
               </Text>
               <Text style={{ fontSize: 13, color: colors.text.tertiary, textAlign: 'center' }}>
-                글로와 함께 여행 지출을{'\n'}일상 예산과 분리해 관리해보세요.
+                GLLO와 함께 여행 지출을{'\n'}일상 예산과 분리해 관리해보세요.
               </Text>
             </View>
           ) : (

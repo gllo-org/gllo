@@ -42,7 +42,7 @@ export default function DeleteAccountScreen() {
       await signOut();
     } catch {
       setDeleting(false);
-      showAlert('오류', '글로가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
+      showAlert('오류', 'GLLO가 탈퇴 처리에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 
@@ -100,7 +100,7 @@ export default function DeleteAccountScreen() {
           marginBottom: 40,
         }}>
           <Text style={{ fontSize: 14, color: colors.text.secondary, lineHeight: 22 }}>
-            탈퇴 후에도 30일 동안은 같은 이메일로 로그인하면 계정을 그대로 사용할 수 있어요. 글로와 함께한 시간이 소중하니, 다시 돌아와주세요 💜
+            탈퇴 후에도 30일 동안은 같은 이메일로 로그인하면 계정을 그대로 사용할 수 있어요. GLLO와 함께한 시간이 소중하니, 다시 돌아와주세요 💜
           </Text>
         </View>
 

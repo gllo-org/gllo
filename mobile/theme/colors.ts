@@ -1,25 +1,45 @@
-export const colors = {
+export type CurrencyCode = 'EUR' | 'USD' | 'GBP' | 'KRW';
+
+type GradientPair = readonly [string, string];
+
+export interface ThemeColors {
+  gradient: { hero: GradientPair; accent: GradientPair };
+  bg: { screen: string; surface: string; input: string; overlay: string };
+  text: { primary: string; secondary: string; tertiary: string; inverse: string; brand: string };
+  accent: { primary: string; light: string; text: string };
+  profit: { text: string; bg: string; light: string };
+  loss: { text: string; bg: string; light: string };
+  neutral: { text: string; bg: string };
+  currency: Record<CurrencyCode, { primary: string; bg: string; text: string }>;
+  system: { border: string; divider: string; shadow: string; skeleton: string };
+  status: { normal: string; warning: string; danger: string };
+}
+
+const light: ThemeColors = {
   gradient: {
-    primary:     ['#C4B5F8', '#F0A8C8', '#FFBDA0'] as const,
-    light:       ['#EDE8FF', '#FDE8F2', '#FFF0E8'] as const,
-    card:        ['#D4C8FC', '#F8C0D8', '#FFC8AE'] as const,
-    travel:      ['#A8E6C0', '#FFD4A8', '#A8D8F0'] as const,
-    travelLight: ['#E4FDE9', '#FFF5EC', '#DCF4FF'] as const,
+    hero: ['#EEF2FF', '#F8FAFC'],
+    accent: ['#6366F1', '#4F46E5'],
   },
 
   bg: {
-    screen:  '#FFFFFF',
-    surface: '#F8F7FF',
-    input:   '#F4F3FF',
-    overlay: 'rgba(0,0,0,0.4)',
+    screen:  '#F8FAFC',
+    surface: '#FFFFFF',
+    input:   '#F1F5F9',
+    overlay: 'rgba(15,23,42,0.5)',
   },
 
   text: {
-    primary:   '#1A1A2E',
-    secondary: '#6B7280',
-    tertiary:  '#9CA3AF',
+    primary:   '#0F172A',
+    secondary: '#64748B',
+    tertiary:  '#94A3B8',
     inverse:   '#FFFFFF',
-    brand:     '#9B7CF8',
+    brand:     '#4F46E5',
+  },
+
+  accent: {
+    primary: '#4F46E5',
+    light:   '#EEF2FF',
+    text:    '#4F46E5',
   },
 
   profit: {
@@ -33,29 +53,94 @@ export const colors = {
     light: '#FEF2F2',
   },
   neutral: {
-    text:  '#6B7280',
-    bg:    '#F3F4F6',
+    text:  '#64748B',
+    bg:    '#F1F5F9',
   },
 
   currency: {
-    EUR: { primary: '#C4B5F8', bg: '#EDE8FF', text: '#7C3AED' },
-    USD: { primary: '#86EFAC', bg: '#DCFCE7', text: '#16A34A' },
-    GBP: { primary: '#FCA5A5', bg: '#FEE2E2', text: '#DC2626' },
-    KRW: { primary: '#93C5FD', bg: '#DBEAFE', text: '#2563EB' },
+    EUR: { primary: '#6366F1', bg: '#EEF2FF', text: '#4338CA' },
+    USD: { primary: '#059669', bg: '#D1FAE5', text: '#047857' },
+    GBP: { primary: '#DC2626', bg: '#FEE2E2', text: '#B91C1C' },
+    KRW: { primary: '#0284C7', bg: '#E0F2FE', text: '#0369A1' },
   },
 
   system: {
-    border:   '#F0EEF8',
-    divider:  '#F3F4F6',
-    shadow:   'rgba(196, 181, 248, 0.15)',
-    skeleton: '#F0EEF8',
+    border:   '#E2E8F0',
+    divider:  '#EDF1F5',
+    shadow:   'rgba(15, 23, 42, 0.08)',
+    skeleton: '#E2E8F0',
   },
 
   status: {
-    normal:  '#9B7CF8',
-    warning: '#F59E0B',
-    danger:  '#EF4444',
+    normal:  '#4F46E5',
+    warning: '#D97706',
+    danger:  '#DC2626',
   },
-} as const;
+};
 
-export type CurrencyCode = keyof typeof colors.currency;
+const dark: ThemeColors = {
+  gradient: {
+    hero: ['#151B2C', '#0B1120'],
+    accent: ['#6366F1', '#4F46E5'],
+  },
+
+  bg: {
+    screen:  '#0B1120',
+    surface: '#151B2C',
+    input:   '#1C2436',
+    overlay: 'rgba(0,0,0,0.6)',
+  },
+
+  text: {
+    primary:   '#F8FAFC',
+    secondary: '#94A3B8',
+    tertiary:  '#64748B',
+    inverse:   '#0F172A',
+    brand:     '#818CF8',
+  },
+
+  accent: {
+    primary: '#818CF8',
+    light:   '#1E2340',
+    text:    '#A5B4FC',
+  },
+
+  profit: {
+    text:  '#34D399',
+    bg:    '#0F2E22',
+    light: '#132F25',
+  },
+  loss: {
+    text:  '#F87171',
+    bg:    '#3B1414',
+    light: '#331414',
+  },
+  neutral: {
+    text:  '#94A3B8',
+    bg:    '#1C2436',
+  },
+
+  currency: {
+    EUR: { primary: '#818CF8', bg: '#1E2340', text: '#A5B4FC' },
+    USD: { primary: '#34D399', bg: '#0F2E22', text: '#6EE7B7' },
+    GBP: { primary: '#F87171', bg: '#3B1414', text: '#FCA5A5' },
+    KRW: { primary: '#38BDF8', bg: '#0C2536', text: '#7DD3FC' },
+  },
+
+  system: {
+    border:   '#263042',
+    divider:  '#1C2436',
+    shadow:   'rgba(0, 0, 0, 0.4)',
+    skeleton: '#1C2436',
+  },
+
+  status: {
+    normal:  '#818CF8',
+    warning: '#FBBF24',
+    danger:  '#F87171',
+  },
+};
+
+export const themes: Record<'light' | 'dark', ThemeColors> = { light, dark };
+export const colors = light;
+export type ColorScheme = keyof typeof themes;

@@ -5,10 +5,9 @@ import {
 } from 'react-native';
 import { showAlert } from '@/lib/ui/alert';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '@/stores/authStore';
-import { colors, radius, spacing } from '@/theme';
+import { useTheme, radius, spacing } from '@/theme';
 import { supabase } from '@/lib/supabase';
 import { isPinRegistered, markPinRegistered, saveLastEmail, toPinPassword } from '@/lib/auth/pinAuth';
 import { PinPad } from '@/components/ui/PinPad';
@@ -18,6 +17,7 @@ type Step = 'otp' | 'pin-setup' | 'pin-confirm';
 const OTP_EXPIRE_SECONDS = 300;
 
 export default function VerifyScreen() {
+  const { colors } = useTheme();
   const { email } = useLocalSearchParams<{ email: string }>();
   const [step, setStep] = useState<Step>('otp');
   const [otp, setOtp] = useState('');
@@ -138,7 +138,7 @@ export default function VerifyScreen() {
       await sendOtp(email);
       setSecondsLeft(OTP_EXPIRE_SECONDS);
       setOtp('');
-      showAlert('재전송 완료', '글로가 새 인증번호를 보냈어요.');
+      showAlert('재전송 완료', 'GLLO가 새 인증번호를 보냈어요.');
     } catch (err: unknown) {
       const isRateLimit = (err as { status?: number })?.status === 429;
       showAlert(
@@ -250,7 +250,7 @@ export default function VerifyScreen() {
                 backgroundColor: colors.bg.input,
                 borderRadius: radius.input,
                 borderWidth: 2,
-                borderColor: otp.length === 6 ? colors.gradient.primary[0] : colors.system.border,
+                borderColor: otp.length === 6 ? colors.accent.primary : colors.system.border,
                 width: '100%',
               }}
               placeholder="000000"
@@ -288,33 +288,26 @@ export default function VerifyScreen() {
           <TouchableOpacity
             onPress={handleVerify}
             disabled={otp.length !== 6 || isLoading}
+            accessibilityRole="button"
+            style={{
+              borderRadius: radius.button,
+              paddingVertical: 16,
+              alignItems: 'center',
+              backgroundColor: otp.length === 6 && !isLoading ? colors.accent.primary : colors.bg.input,
+            }}
           >
-            <LinearGradient
-              colors={otp.length === 6 && !isLoading
-                ? colors.gradient.primary
-                : ['#E5E7EB', '#E5E7EB', '#E5E7EB']
-              }
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: radius.button,
-                paddingVertical: 16,
-                alignItems: 'center',
-              }}
-            >
-              {isLoading
-                ? <ActivityIndicator color={colors.text.inverse} />
-                : (
-                  <Text style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    color: otp.length === 6 ? colors.text.inverse : colors.text.tertiary,
-                  }}>
-                    확인
-                  </Text>
-                )
-              }
-            </LinearGradient>
+            {isLoading
+              ? <ActivityIndicator color={colors.text.inverse} />
+              : (
+                <Text style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: otp.length === 6 ? colors.text.inverse : colors.text.tertiary,
+                }}>
+                  확인
+                </Text>
+              )
+            }
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
